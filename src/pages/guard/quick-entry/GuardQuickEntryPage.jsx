@@ -42,6 +42,7 @@ export const QUICK_ENTRY_MODES = {
     ],
     tableCopy: {
       visitorCol: 'Courier',
+      purposeCol: 'Company',
       approve: 'By Resident',
       deny: 'By Guard',
       checkIn: 'Send to flat',

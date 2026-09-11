@@ -1232,14 +1232,14 @@
 .vtbl-actions {
   display: flex;
   gap: 6px;
-  justify-content: flex-end;
+  justify-content: center;
   flex-wrap: wrap;
   align-items: center;
   width: 100%;
   min-width: 0;
 }
 .vtbl-actions-head {
-  text-align: right;
+  text-align: center;
   width: 100%;
 }
 .vtbl-act {
@@ -1385,7 +1385,7 @@
     column-gap: 10px;
   }
   .vtbl-actions {
-    justify-content: flex-end;
+    justify-content: center;
     flex-wrap: wrap;
   }
   .vtbl-head,
@@ -1970,5 +1970,62 @@
   }
   .vp-header {
     flex-wrap: wrap;
+  }
+}
+
+/* ================================================================
+   CAB ENTRY (simple gate log)
+   ================================================================ */
+.cab-grid {
+  display: grid;
+  grid-template-columns: minmax(120px, 1.2fr) minmax(110px, 1fr) minmax(120px, 1.2fr) minmax(90px, 0.9fr) minmax(80px, 0.8fr) minmax(90px, 0.85fr);
+  column-gap: 14px;
+  align-items: center;
+}
+.cab-flat-dropdown {
+  position: absolute;
+  z-index: 40;
+  left: 0;
+  right: 0;
+  top: calc(100% + 4px);
+  margin: 0;
+  padding: 4px;
+  list-style: none;
+  max-height: 220px;
+  overflow: auto;
+  background: var(--vp-s2);
+  border: 1px solid var(--vp-b2);
+  border-radius: var(--vp-r);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.35);
+}
+.cab-flat-dropdown button {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 2px;
+  padding: 8px 10px;
+  border: none;
+  border-radius: 6px;
+  background: transparent;
+  color: var(--vp-tx);
+  font-family: inherit;
+  cursor: pointer;
+  text-align: left;
+}
+.cab-flat-dropdown button:hover {
+  background: var(--vp-s3);
+}
+.cab-flat-label {
+  font-size: 13px;
+  font-weight: 600;
+}
+.cab-flat-res {
+  font-size: 12px;
+  color: var(--vp-tx3);
+}
+@media (max-width: 900px) {
+  .cab-grid {
+    grid-template-columns: minmax(100px, 1.1fr) minmax(90px, 1fr) minmax(70px, 0.8fr) minmax(80px, 0.85fr);
   }
 }

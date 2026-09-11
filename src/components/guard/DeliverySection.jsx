@@ -5,7 +5,6 @@ import '../../styles/guard/guard-main.css';
 export default function DeliverySection({
   data = [],
   loading = false,
-  onCollect,
   onViewAll,
 }) {
   const deliveries = data;
@@ -14,15 +13,20 @@ export default function DeliverySection({
     <div className="gm-panel">
       <div className="gm-panel-header">
         <span className="gm-panel-title">Deliveries at Gate</span>
-        <span className="gm-badge gm-badge-warning">{deliveries.length} At gate</span>
+        <button
+          type="button"
+          className="gm-view-all"
+          onClick={onViewAll}
+          style={{ background: 'none', border: 'none', padding: 0, font: 'inherit', cursor: 'pointer' }}
+        >
+          View all
+        </button>
       </div>
 
       <div className="gm-table-header gm-delivery-grid">
         <span>Delivery By</span>
         <span>Flat No.</span>
         <span>Company</span>
-        <span>Status</span>
-        {onCollect ? <span>Action</span> : null}
       </div>
 
       <div className="gm-table-body">
@@ -42,32 +46,8 @@ export default function DeliverySection({
               <span className="gm-visitor-name">{d.person || d.courier}</span>
               <span className="gm-cell-center">{d.flat}</span>
               <span className="gm-cell-center">{d.company}</span>
-              <span className="gm-badge gm-badge-warning">{d.status || 'At Gate'}</span>
-              {onCollect ? (
-                <div>
-                  <button
-                    type="button"
-                    className="gm-exit-btn"
-                    onClick={() => onCollect(d.id)}
-                    title="Resident confirmed they received the parcel"
-                  >
-                    Received
-                  </button>
-                </div>
-              ) : null}
             </div>
           ))}
-      </div>
-
-      <div className="gm-panel-footer">
-        <button
-          type="button"
-          className="gm-view-all"
-          onClick={onViewAll}
-          style={{ background: 'none', border: 'none', padding: 0, font: 'inherit' }}
-        >
-          Open deliveries →
-        </button>
       </div>
     </div>
   );

@@ -54,6 +54,7 @@ export default function VisitorTable({
   const [purpose, setPurpose] = useState("");
   const labels = {
     visitorCol: "Visitor",
+    purposeCol: "Purpose",
     approve: "Approve",
     deny: "Deny",
     checkIn: "Check in",
@@ -97,7 +98,7 @@ export default function VisitorTable({
           onChange={(e) => setPurpose(e.target.value)}
         >
           <option value="">All purposes</option>
-          {["Guest","Work / Service","Delivery","Cab","Medical","Other"].map((p) => (
+          {["Guest","Work / Service","Medical","Other"].map((p) => (
             <option key={p}>{p}</option>
           ))}
         </select>
@@ -109,7 +110,7 @@ export default function VisitorTable({
         <div className={`vtbl-head vtbl-grid vtbl-grid--${variant}`}>
           <span>{labels.visitorCol}</span>
           <span className="vtbl-hide">Flat</span>
-          <span className="vtbl-hide">Purpose</span>
+          <span className="vtbl-hide">{labels.purposeCol}</span>
           {variant === "pending"  && <><span className="vtbl-hide">Requested</span><span>Waiting</span></>}
           {variant === "approved" && <><span className="vtbl-hide">Entry time</span><span className="vtbl-hide">Duration</span></>}
           {variant === "completed" && <><span className="vtbl-hide">Exit time</span><span className="vtbl-hide">Duration</span></>}
@@ -154,8 +155,8 @@ export default function VisitorTable({
               {/* Flat — visitors.flat_id → flats.flat_number */}
               <div className="vtbl-mono vtbl-hide">{v.flat}</div>
 
-              {/* Purpose — visitors.purpose (enum / varchar) */}
-              <div className="vtbl-text vtbl-hide">{v.purpose}</div>
+              {/* Purpose / Company */}
+              <div className="vtbl-text vtbl-hide">{v.company || v.purpose}</div>
 
               {/* Variant-specific cells */}
               {variant === "pending" && (

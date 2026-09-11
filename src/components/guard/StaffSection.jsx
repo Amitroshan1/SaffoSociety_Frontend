@@ -2,14 +2,21 @@
 
 import '../../styles/guard/guard-main.css';
 
-export default function StaffSection({ data = [], loading = false }) {
+export default function StaffSection({ data = [], loading = false, onViewAll }) {
   const staff = data;
 
   return (
     <div className="gm-panel">
       <div className="gm-panel-header">
         <span className="gm-panel-title">Staff Inside</span>
-        <span className="gm-badge gm-badge-staff">{staff.length} Inside</span>
+        <button
+          type="button"
+          className="gm-view-all"
+          onClick={onViewAll}
+          style={{ background: 'none', border: 'none', padding: 0, font: 'inherit', cursor: 'pointer' }}
+        >
+          View all
+        </button>
       </div>
 
       <div className="gm-table-header gm-staff-grid">
@@ -39,12 +46,6 @@ export default function StaffSection({ data = [], loading = false }) {
               <span className="gm-cell-sm">{s.since}</span>
             </div>
           ))}
-      </div>
-
-      <div className="gm-panel-footer">
-        <span className="gm-view-all" style={{ cursor: 'default', opacity: 0.7 }}>
-          Maid / driver visits currently inside
-        </span>
       </div>
     </div>
   );

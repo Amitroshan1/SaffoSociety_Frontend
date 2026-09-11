@@ -17,16 +17,20 @@ import {
   apiError,
   getDashboardBundle,
   logGuardCall,
-  markDeliveryCollected,
   markVisitorExit,
 } from '../../services/guard.service';
-import { DEMO_SOS_ALERTS, activeSosAlerts } from '../../constants/guardSosDemo.js';
+import {
+  activeSosAlerts,
+  getActiveTestSosAlerts,
+  subscribeTestSos,
+} from '../../constants/guardSosDemo.js';
 
 export default function GuardMain() {
   const navigate = useNavigate();
   const [bundle, setBundle] = useState(null);
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(true);
+  const [testSosTick, setTestSosTick] = useState(0);
 
   const load = useCallback(async () => {
     setLoading(true);
@@ -46,6 +50,10 @@ export default function GuardMain() {
     load();
   }, [load]);
 
+  useEffect(() => {
+    return subscribeTestSos(() => setTestSosTick((n) => n + 1));
+  }, []);
+
   function handleSidebarNav(label) {
     navigateGuard(navigate, label);
   }
@@ -61,6 +69,8 @@ export default function GuardMain() {
   const stats = useMemo(() => {
     const s = bundle?.stats;
     if (!s) return null;
+    const pendingCount = bundle?.pending?.length ?? s.pendingApprovalsCount ?? 0;
+    const insideCount = bundle?.inside?.length ?? s.visitorsInsideCount ?? 0;
     return [
       {
         label: 'Total Entries Today',
@@ -71,7 +81,7 @@ export default function GuardMain() {
       },
       {
         label: 'Pending Approvals',
-        value: s.pendingApprovalsCount,
+        value: pendingCount,
         sub: 'Awaiting resident response',
         subClass: '',
         colorClass: 'yellow',
@@ -79,7 +89,7 @@ export default function GuardMain() {
       },
       {
         label: 'Active Visitors',
-        value: s.visitorsInsideCount,
+        value: insideCount,
         sub: 'Inside Society',
         subClass: '',
         colorClass: 'green',
@@ -129,20 +139,13 @@ export default function GuardMain() {
     window.location.href = `tel:${raw}`;
   }
 
-  async function handleCollectDelivery(id) {
-    try {
-      await markDeliveryCollected(id);
-      await load();
-    } catch (err) {
-      setError(apiError(err, 'Collect failed'));
-    }
-  }
-
   const approvalRows = bundle?.pending || [];
-  // Live active SOS first; if none, show demo so top banner is visible for UI check
+  // Prefer live API SOS; otherwise use temporary FE test SOS (Activate/Resolve on /guard/sos)
+  void testSosTick;
   const liveSos = activeSosAlerts(bundle?.sosAlerts || []);
-  const sosAlerts = liveSos.length > 0 ? liveSos : activeSosAlerts(DEMO_SOS_ALERTS);
-  const sosIsDemo = liveSos.length === 0;
+  const testSos = getActiveTestSosAlerts();
+  const sosAlerts = liveSos.length > 0 ? liveSos : testSos;
+  const sosIsDemo = liveSos.length === 0 && testSos.length > 0;
 
   return (
     <div className="gm-root">
@@ -197,10 +200,13 @@ export default function GuardMain() {
             <DeliverySection
               data={bundle?.deliveries || []}
               loading={loading}
-              onCollect={handleCollectDelivery}
               onViewAll={() => navigate('/guard/delivery?tab=pending')}
             />
-            <StaffSection data={bundle?.staff || []} loading={loading} />
+            <StaffSection
+              data={bundle?.staff || []}
+              loading={loading}
+              onViewAll={() => navigate('/guard/staff-entry')}
+            />
             <RecentActivity data={bundle?.activity || []} loading={loading} />
           </div>
         </main>

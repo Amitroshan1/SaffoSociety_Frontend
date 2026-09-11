@@ -73,8 +73,6 @@ import { getRecentWalkIns } from "../../../services/guard.service";
 const PURPOSES = [
   "Guest",
   "Work / Service",
-  "Delivery",
-  "Cab",
   "Medical",
   "Other",
 ];

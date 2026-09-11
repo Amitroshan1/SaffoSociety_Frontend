@@ -5,7 +5,7 @@ export const GUARD_ROUTES = {
   'Add Delivery': '/guard/delivery?tab=add',
   'Staff Entry': '/guard/staff-entry',
   Staff: '/guard/staff-entry',
-  'Cab Entry': '/guard/cab-entry',
+  'Cab Entry': '/guard/cab-entry?tab=add',
   'My Shifts': '/guard/shifts',
   'Clock In/Out': '/guard/attendance',
   Documents: '/guard/documents',

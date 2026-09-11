@@ -77,6 +77,9 @@ export function mapGuardVisitorToUiRow(row) {
     photoUrl: row.photoUrl || row.photo_url || null,
     createdAt: row.createdAt,
     checkInTime: row.checkInTime,
+    vehicleType: row.vehicleType || '',
+    remarks: row.remarks || '',
+    residentName: row.residentName || '',
     raw: row,
   };
 }
@@ -97,20 +100,60 @@ async function fetchGuardVisitors(params = {}) {
 function matchesQuickEntryMode(row, mode) {
   const purpose = String(row.purpose || '').toLowerCase();
   const type = mapPurposeToVisitorType(row.purpose);
+  const vehicleType = String(row.vehicleType || row.raw?.vehicleType || '').toLowerCase();
   if (mode === 'delivery') {
     return ['delivery', 'courier'].includes(type) || purpose.includes('deliver');
   }
   if (mode === 'cab') {
-    return purpose.includes('cab') || purpose.includes('taxi') || type === 'driver';
+    return (
+      purpose.includes('cab') ||
+      purpose.includes('taxi') ||
+      purpose.startsWith('pickup') ||
+      purpose.startsWith('drop') ||
+      ['uber', 'ola', 'rapido', 'local', 'cab'].includes(vehicleType) ||
+      (type === 'driver' && (purpose.includes('cab') || vehicleType.includes('uber') || vehicleType.includes('ola')))
+    );
   }
   if (mode === 'staff') {
-    if (purpose.includes('cab') || purpose.includes('taxi')) return false;
+    if (purpose.includes('cab') || purpose.includes('taxi') || purpose.includes('deliver')) return false;
+    if (['uber', 'ola', 'rapido', 'local', 'cab'].includes(vehicleType)) return false;
     return (
       ['maid', 'driver', 'technician'].includes(type) ||
       purpose.includes('work') ||
       purpose.includes('service')
     );
   }
+  return true;
+}
+
+/** Guests only — exclude delivery / cab / staff gate entries from Visitors module. */
+export function isRegularVisitor(row) {
+  const r = row?.raw || row || {};
+  const purpose = String(row?.purpose || r.purpose || '').toLowerCase();
+  const type = String(
+    row?.visitorType || r.visitorType || r.visitor_type || mapPurposeToVisitorType(purpose),
+  ).toLowerCase();
+
+  if (['delivery', 'courier'].includes(type)) return false;
+  if (purpose.includes('deliver') || purpose.includes('courier')) return false;
+
+  if (
+    purpose.includes('cab') ||
+    purpose.includes('taxi') ||
+    purpose.startsWith('pickup') ||
+    purpose.startsWith('drop')
+  ) {
+    return false;
+  }
+
+  const vehicleType = String(row?.vehicleType || r.vehicleType || '').toLowerCase();
+  if (['uber', 'ola', 'rapido', 'local', 'cab'].some((k) => vehicleType.includes(k))) {
+    return false;
+  }
+
+  if (['maid', 'driver', 'technician'].includes(type)) return false;
+  if (purpose.includes('work') || purpose.includes('service')) return false;
+
   return true;
 }
 
@@ -230,23 +273,24 @@ export async function getDashboardBundle() {
   const staff = unwrap(staffRes)?.staff || [];
   const activities = unwrap(activityRes)?.activities || [];
 
-  const pending = pendingRows.map(mapGuardVisitorToUiRow);
-  const inside = insideRows.map(mapGuardVisitorToUiRow);
+  const pending = pendingRows.map(mapGuardVisitorToUiRow).filter(isRegularVisitor);
+  const inside = insideRows.map(mapGuardVisitorToUiRow).filter(isRegularVisitor);
 
   return {
     stats: {
-      visitorsInsideCount: statsRaw.visitorsInsideCount ?? statsRaw.activeVisitorsCount ?? 0,
+      // Use the same filtered lists the UI shows — avoids card vs page mismatches
+      visitorsInsideCount: inside.length,
       todaysVisitorCount: statsRaw.todaysVisitorCount ?? statsRaw.totalEntriesToday ?? 0,
-      pendingApprovalsCount: statsRaw.pendingApprovalsCount ?? 0,
+      pendingApprovalsCount: pending.length,
       pendingDeliveriesCount: statsRaw.pendingDeliveriesCount ?? statsRaw.deliveriesPendingCount ?? 0,
       staffInsideCount: statsRaw.staffInsideCount ?? 0,
       activeSosCount: statsRaw.activeSosCount ?? alerts.filter((a) => a.status === 'active').length,
     },
     pending,
     approved: inside,
-    rejected: (await fetchGuardVisitors({ status: 'rejected' }).catch(() => [])).map(
-      mapGuardVisitorToUiRow,
-    ),
+    rejected: (await fetchGuardVisitors({ status: 'rejected' }).catch(() => []))
+      .map(mapGuardVisitorToUiRow)
+      .filter(isRegularVisitor),
     inside,
     deliveries,
     staff,
@@ -296,10 +340,11 @@ export async function listGuardVisitsByTab() {
     fetchGuardVisitors({ status: 'approved' }),
     fetchGuardVisitors({ status: 'rejected' }),
   ]);
+  const onlyVisitors = (rows) => rows.map(mapGuardVisitorToUiRow).filter(isRegularVisitor);
   return {
-    pending: pending.map(mapGuardVisitorToUiRow),
-    approved: approved.map(mapGuardVisitorToUiRow),
-    rejected: rejected.map(mapGuardVisitorToUiRow),
+    pending: onlyVisitors(pending),
+    approved: onlyVisitors(approved),
+    rejected: onlyVisitors(rejected),
   };
 }
 
@@ -312,7 +357,8 @@ export async function listQuickEntryByMode(mode) {
       name: card.courierName || 'Courier',
       phone: card.phone || '',
       flat: card.flat || '—',
-      purpose: 'Delivery',
+      purpose: card.company || 'Delivery',
+      company: card.company || 'Delivery',
       persons: 1,
       time: card.time || '—',
       wait: card.raw?.wait || card.time || '0m',
@@ -453,8 +499,11 @@ export async function logGuardCall(visitorId, notes) {
 }
 
 export async function getRecentWalkIns(limit = 5) {
-  const res = await api.get('/guard/visitors/recent', { params: { limit } });
-  return (unwrap(res)?.visitors || unwrap(res)?.items || []).map(mapGuardVisitorToUiRow);
+  const res = await api.get('/guard/visitors/recent', { params: { limit: Math.max(limit * 3, 15) } });
+  return (unwrap(res)?.visitors || unwrap(res)?.items || [])
+    .map(mapGuardVisitorToUiRow)
+    .filter(isRegularVisitor)
+    .slice(0, limit);
 }
 
 export async function getUnreadNotificationCount() {
@@ -667,6 +716,83 @@ export async function logDelivery(form) {
     visitorType: 'delivery',
     // Always land in At Gate — Guard confirms outcome later
     preapprove: false,
+  });
+}
+
+function parseCabMeta(row) {
+  const remarks = String(row.remarks || row.raw?.remarks || '');
+  const serviceFromNote = remarks.match(/Service:\s*([^|]+)/i)?.[1]?.trim();
+  const tripFromNote = remarks.match(/Trip:\s*([^|]+)/i)?.[1]?.trim();
+  const purpose = String(row.purpose || '');
+  const tripFromPurpose = purpose.replace(/^cab\s*[·\-]?\s*/i, '').trim();
+  const service =
+    serviceFromNote ||
+    row.vehicleType ||
+    row.raw?.vehicleType ||
+    'Local / Other';
+  let trip = tripFromNote || tripFromPurpose || 'Guest';
+  if (/^cab$/i.test(trip)) trip = 'Guest';
+  return { service, tripPurpose: trip };
+}
+
+/** Flat cab log list (no status tabs) — merges existing visit statuses. */
+export async function listCabEntries() {
+  const [pending, approved, exited, rejected] = await Promise.all([
+    fetchGuardVisitors({ status: 'pending' }),
+    fetchGuardVisitors({ status: 'approved' }),
+    fetchGuardVisitors({ status: 'exited' }),
+    fetchGuardVisitors({ status: 'rejected' }),
+  ]);
+
+  const rows = [...pending, ...approved, ...exited, ...rejected]
+    .filter((r) => matchesQuickEntryMode(r, 'cab'))
+    .map(mapGuardVisitorToUiRow)
+    .map((row) => {
+      const meta = parseCabMeta(row);
+      return {
+        id: row.id,
+        driver: row.name || 'Driver',
+        vehicle: row.vehicle || '—',
+        flat: row.flat || '—',
+        resident: row.residentName || row.raw?.residentName || '',
+        service: meta.service,
+        purpose: meta.tripPurpose,
+        entryTime: row.time || '—',
+        createdAt: row.createdAt || row.checkInTime || null,
+        raw: row,
+      };
+    });
+
+  rows.sort((a, b) => {
+    const ta = a.createdAt ? new Date(a.createdAt).getTime() : 0;
+    const tb = b.createdAt ? new Date(b.createdAt).getTime() : 0;
+    return tb - ta;
+  });
+
+  return rows;
+}
+
+/**
+ * Log cab at gate. Reuses POST /guard/visitors.
+ * Phone is required by API — send placeholder; not shown in UI.
+ * preapprove + notify false → no approval/OTP workflow.
+ */
+export async function logCabEntry(form) {
+  const service = form.service || 'Local / Other';
+  const tripPurpose = form.tripPurpose || 'Guest';
+  return logVisitor({
+    name: (form.driverName || '').trim() || 'Driver',
+    phone: '0000000000',
+    flat: form.flat,
+    purpose: `Cab ${tripPurpose}`,
+    persons: 1,
+    vehicle: form.vehicle,
+    vtype: service,
+    note: `Service: ${service} | Trip: ${tripPurpose}`,
+    notify: false,
+    preapprove: true,
+    visitorType: 'driver',
+    photoSrc: null,
   });
 }
 
