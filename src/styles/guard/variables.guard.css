@@ -1,0 +1,73 @@
+/* ============================================================
+   client/src/styles/guard/variables.guard.css
+   Dark theme design tokens — Guard Panel ONLY
+   Do NOT import this in Admin / Finance / Resident panels
+   ============================================================ */
+
+:root {
+  /* ── Brand ── */
+  --gradient-guard: linear-gradient(135deg, #F59E0B, #F97316);
+  --glow-guard:     rgba(251, 191, 36, 0.4);
+
+  /* ── Page background ── */
+  --dark-bg-full:
+    radial-gradient(ellipse at 20% 50%, rgba(120, 40, 200, 0.08) 0%, transparent 60%),
+    radial-gradient(ellipse at 80% 20%, rgba(30, 140, 220, 0.06)  0%, transparent 60%),
+    radial-gradient(ellipse at 60% 80%, rgba(245, 158, 11, 0.05)  0%, transparent 60%),
+    linear-gradient(135deg, #040d1a 0%, #060f20 40%, #070f1e 100%);
+
+  /* ── Glass cards ── */
+  --glass-card-bg:          rgba(15, 23, 42, 0.70);
+  --glass-card-border:      rgba(255, 255, 255, 0.07);
+  --glass-card-light-bg:    rgba(255, 255, 255, 0.04);
+  --glass-card-light-border:rgba(255, 255, 255, 0.08);
+
+  /* ── Typography ── */
+  --text-primary:   #f1f5f9;
+  --text-secondary: #94a3b8;
+  --text-tertiary:  #64748b;
+
+  /* ── Semantic colors ── */
+  --color-blue:        #3B82F6;
+  --color-blue-glow:   rgba(59,  130, 246, 0.30);
+  --color-blue-bg:     rgba(59,  130, 246, 0.15);
+
+  --color-green:       #10B981;
+  --color-green-glow:  rgba(16,  185, 129, 0.30);
+  --color-green-bg:    rgba(16,  185, 129, 0.15);
+
+  --color-orange:      #F97316;
+  --color-orange-glow: rgba(249, 115,  22, 0.30);
+  --color-orange-bg:   rgba(249, 115,  22, 0.15);
+
+  --color-red:         #EF4444;
+  --color-red-glow:    rgba(239,  68,  68, 0.30);
+  --color-red-bg:      rgba(239,  68,  68, 0.15);
+
+  --color-purple:      #8B5CF6;
+  --color-purple-glow: rgba(139,  92, 246, 0.30);
+  --color-purple-bg:   rgba(139,  92, 246, 0.15);
+
+  --color-amber:       #F59E0B;
+  --color-amber-bg:    rgba(245, 158,  11, 0.15);
+
+  /* ── Navbar ── */
+  --navbar-bg:     rgba(4, 13, 26, 0.95);
+  --navbar-border: rgba(255, 255, 255, 0.08);
+  --navbar-height: 64px;
+
+  /* ── Borders ── */
+  --border-subtle: rgba(255, 255, 255, 0.07);
+  --border-medium: rgba(255, 255, 255, 0.12);
+
+  /* ── Border radius ── */
+  --radius-sm:  6px;
+  --radius-md:  8px;
+  --radius-lg:  12px;
+  --radius-xl:  16px;
+  --radius-2xl: 20px;
+
+  /* ── Shadows ── */
+  --shadow-card:  0 4px 24px rgba(0, 0, 0, 0.30), 0 1px 4px rgba(0, 0, 0, 0.20);
+  --shadow-modal: 0 20px 60px rgba(0, 0, 0, 0.60), 0 4px 16px rgba(0, 0, 0, 0.40);
+}

@@ -1,0 +1,31 @@
+export const SUPER_ADMIN_ROUTES = [
+  { path: '/superadmin/dashboard', label: 'Dashboard', group: 'Overview' },
+  { path: '/superadmin/tenants', label: 'Tenants', group: 'Tenants' },
+  { path: '/superadmin/subscriptions', label: 'Subscriptions', group: 'Commercial' },
+  { path: '/superadmin/licenses', label: 'Licenses', group: 'Commercial' },
+  { path: '/superadmin/feature-flags', label: 'Feature Flags', group: 'Config' },
+  { path: '/superadmin/settings', label: 'Global Settings', group: 'Config' },
+  { path: '/superadmin/users', label: 'Platform Users', group: 'Access' },
+  { path: '/superadmin/roles', label: 'Global Roles', group: 'Access' },
+  { path: '/superadmin/announcements', label: 'Announcements', group: 'Comms' },
+  { path: '/superadmin/analytics', label: 'Analytics', group: 'Ops' },
+  { path: '/superadmin/health', label: 'Health', group: 'Ops' },
+  { path: '/superadmin/jobs', label: 'Background Jobs', group: 'Ops' },
+  { path: '/superadmin/maintenance', label: 'Maintenance', group: 'Ops' },
+  { path: '/superadmin/audit', label: 'Audit Logs', group: 'Ops' },
+  { path: '/superadmin/integrations', label: 'Providers', group: 'Integrations' },
+  { path: '/superadmin/webhooks', label: 'Webhooks', group: 'Integrations' },
+  { path: '/superadmin/api-clients', label: 'API Clients', group: 'Integrations' },
+  { path: '/superadmin/provider-health', label: 'Provider Health', group: 'Integrations' },
+  { path: '/superadmin/mobile-devices', label: 'Mobile Devices', group: 'Integrations' },
+  { path: '/superadmin/payment-providers', label: 'Payment Providers', group: 'Integrations' },
+  { path: '/superadmin/identity-providers', label: 'Identity Providers', group: 'Integrations' },
+  { path: '/superadmin/push-dashboard', label: 'Push Dashboard', group: 'Integrations' },
+];
+
+export const PLATFORM_ROLES = [
+  'super_admin',
+  'platform_support',
+  'platform_auditor',
+  'platform_billing',
+];

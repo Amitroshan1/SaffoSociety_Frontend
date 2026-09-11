@@ -1,0 +1,833 @@
+/* ============================================================
+   Global light theme — applied when <html data-theme="light">
+   Dark remains the default (no attribute).
+   ============================================================ */
+
+:root[data-theme='light'] {
+  --background: #f4f6fb;
+  --bg: #f4f6fb;
+
+  --glass: rgba(255, 255, 255, 0.92);
+  --glass-hover: rgba(255, 255, 255, 1);
+  --border-soft: rgba(15, 23, 42, 0.1);
+  --border-hover: rgba(79, 70, 229, 0.35);
+
+  --c-primary: #4f46e5;
+  --c-primary-2: #6366f1;
+  --c-primary-glow: rgba(79, 70, 229, 0.18);
+  --c-primary-muted: rgba(79, 70, 229, 0.1);
+
+  --t1: #0f172a;
+  --t2: #334155;
+  --t3: #64748b;
+  --t4: #94a3b8;
+
+  color-scheme: light;
+}
+
+/* Shared toggle button */
+.theme-toggle {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 34px;
+  height: 34px;
+  border-radius: 10px;
+  border: 1px solid var(--border-soft, rgba(255, 255, 255, 0.12));
+  background: var(--glass, rgba(255, 255, 255, 0.06));
+  color: var(--t2, #cbd5e1);
+  cursor: pointer;
+  transition: background 0.15s, color 0.15s, border-color 0.15s, transform 0.15s;
+  flex-shrink: 0;
+}
+
+.theme-toggle:hover {
+  color: var(--t1, #fff);
+  border-color: var(--border-hover, rgba(99, 102, 241, 0.4));
+  background: var(--glass-hover, rgba(255, 255, 255, 0.1));
+}
+
+.theme-toggle.is-spinning svg {
+  animation: theme-toggle-spin 0.4s ease;
+}
+
+@keyframes theme-toggle-spin {
+  from {
+    transform: rotate(0deg) scale(0.85);
+  }
+  to {
+    transform: rotate(180deg) scale(1);
+  }
+}
+
+.theme-toggle--ghost {
+  background: transparent;
+}
+
+.theme-toggle--nav {
+  width: 36px;
+  height: 36px;
+  border-radius: 12px;
+}
+
+/* Body / ambient */
+:root[data-theme='light'] body {
+  background-color: var(--bg);
+  color: var(--t2);
+}
+
+:root[data-theme='light'] body::before {
+  background:
+    radial-gradient(ellipse 800px 600px at 85% 10%, rgba(79, 70, 229, 0.08) 0%, transparent 70%),
+    radial-gradient(ellipse 600px 400px at 10% 90%, rgba(14, 165, 233, 0.06) 0%, transparent 70%);
+}
+
+/* Auth / landing */
+:root[data-theme='light'] .auth-bg {
+  background:
+    radial-gradient(ellipse at 20% 50%, rgba(99, 102, 241, 0.08) 0%, transparent 60%),
+    radial-gradient(ellipse at 80% 20%, rgba(14, 165, 233, 0.07) 0%, transparent 60%),
+    radial-gradient(ellipse at 60% 80%, rgba(16, 185, 129, 0.05) 0%, transparent 60%),
+    linear-gradient(135deg, #eef2ff 0%, #f8fafc 45%, #f1f5f9 100%);
+}
+
+:root[data-theme='light'] .auth-login-card,
+:root[data-theme='light'] .glass-card {
+  background: rgba(255, 255, 255, 0.88) !important;
+  border-color: rgba(15, 23, 42, 0.1) !important;
+  box-shadow: 0 12px 40px rgba(15, 23, 42, 0.08);
+}
+
+:root[data-theme='light'] .glass-card-light {
+  background: rgba(255, 255, 255, 0.7) !important;
+  border-color: rgba(15, 23, 42, 0.08) !important;
+}
+
+:root[data-theme='light'] .auth-bg .text-white,
+:root[data-theme='light'] .auth-login-shell .text-white {
+  color: #0f172a !important;
+}
+
+:root[data-theme='light'] .auth-bg .text-slate-400,
+:root[data-theme='light'] .auth-bg .text-slate-300,
+:root[data-theme='light'] .auth-bg .text-slate-500,
+:root[data-theme='light'] .auth-login-shell .text-slate-400 {
+  color: #64748b !important;
+}
+
+:root[data-theme='light'] .auth-input {
+  background: #fff !important;
+  border-color: rgba(15, 23, 42, 0.12) !important;
+  color: #0f172a !important;
+}
+
+:root[data-theme='light'] .auth-back-link {
+  color: #475569 !important;
+}
+
+/* Admin shell */
+:root[data-theme='light'] .topbar {
+  background: rgba(255, 255, 255, 0.92);
+  border-bottom-color: rgba(15, 23, 42, 0.08);
+  backdrop-filter: blur(12px);
+}
+
+:root[data-theme='light'] .topbar-title,
+:root[data-theme='light'] .avatar-name,
+:root[data-theme='light'] .crumb-text.last {
+  color: #0f172a !important;
+}
+
+:root[data-theme='light'] .topbar-sub,
+:root[data-theme='light'] .crumb-text:not(.last) {
+  color: #64748b !important;
+}
+
+:root[data-theme='light'] .topbar svg,
+:root[data-theme='light'] .bell-btn svg,
+:root[data-theme='light'] .search-trigger svg {
+  color: #475569;
+  stroke: currentColor;
+}
+
+:root[data-theme='light'] .search-trigger {
+  background: #f1f5f9;
+  border-color: rgba(15, 23, 42, 0.1);
+  color: #475569;
+}
+
+:root[data-theme='light'] .kbd {
+  background: #e2e8f0;
+  color: #475569;
+}
+
+:root[data-theme='light'] .bell-btn {
+  color: #475569;
+}
+
+:root[data-theme='light'] .dock,
+:root[data-theme='light'] .dock-panel {
+  background: rgba(255, 255, 255, 0.96);
+  border-color: rgba(15, 23, 42, 0.1);
+}
+
+:root[data-theme='light'] .dock-item,
+:root[data-theme='light'] .dock-label {
+  color: #475569;
+}
+
+:root[data-theme='light'] .dock-item:hover,
+:root[data-theme='light'] .dock-item.active {
+  color: #0f172a;
+}
+
+:root[data-theme='light'] .dock-item.active {
+  background: rgba(79, 70, 229, 0.12);
+  color: #4338ca !important;
+}
+
+:root[data-theme='light'] .app-main {
+  color: var(--t2);
+}
+
+:root[data-theme='light'] .page-header h1,
+:root[data-theme='light'] .page-header-title {
+  color: #0f172a;
+}
+
+:root[data-theme='light'] .crud-stat-card,
+:root[data-theme='light'] .crud-table-wrap,
+:root[data-theme='light'] .crud-panel,
+:root[data-theme='light'] .glass-panel {
+  background: #ffffff;
+  border-color: rgba(15, 23, 42, 0.1);
+  color: #0f172a;
+  box-shadow: 0 4px 18px rgba(15, 23, 42, 0.05);
+}
+
+:root[data-theme='light'] .crud-stat-label {
+  color: #64748b;
+}
+
+:root[data-theme='light'] .crud-table th {
+  color: #475569;
+  border-bottom-color: rgba(15, 23, 42, 0.1);
+  background: #f8fafc;
+}
+
+:root[data-theme='light'] .crud-table td {
+  color: #1e293b;
+  border-bottom-color: rgba(15, 23, 42, 0.06);
+}
+
+:root[data-theme='light'] .crud-table tbody tr:hover {
+  background: #f1f5f9;
+}
+
+:root[data-theme='light'] .crud-search input,
+:root[data-theme='light'] .crud-filter-bar select,
+:root[data-theme='light'] .crud-form-control,
+:root[data-theme='light'] input,
+:root[data-theme='light'] select,
+:root[data-theme='light'] textarea {
+  background: #ffffff !important;
+  border-color: rgba(15, 23, 42, 0.12) !important;
+  color: #0f172a !important;
+}
+
+:root[data-theme='light'] .crud-filter-bar select option,
+:root[data-theme='light'] .crud-form-control option {
+  background: #ffffff;
+  color: #0f172a;
+}
+
+:root[data-theme='light'] .crud-empty,
+:root[data-theme='light'] .crud-pagination {
+  background: #ffffff;
+  border-color: rgba(15, 23, 42, 0.1);
+  color: #475569;
+}
+
+:root[data-theme='light'] .btn-primary {
+  color: #fff;
+}
+
+:root[data-theme='light'] .btn-secondary,
+:root[data-theme='light'] .crud-btn-ghost {
+  background: #f1f5f9;
+  border-color: rgba(15, 23, 42, 0.12);
+  color: #334155;
+}
+
+/* Resident */
+:root[data-theme='light'] .resident-shell {
+  --resident-accent: #2563eb;
+  --resident-accent-soft: rgba(37, 99, 235, 0.1);
+  --resident-accent-border: rgba(37, 99, 235, 0.28);
+  --resident-bg: #f4f6fb;
+  --resident-card: #ffffff;
+  --resident-border: rgba(15, 23, 42, 0.1);
+  --resident-border-hover: rgba(15, 23, 42, 0.16);
+  --resident-text: #0f172a;
+  --resident-text-soft: #64748b;
+  --resident-shadow: 0 4px 20px rgba(15, 23, 42, 0.06);
+  background:
+    radial-gradient(ellipse at 20% 50%, rgba(37, 99, 235, 0.05) 0%, transparent 60%),
+    linear-gradient(135deg, #f8fafc 0%, #eef2ff 50%, #f1f5f9 100%);
+  color: var(--resident-text-soft);
+}
+
+:root[data-theme='light'] .resident-sidebar,
+:root[data-theme='light'] .resident-header {
+  background: rgba(255, 255, 255, 0.94);
+  border-color: rgba(15, 23, 42, 0.1);
+}
+
+:root[data-theme='light'] .resident-menu-btn {
+  background: rgba(15, 23, 42, 0.04);
+  border-color: rgba(15, 23, 42, 0.1);
+  color: #0f172a;
+}
+
+:root[data-theme='light'] .resident-mobile-backdrop {
+  background: rgba(15, 23, 42, 0.45);
+}
+
+:root[data-theme='light'] .resident-sidebar-header h2,
+:root[data-theme='light'] .resident-header-title,
+:root[data-theme='light'] .resident-page-title,
+:root[data-theme='light'] .resident-header-name,
+:root[data-theme='light'] .resident-card h3,
+:root[data-theme='light'] .resident-section h3 {
+  color: #0f172a;
+}
+
+:root[data-theme='light'] .resident-nav-link {
+  color: #64748b;
+}
+
+:root[data-theme='light'] .resident-nav-link:hover {
+  background: rgba(15, 23, 42, 0.05);
+  color: #0f172a;
+}
+
+:root[data-theme='light'] .resident-nav-link.active {
+  background: #2563eb;
+  color: #fff;
+}
+
+:root[data-theme='light'] .resident-card,
+:root[data-theme='light'] .resident-section,
+:root[data-theme='light'] .resident-panel,
+:root[data-theme='light'] .notice-hero,
+:root[data-theme='light'] .notice-body,
+:root[data-theme='light'] .notice-stat,
+:root[data-theme='light'] .notice-tabs {
+  background: #ffffff;
+  border-color: rgba(15, 23, 42, 0.1);
+  color: #334155;
+}
+
+:root[data-theme='light'] .resident-card-amount,
+:root[data-theme='light'] .notice-hero-title,
+:root[data-theme='light'] .notice-stat-value,
+:root[data-theme='light'] .notice-title {
+  color: #0f172a;
+}
+
+:root[data-theme='light'] .resident-main .crud-table-wrap {
+  background: #ffffff;
+}
+
+:root[data-theme='light'] .resident-main button:not(.resident-nav-link):not(.resident-logout-btn):not(.btn-primary):not(.theme-toggle) {
+  background: #f8fafc;
+  border-color: rgba(15, 23, 42, 0.12);
+  color: #334155;
+}
+
+:root[data-theme='light'] .notice-chip {
+  background: #f1f5f9;
+  border-color: rgba(15, 23, 42, 0.12);
+  color: #475569;
+}
+
+:root[data-theme='light'] .resident-main .notice-tab.active {
+  color: #fff;
+}
+
+/* Super admin */
+:root[data-theme='light'] {
+  --sa-bg: #f4f7fb;
+  --sa-panel: #ffffff;
+  --sa-border: rgba(15, 23, 42, 0.1);
+  --sa-text: #0f172a;
+  --sa-muted: #64748b;
+}
+
+:root[data-theme='light'] .sa-shell {
+  background:
+    radial-gradient(1200px 600px at 10% -10%, rgba(20, 184, 166, 0.1), transparent 55%),
+    radial-gradient(900px 500px at 100% 0%, rgba(56, 189, 248, 0.08), transparent 50%),
+    var(--sa-bg);
+  color: var(--sa-text);
+}
+
+:root[data-theme='light'] .sa-sidebar {
+  background: rgba(255, 255, 255, 0.94);
+  border-color: var(--sa-border);
+}
+
+:root[data-theme='light'] .sa-nav-link {
+  color: #475569;
+}
+
+:root[data-theme='light'] .sa-nav-link:hover {
+  color: #0f172a;
+}
+
+:root[data-theme='light'] .sa-nav-link.is-active {
+  background: rgba(13, 148, 136, 0.12);
+  color: #0f766e !important;
+}
+
+:root[data-theme='light'] .sa-brand-title,
+:root[data-theme='light'] .sa-user strong {
+  color: #0f172a;
+}
+
+/* Landing / nav light tweaks for Tailwind utility classes used on landing */
+:root[data-theme='light'] .auth-bg .text-violet-300,
+:root[data-theme='light'] .auth-bg .text-violet-400 {
+  color: #6d28d9 !important;
+}
+
+:root[data-theme='light'] .auth-bg nav {
+  background: rgba(255, 255, 255, 0.85) !important;
+  border-bottom: 1px solid rgba(15, 23, 42, 0.08);
+  backdrop-filter: blur(12px);
+}
+
+/* ── Contrast fix: force dark readable text in light mode ─────────────────
+   Many components hardcode #fff / light rgba for dark theme. Override them
+   here so content stays visible on light backgrounds.
+   Keep white text only on filled primary / active / accent chips.
+   ─────────────────────────────────────────────────────────────────────── */
+
+:root[data-theme='light'] {
+  --text-primary: #0f172a;
+  --text-secondary: #475569;
+  --text-tertiary: #64748b;
+  --color-text-primary: #0f172a;
+  --color-text-secondary: #475569;
+}
+
+:root[data-theme='light'] body,
+:root[data-theme='light'] #root,
+:root[data-theme='light'] .app-main,
+:root[data-theme='light'] .resident-main,
+:root[data-theme='light'] .sa-main,
+:root[data-theme='light'] .auth-bg {
+  color: #334155 !important;
+}
+
+/* Generic headings / paragraphs in main content */
+:root[data-theme='light'] .app-main h1,
+:root[data-theme='light'] .app-main h2,
+:root[data-theme='light'] .app-main h3,
+:root[data-theme='light'] .app-main h4,
+:root[data-theme='light'] .app-main p,
+:root[data-theme='light'] .app-main label,
+:root[data-theme='light'] .app-main span:not(.kbd):not(.bell-dot):not(.crud-badge):not(.badge),
+:root[data-theme='light'] .app-main li,
+:root[data-theme='light'] .app-main td,
+:root[data-theme='light'] .app-main th,
+:root[data-theme='light'] .resident-main h1,
+:root[data-theme='light'] .resident-main h2,
+:root[data-theme='light'] .resident-main h3,
+:root[data-theme='light'] .resident-main h4,
+:root[data-theme='light'] .resident-main p,
+:root[data-theme='light'] .resident-main label,
+:root[data-theme='light'] .resident-main li,
+:root[data-theme='light'] .resident-main td,
+:root[data-theme='light'] .resident-main th,
+:root[data-theme='light'] .sa-main h1,
+:root[data-theme='light'] .sa-main h2,
+:root[data-theme='light'] .sa-main h3,
+:root[data-theme='light'] .sa-main p,
+:root[data-theme='light'] .sa-main label,
+:root[data-theme='light'] .sa-main li,
+:root[data-theme='light'] .sa-main td,
+:root[data-theme='light'] .sa-main th {
+  color: #0f172a !important;
+}
+
+:root[data-theme='light'] .page-header-sub,
+:root[data-theme='light'] .resident-page-subtitle,
+:root[data-theme='light'] .resident-card-muted,
+:root[data-theme='light'] .resident-meta,
+:root[data-theme='light'] .resident-header-subtitle,
+:root[data-theme='light'] .resident-header-role,
+:root[data-theme='light'] .resident-sidebar-header p,
+:root[data-theme='light'] .topbar-sub,
+:root[data-theme='light'] .sa-brand-sub,
+:root[data-theme='light'] .sa-user span,
+:root[data-theme='light'] .sa-nav-group-label,
+:root[data-theme='light'] .sa-page-sub,
+:root[data-theme='light'] .resident-nav-label {
+  color: #64748b !important;
+}
+
+/* Admin dashboard hard-coded white text */
+:root[data-theme='light'] .page-header-title,
+:root[data-theme='light'] .cell-strong,
+:root[data-theme='light'] .cell-amount,
+:root[data-theme='light'] .activity-head h3,
+:root[data-theme='light'] .side-panel-head h3,
+:root[data-theme='light'] .panel-resident-name,
+:root[data-theme='light'] .panel-amount,
+:root[data-theme='light'] .timeline-title,
+:root[data-theme='light'] .palette-item-label,
+:root[data-theme='light'] .placeholder-card h3,
+:root[data-theme='light'] .stat-value,
+:root[data-theme='light'] .stat-label,
+:root[data-theme='light'] .dock-group-label,
+:root[data-theme='light'] .section-title,
+:root[data-theme='light'] .card-title {
+  color: #0f172a !important;
+}
+
+:root[data-theme='light'] .link-soft,
+:root[data-theme='light'] .row-action-btn,
+:root[data-theme='light'] .btn-ghost,
+:root[data-theme='light'] .panel-resident-unit,
+:root[data-theme='light'] .timeline-meta,
+:root[data-theme='light'] .palette-item-meta {
+  color: #475569 !important;
+}
+
+:root[data-theme='light'] .link-soft:hover,
+:root[data-theme='light'] .row-action-btn:hover,
+:root[data-theme='light'] .btn-ghost:hover {
+  color: #0f172a !important;
+  background: rgba(15, 23, 42, 0.05);
+}
+
+:root[data-theme='light'] .badge-neutral {
+  background: #f1f5f9;
+  color: #475569 !important;
+  border-color: rgba(15, 23, 42, 0.12);
+}
+
+:root[data-theme='light'] .badge-warning {
+  color: #b45309 !important;
+}
+
+:root[data-theme='light'] .badge-danger {
+  color: #b91c1c !important;
+}
+
+/* CRUD / common */
+:root[data-theme='light'] .crud-stat-card,
+:root[data-theme='light'] .crud-stat-card strong,
+:root[data-theme='light'] .crud-empty-title,
+:root[data-theme='light'] .crud-empty-desc,
+:root[data-theme='light'] .empty-title,
+:root[data-theme='light'] .empty-description {
+  color: #0f172a !important;
+}
+
+:root[data-theme='light'] .crud-stat-label,
+:root[data-theme='light'] .crud-empty-desc,
+:root[data-theme='light'] .empty-description {
+  color: #64748b !important;
+}
+
+:root[data-theme='light'] .crud-badge-active {
+  color: #15803d !important;
+}
+
+:root[data-theme='light'] .crud-badge-inactive {
+  color: #b91c1c !important;
+}
+
+/* Resident hard-coded whites */
+:root[data-theme='light'] .resident-page-title,
+:root[data-theme='light'] .resident-card-amount,
+:root[data-theme='light'] .resident-list li,
+:root[data-theme='light'] .resident-summary,
+:root[data-theme='light'] .resident-detail-body,
+:root[data-theme='light'] .resident-link,
+:root[data-theme='light'] .notice-hero-title,
+:root[data-theme='light'] .notice-hero-summary,
+:root[data-theme='light'] .notice-body,
+:root[data-theme='light'] .notice-stat-value,
+:root[data-theme='light'] .notice-title,
+:root[data-theme='light'] .notice-summary-line,
+:root[data-theme='light'] .notice-date,
+:root[data-theme='light'] .notice-hero-meta span,
+:root[data-theme='light'] .profile-hero-text h2,
+:root[data-theme='light'] .profile-field-value {
+  color: #0f172a !important;
+}
+
+:root[data-theme='light'] .resident-page-subtitle,
+:root[data-theme='light'] .resident-card-muted,
+:root[data-theme='light'] .resident-meta,
+:root[data-theme='light'] .notice-stat-label,
+:root[data-theme='light'] .notice-summary-line,
+:root[data-theme='light'] .profile-hero-text p,
+:root[data-theme='light'] .profile-field-label {
+  color: #64748b !important;
+}
+
+:root[data-theme='light'] .resident-main a:not(.resident-nav-link):not(.btn-primary):not(.notice-tab.active) {
+  color: #1d4ed8 !important;
+}
+
+:root[data-theme='light'] .resident-error {
+  color: #b91c1c !important;
+}
+
+:root[data-theme='light'] .resident-success,
+:root[data-theme='light'] .notice-ack-done {
+  color: #15803d !important;
+}
+
+:root[data-theme='light'] .notice-priority--normal {
+  color: #1d4ed8 !important;
+}
+
+:root[data-theme='light'] .notice-priority--high {
+  color: #c2410c !important;
+}
+
+:root[data-theme='light'] .notice-priority--critical {
+  color: #b91c1c !important;
+}
+
+:root[data-theme='light'] .notice-priority--low {
+  color: #475569 !important;
+}
+
+:root[data-theme='light'] .notice-chip--pin {
+  color: #b45309 !important;
+}
+
+:root[data-theme='light'] .notice-ack h3 {
+  color: #b45309 !important;
+}
+
+:root[data-theme='light'] .notice-ack p {
+  color: #92400e !important;
+}
+
+:root[data-theme='light'] .resident-logout-btn {
+  color: #475569 !important;
+}
+
+:root[data-theme='light'] .resident-logout-btn:hover {
+  color: #b91c1c !important;
+}
+
+/* Auth / landing Tailwind utilities */
+:root[data-theme='light'] .auth-bg .text-white,
+:root[data-theme='light'] .auth-bg h1,
+:root[data-theme='light'] .auth-bg h2,
+:root[data-theme='light'] .auth-bg h3,
+:root[data-theme='light'] .auth-bg h4,
+:root[data-theme='light'] .auth-login-shell .text-white,
+:root[data-theme='light'] .auth-login-shell h1,
+:root[data-theme='light'] .auth-login-content label {
+  color: #0f172a !important;
+}
+
+:root[data-theme='light'] .auth-bg .text-slate-300,
+:root[data-theme='light'] .auth-bg .text-slate-400,
+:root[data-theme='light'] .auth-bg .text-slate-500,
+:root[data-theme='light'] .auth-bg .text-slate-600,
+:root[data-theme='light'] .auth-login-shell .text-slate-400,
+:root[data-theme='light'] .auth-login-shell .text-slate-500,
+:root[data-theme='light'] .auth-login-shell .text-slate-600 {
+  color: #64748b !important;
+}
+
+:root[data-theme='light'] .auth-bg .hover\:text-white:hover {
+  color: #0f172a !important;
+}
+
+:root[data-theme='light'] .glass-card,
+:root[data-theme='light'] .glass-card p,
+:root[data-theme='light'] .glass-card h3,
+:root[data-theme='light'] .glass-card span,
+:root[data-theme='light'] .glass-card-light {
+  color: #0f172a;
+}
+
+:root[data-theme='light'] .auth-input::placeholder {
+  color: #94a3b8 !important;
+}
+
+/* Forms in admin / finance */
+:root[data-theme='light'] .crud-form-layout label,
+:root[data-theme='light'] .form-field-label,
+:root[data-theme='light'] .form-section-title {
+  color: #0f172a !important;
+}
+
+:root[data-theme='light'] .form-hint,
+:root[data-theme='light'] .muted,
+:root[data-theme='light'] .text-muted {
+  color: #64748b !important;
+}
+
+/* Keep white text on filled accents / primary actions */
+:root[data-theme='light'] .btn-primary,
+:root[data-theme='light'] .btn-primary *,
+:root[data-theme='light'] .resident-nav-link.active,
+:root[data-theme='light'] .resident-nav-link.active *,
+:root[data-theme='light'] .notice-tab.active,
+:root[data-theme='light'] .profile-avatar,
+:root[data-theme='light'] .resident-brand-mark,
+:root[data-theme='light'] .sa-brand-mark,
+:root[data-theme='light'] .topbar-logo {
+  color: #ffffff !important;
+}
+
+:root[data-theme='light'] .btn-primary {
+  color: #ffffff !important;
+}
+
+/* Filled gradient CTAs / chips — keep white label text */
+:root[data-theme='light'] .auth-bg button.bg-gradient-to-r,
+:root[data-theme='light'] .auth-bg button.bg-gradient-to-br,
+:root[data-theme='light'] .auth-bg button.bg-linear-to-r,
+:root[data-theme='light'] .auth-bg a.bg-gradient-to-r,
+:root[data-theme='light'] .auth-bg a.bg-linear-to-r,
+:root[data-theme='light'] .auth-bg [class*='bg-gradient'] .text-white,
+:root[data-theme='light'] .auth-bg [class*='bg-linear'] .text-white,
+:root[data-theme='light'] .auth-bg [class*='from-violet'] .text-white,
+:root[data-theme='light'] .auth-bg [class*='from-emerald'] .text-white,
+:root[data-theme='light'] .auth-bg [class*='from-teal'] .text-white,
+:root[data-theme='light'] .auth-bg [class*='from-cyan'] .text-white,
+:root[data-theme='light'] .auth-bg [class*='from-amber'] .text-white,
+:root[data-theme='light'] .auth-bg [class*='from-rose'] .text-white,
+:root[data-theme='light'] .auth-bg [class*='from-orange'] .text-white,
+:root[data-theme='light'] .auth-bg [class*='from-blue'] .text-white,
+:root[data-theme='light'] .auth-bg [class*='from-indigo'] .text-white,
+:root[data-theme='light'] .auth-login-shell button[class*='bg-gradient'],
+:root[data-theme='light'] .auth-login-shell button[class*='from-'],
+:root[data-theme='light'] .auth-login-shell [class*='bg-gradient'] .text-white,
+:root[data-theme='light'] .auth-login-shell [class*='from-'] > .text-white {
+  color: #ffffff !important;
+}
+
+:root[data-theme='light'] .theme-toggle {
+  color: #475569 !important;
+  background: #ffffff;
+  border-color: rgba(15, 23, 42, 0.12);
+}
+
+:root[data-theme='light'] .theme-toggle:hover {
+  color: #0f172a !important;
+  background: #f1f5f9;
+}
+
+/* Super admin content cards */
+:root[data-theme='light'] .sa-main .sa-card,
+:root[data-theme='light'] .sa-main .sa-panel,
+:root[data-theme='light'] .sa-main .glass-card,
+:root[data-theme='light'] .sa-kpi,
+:root[data-theme='light'] .sa-page-title {
+  background: #ffffff;
+  border-color: rgba(15, 23, 42, 0.1);
+  color: #0f172a !important;
+}
+
+:root[data-theme='light'] .sa-page-sub,
+:root[data-theme='light'] .sa-kpi span {
+  color: #64748b !important;
+}
+
+:root[data-theme='light'] .sa-btn-ghost {
+  color: #334155 !important;
+}
+
+/* Extra admin muted / activity text that stays white in dark CSS */
+:root[data-theme='light'] .cell-muted,
+:root[data-theme='light'] .cell-id,
+:root[data-theme='light'] .activity-text .what,
+:root[data-theme='light'] .activity-time,
+:root[data-theme='light'] .panel-amount-sub,
+:root[data-theme='light'] .placeholder-card p,
+:root[data-theme='light'] .palette-empty,
+:root[data-theme='light'] .palette-item-meta,
+:root[data-theme='light'] .palette-hint,
+:root[data-theme='light'] .dock-group-label {
+  color: #64748b !important;
+}
+
+:root[data-theme='light'] .activity-text,
+:root[data-theme='light'] .activity-text .who,
+:root[data-theme='light'] .palette-item-label,
+:root[data-theme='light'] .palette-input {
+  color: #0f172a !important;
+}
+
+:root[data-theme='light'] .palette {
+  background: #ffffff;
+  border-color: rgba(15, 23, 42, 0.12);
+  box-shadow: 0 24px 60px rgba(15, 23, 42, 0.18);
+  color: #0f172a;
+}
+
+:root[data-theme='light'] .palette-input {
+  color: #0f172a !important;
+  background: transparent !important;
+}
+
+:root[data-theme='light'] .palette-input::placeholder {
+  color: #94a3b8 !important;
+}
+
+:root[data-theme='light'] .palette-item-icon {
+  background: #f1f5f9;
+  border-color: rgba(15, 23, 42, 0.1);
+  color: #475569 !important;
+}
+
+:root[data-theme='light'] .palette-item.active {
+  background: rgba(79, 70, 229, 0.1);
+}
+
+:root[data-theme='light'] .palette-item-tag,
+:root[data-theme='light'] .palette-foot {
+  color: #64748b !important;
+  background: transparent;
+  border-color: rgba(15, 23, 42, 0.08);
+}
+
+:root[data-theme='light'] .palette-divider,
+:root[data-theme='light'] .palette-foot {
+  border-color: rgba(15, 23, 42, 0.08);
+}
+
+:root[data-theme='light'] .stat-card,
+:root[data-theme='light'] .activity-panel,
+:root[data-theme='light'] .side-panel,
+:root[data-theme='light'] .placeholder-card {
+  background: #ffffff;
+  border-color: rgba(15, 23, 42, 0.1);
+  color: #0f172a;
+}
+
+:root[data-theme='light'] .app-main svg,
+:root[data-theme='light'] .resident-main svg:not(.resident-nav-link.active svg),
+:root[data-theme='light'] .sa-main svg {
+  color: inherit;
+}
+
+:root[data-theme='light'] .resident-nav-link.active svg,
+:root[data-theme='light'] .btn-primary svg {
+  color: #ffffff !important;
+  stroke: currentColor;
+}

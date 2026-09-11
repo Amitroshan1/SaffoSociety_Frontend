@@ -1,0 +1,1002 @@
+/* ═══════════════════════════════════════════════════════════
+   Admin Profile  ·  Dark Dashboard Theme
+   Matches: #080c14 bg · glass cards · indigo accents
+   ═══════════════════════════════════════════════════════════ */
+
+@import url("https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=DM+Mono:wght@400;500&display=swap");
+
+/* ─────────────────────────────────────────────────────────────
+   1. FORCE DARK on html / body / #root so the whole page is dark
+   (Your AppShell already sets --bg:#080c14 but the profile
+   page inside might have a white wrapper — this kills it.)
+───────────────────────────────────────────────────────────── */
+/* Keep dark shell only when not in light mode (profile CSS is global once loaded) */
+html:not([data-theme='light']),
+html:not([data-theme='light']) body,
+html:not([data-theme='light']) #root {
+  background-color: #080c14 !important;
+  color: rgba(255, 255, 255, 0.75);
+  min-height: 100%;
+}
+
+/* ─────────────────────────────────────────────────────────────
+   2. DESIGN TOKENS  (mirror Command Dock :root exactly)
+───────────────────────────────────────────────────────────── */
+.ap-root {
+  /* backgrounds */
+  --bg: #080c14;
+  --glass: rgba(255, 255, 255, 0.035);
+  --glass-hover: rgba(255, 255, 255, 0.055);
+  --glass-active: rgba(79, 70, 229, 0.2);
+
+  /* borders */
+  --border-soft: rgba(255, 255, 255, 0.07);
+  --border-hover: rgba(99, 102, 241, 0.4);
+  --border-active: rgba(99, 102, 241, 0.35);
+
+  /* primary */
+  --c-primary: #4f46e5;
+  --c-primary-2: #7c3aed;
+  --c-primary-glow: rgba(79, 70, 229, 0.3);
+  --c-primary-muted: rgba(79, 70, 229, 0.15);
+  --grad-primary: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%);
+  --shadow-glow:
+    0 0 0 1px rgba(99, 102, 241, 0.4), 0 4px 16px rgba(79, 70, 229, 0.3);
+
+  /* text */
+  --t1: #ffffff;
+  --t2: rgba(255, 255, 255, 0.75);
+  --t3: rgba(255, 255, 255, 0.45);
+  --t4: rgba(255, 255, 255, 0.22);
+
+  /* radii */
+  --r-sm: 8px;
+  --r-md: 12px;
+  --r-lg: 16px;
+  --r-xl: 20px;
+
+  /* motion */
+  --ease: all 0.16s ease;
+  --spring: cubic-bezier(0.34, 1.56, 0.64, 1);
+
+  /* status */
+  --ok-bg: rgba(34, 197, 94, 0.12);
+  --ok-c: #86efac;
+  --ok-b: rgba(34, 197, 94, 0.18);
+  --info-bg: rgba(59, 130, 246, 0.1);
+  --info-c: #93c5fd;
+  --info-b: rgba(59, 130, 246, 0.18);
+  --warn-bg: rgba(251, 191, 36, 0.1);
+  --warn-c: #fde68a;
+  --warn-b: rgba(251, 191, 36, 0.18);
+  --err-bg: rgba(239, 68, 68, 0.1);
+  --err-c: #fca5a5;
+  --err-b: rgba(239, 68, 68, 0.18);
+
+  /* ── layout ── */
+  position: relative;
+  z-index: 1;
+  min-height: 100vh;
+  background: #080c14;
+  background-image:
+    radial-gradient(
+      ellipse 800px 600px at 85% 10%,
+      rgba(79, 70, 229, 0.12) 0%,
+      transparent 70%
+    ),
+    radial-gradient(
+      ellipse 600px 400px at 10% 90%,
+      rgba(124, 58, 237, 0.07) 0%,
+      transparent 70%
+    );
+  color: var(--t2);
+  font-family:
+    "Inter",
+    ui-sans-serif,
+    system-ui,
+    -apple-system,
+    sans-serif;
+  padding: 28px 20px 60px;
+  box-sizing: border-box;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* Dot-grid overlay (same as dashboard) */
+.ap-root::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 0;
+  background-image:
+    repeating-linear-gradient(
+      0deg,
+      rgba(255, 255, 255, 0.018) 0,
+      rgba(255, 255, 255, 0.018) 1px,
+      transparent 1px,
+      transparent 40px
+    ),
+    repeating-linear-gradient(
+      90deg,
+      rgba(255, 255, 255, 0.018) 0,
+      rgba(255, 255, 255, 0.018) 1px,
+      transparent 1px,
+      transparent 40px
+    );
+  -webkit-mask-image: radial-gradient(
+    ellipse at center,
+    black 50%,
+    transparent 90%
+  );
+  mask-image: radial-gradient(ellipse at center, black 50%, transparent 90%);
+}
+
+/* ─────────────────────────────────────────────────────────────
+   3. CONTAINER
+───────────────────────────────────────────────────────────── */
+.ap-container {
+  max-width: 1100px;
+  margin: 0 auto;
+  position: relative;
+  z-index: 1;
+}
+
+/* ─────────────────────────────────────────────────────────────
+   4. GLASS CARD BASE  (matches dashboard stat/payment cards)
+───────────────────────────────────────────────────────────── */
+.ap-card {
+  background: var(--glass);
+  -webkit-backdrop-filter: blur(12px);
+  backdrop-filter: blur(12px);
+  border: 1px solid var(--border-soft);
+  border-radius: var(--r-lg);
+  box-shadow: 0 2px 20px rgba(0, 0, 0, 0.28);
+  overflow: hidden;
+  transition:
+    box-shadow 0.2s ease,
+    border-color 0.2s ease;
+}
+.ap-card:hover {
+  border-color: rgba(255, 255, 255, 0.11);
+  box-shadow: 0 4px 32px rgba(0, 0, 0, 0.4);
+}
+
+/* ─────────────────────────────────────────────────────────────
+   5. HEADER CARD  (indigo gradient — same as topbar logo area)
+───────────────────────────────────────────────────────────── */
+.ap-header {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 24px;
+  padding: 26px 28px;
+  margin-bottom: 20px;
+  align-items: center;
+  justify-content: space-between;
+
+  background:
+    linear-gradient(
+      135deg,
+      rgba(79, 70, 229, 0.55) 0%,
+      rgba(124, 58, 237, 0.42) 55%,
+      rgba(79, 70, 229, 0.28) 100%
+    ),
+    rgba(8, 12, 20, 0.6);
+  -webkit-backdrop-filter: blur(16px);
+  backdrop-filter: blur(16px);
+  border: 1px solid rgba(99, 102, 241, 0.28);
+  border-top: 1.5px solid rgba(99, 102, 241, 0.55);
+  border-radius: var(--r-lg);
+  box-shadow:
+    0 0 0 1px rgba(99, 102, 241, 0.15),
+    0 8px 40px rgba(79, 70, 229, 0.22),
+    0 2px 20px rgba(0, 0, 0, 0.35);
+}
+
+.ap-header-left {
+  display: flex;
+  gap: 20px;
+  align-items: center;
+}
+.ap-avatar-wrap {
+  position: relative;
+  flex-shrink: 0;
+}
+
+/* Avatar — same gradient pill as dashboard topbar user icon */
+.ap-avatar-fallback {
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #fff;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  background: var(--grad-primary);
+  box-shadow: 0 4px 14px rgba(79, 70, 229, 0.5);
+  border: 2px solid rgba(255, 255, 255, 0.18);
+  user-select: none;
+}
+
+.ap-avatar-btn {
+  position: absolute;
+  bottom: 2px;
+  right: 2px;
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.14);
+  color: #fff;
+  border: 1px solid rgba(255, 255, 255, 0.22);
+  display: grid;
+  place-items: center;
+  cursor: pointer;
+  -webkit-backdrop-filter: blur(8px);
+  backdrop-filter: blur(8px);
+  transition: var(--ease);
+}
+.ap-avatar-btn:hover {
+  background: rgba(255, 255, 255, 0.24);
+  transform: scale(1.1);
+}
+
+.ap-header-info h1 {
+  margin: 0 0 5px;
+  font-size: 22px;
+  font-weight: 700;
+  color: var(--t1);
+  letter-spacing: -0.02em;
+}
+
+.ap-role-line {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin: 0 0 10px;
+  color: var(--t3);
+  font-size: 13.5px;
+}
+
+/* Role chip — matches dashboard breadcrumb/badge style */
+.ap-role-chip {
+  background: rgba(79, 70, 229, 0.22);
+  color: #a5b4fc;
+  padding: 2px 10px;
+  border-radius: 99px;
+  font-size: 12px;
+  font-weight: 600;
+  text-transform: capitalize;
+  letter-spacing: 0.04em;
+  border: 1px solid rgba(99, 102, 241, 0.35);
+}
+
+.ap-badges {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 7px;
+}
+
+/* ── Header right ── */
+.ap-header-right {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  align-items: flex-end;
+  min-width: 260px;
+}
+
+.ap-progress {
+  width: 100%;
+  max-width: 300px;
+}
+
+.ap-progress-head {
+  display: flex;
+  justify-content: space-between;
+  font-size: 12.5px;
+  color: var(--t3);
+  margin-bottom: 7px;
+}
+.ap-progress-head strong {
+  color: var(--t1);
+  font-size: 14px;
+}
+
+.ap-progress-track {
+  height: 6px;
+  background: rgba(255, 255, 255, 0.09);
+  border-radius: 99px;
+  overflow: hidden;
+}
+.ap-progress-fill {
+  height: 100%;
+  border-radius: 99px;
+  background: linear-gradient(90deg, #6366f1, #a78bfa);
+  box-shadow: 0 0 10px rgba(99, 102, 241, 0.55);
+  transition: width 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+}
+.ap-progress-hint {
+  margin: 6px 0 0;
+  font-size: 11.5px;
+  color: var(--t4);
+}
+
+.ap-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  justify-content: flex-end;
+}
+
+/* ─────────────────────────────────────────────────────────────
+   6. BUTTONS  (exact dashboard button styles)
+───────────────────────────────────────────────────────────── */
+.ap-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 13px;
+  font-weight: 500;
+  padding: 0 16px;
+  height: 36px;
+  border-radius: var(--r-sm);
+  border: 1px solid transparent;
+  cursor: pointer;
+  font-family: inherit;
+  white-space: nowrap;
+  transition:
+    var(--ease),
+    transform 0.18s var(--spring);
+}
+
+/* Primary — indigo gradient (matches dashboard "+ New User" btn) */
+.ap-btn-primary {
+  background: var(--grad-primary);
+  color: #fff;
+  border: none;
+  box-shadow: var(--shadow-glow);
+}
+.ap-btn-primary:hover {
+  filter: brightness(1.12);
+  transform: translateY(-1px);
+  box-shadow:
+    0 0 0 1px rgba(99, 102, 241, 0.55),
+    0 8px 24px rgba(79, 70, 229, 0.45);
+}
+.ap-btn-primary:active {
+  transform: scale(0.97);
+}
+
+/* Outline (Change Password) */
+.ap-btn-outline {
+  background: rgba(255, 255, 255, 0.07);
+  color: var(--t2);
+  border-color: rgba(255, 255, 255, 0.14);
+}
+.ap-btn-outline:hover {
+  background: rgba(255, 255, 255, 0.12);
+  color: var(--t1);
+  border-color: rgba(255, 255, 255, 0.22);
+}
+
+/* Danger (Logout) */
+.ap-btn-danger {
+  background: var(--err-bg);
+  color: var(--err-c);
+  border-color: var(--err-b);
+}
+.ap-btn-danger:hover {
+  background: rgba(239, 68, 68, 0.2);
+}
+
+/* Ghost — inside card headers (Edit / Cancel) */
+.ap-btn-ghost {
+  background: transparent;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  color: var(--t3);
+  height: 30px;
+  padding: 0 12px;
+  font-size: 12.5px;
+}
+.ap-btn-ghost:hover {
+  background: rgba(255, 255, 255, 0.07);
+  color: var(--t1);
+  border-color: rgba(255, 255, 255, 0.18);
+}
+
+/* Save — indigo, smaller */
+.ap-btn-save {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  background: var(--grad-primary);
+  color: #fff;
+  border: none;
+  height: 30px;
+  padding: 0 12px;
+  font-size: 12.5px;
+  border-radius: var(--r-sm);
+  cursor: pointer;
+  box-shadow: var(--shadow-glow);
+  font-family: inherit;
+  transition:
+    var(--ease),
+    transform 0.18s var(--spring);
+}
+.ap-btn-save:hover {
+  filter: brightness(1.1);
+  transform: translateY(-1px);
+}
+.ap-btn-save:active {
+  transform: scale(0.97);
+}
+
+.ap-btn:disabled,
+.ap-btn-save:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+  transform: none !important;
+  filter: none !important;
+}
+
+/* Icon button */
+.ap-icon-btn {
+  width: 34px;
+  height: 34px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: var(--r-sm);
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid var(--border-soft);
+  color: var(--t3);
+  cursor: pointer;
+  transition: var(--ease);
+}
+.ap-icon-btn:hover {
+  background: rgba(255, 255, 255, 0.09);
+  color: var(--t1);
+  border-color: rgba(255, 255, 255, 0.14);
+}
+
+/* ─────────────────────────────────────────────────────────────
+   7. SECTION GRID
+───────────────────────────────────────────────────────────── */
+.ap-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 16px;
+}
+.ap-card-full {
+  grid-column: 1 / -1;
+}
+
+/* ─────────────────────────────────────────────────────────────
+   8. CARD HEAD / BODY  (matches dashboard payments-head style)
+───────────────────────────────────────────────────────────── */
+.ap-card-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 13px 18px;
+  border-bottom: 1px solid var(--border-soft);
+  background: rgba(255, 255, 255, 0.022);
+}
+.ap-card-title {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.ap-card-title h3 {
+  margin: 0;
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--t1);
+}
+/* Icon in title — indigo tint like dashboard section icons */
+.ap-card-title svg {
+  color: #a5b4fc;
+}
+
+.ap-card-actions {
+  display: flex;
+  gap: 6px;
+}
+.ap-card-body {
+  padding: 6px 10px 12px;
+}
+
+.ap-security-body {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+}
+
+/* ─────────────────────────────────────────────────────────────
+   9. FIELD ROWS  (matches dashboard table row hover style)
+───────────────────────────────────────────────────────────── */
+.ap-field {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  padding: 10px;
+  border-radius: var(--r-sm);
+  transition: background 0.15s ease;
+}
+.ap-field:hover {
+  background: rgba(255, 255, 255, 0.038);
+}
+
+/* Read-only fields get a subtler tint */
+.ap-field-readonly {
+  background: rgba(255, 255, 255, 0.014);
+}
+.ap-field-readonly:hover {
+  background: rgba(255, 255, 255, 0.014);
+}
+
+/* Field icon pill — indigo glow (matches dock active btn) */
+.ap-field-icon {
+  width: 34px;
+  height: 34px;
+  border-radius: 9px;
+  display: grid;
+  place-items: center;
+  flex-shrink: 0;
+  background: rgba(79, 70, 229, 0.18);
+  border: 1px solid rgba(99, 102, 241, 0.3);
+  color: #a5b4fc;
+  box-shadow: 0 0 10px rgba(79, 70, 229, 0.14);
+}
+.ap-field-readonly .ap-field-icon {
+  background: rgba(255, 255, 255, 0.04);
+  border-color: var(--border-soft);
+  color: var(--t4);
+  box-shadow: none;
+}
+
+.ap-field-text {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  min-width: 0;
+  flex: 1;
+}
+
+.ap-field-label {
+  font-size: 10.5px;
+  color: var(--t3);
+  text-transform: uppercase;
+  letter-spacing: 0.07em;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+.ap-locked {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  font-size: 10px;
+  color: var(--t4);
+  text-transform: none;
+  letter-spacing: 0;
+}
+
+.ap-field-value {
+  font-size: 13.5px;
+  color: var(--t1);
+  font-weight: 500;
+  word-break: break-word;
+}
+.ap-empty {
+  color: var(--t4);
+  font-style: italic;
+  font-weight: 400;
+}
+
+/* ─────────────────────────────────────────────────────────────
+   10. INPUTS  (dark glass inputs matching dashboard search/filters)
+───────────────────────────────────────────────────────────── */
+.ap-input {
+  width: 100%;
+  padding: 7px 11px;
+  font-size: 13.5px;
+  font-family: inherit;
+  border: 1px solid var(--border-soft);
+  border-radius: var(--r-sm);
+  background: rgba(255, 255, 255, 0.055);
+  color: var(--t1);
+  outline: none;
+  transition:
+    border-color 0.15s ease,
+    box-shadow 0.15s ease,
+    background 0.15s ease;
+  box-sizing: border-box;
+}
+.ap-input::placeholder {
+  color: var(--t4);
+}
+.ap-input:focus {
+  border-color: rgba(99, 102, 241, 0.6);
+  box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.15);
+  background: rgba(79, 70, 229, 0.07);
+}
+select.ap-input option {
+  background: #12141f;
+  color: #fff;
+}
+
+/* ─────────────────────────────────────────────────────────────
+   11. BADGES  (exact dashboard badge styles)
+───────────────────────────────────────────────────────────── */
+.ap-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  border-radius: 6px;
+  padding: 3px 9px;
+  font-size: 11px;
+  font-weight: 600;
+  white-space: nowrap;
+  border: 1px solid transparent;
+  transition: var(--ease);
+}
+.ap-badge:hover {
+  transform: scale(1.05);
+}
+
+.ap-badge-success {
+  background: var(--ok-bg);
+  color: var(--ok-c);
+  border-color: var(--ok-b);
+}
+.ap-badge-info {
+  background: var(--info-bg);
+  color: var(--info-c);
+  border-color: var(--info-b);
+}
+.ap-badge-muted {
+  background: rgba(255, 255, 255, 0.06);
+  color: var(--t3);
+  border-color: var(--border-soft);
+}
+.ap-badge-warn {
+  background: var(--warn-bg);
+  color: var(--warn-c);
+  border-color: var(--warn-b);
+}
+
+.ap-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: currentColor;
+  box-shadow: 0 0 6px currentColor;
+  animation: ap-pulse 1.6s ease-in-out infinite;
+}
+
+/* ─────────────────────────────────────────────────────────────
+   12. PASSWORD MODAL  (matches dashboard side-panel / command palette)
+───────────────────────────────────────────────────────────── */
+.ap-modal-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 1000;
+  display: grid;
+  place-items: center;
+  background: rgba(0, 0, 0, 0.78);
+  -webkit-backdrop-filter: blur(8px);
+  backdrop-filter: blur(8px);
+  animation: ap-fade-in 0.16s ease both;
+}
+
+.ap-modal {
+  width: 440px;
+  max-width: 92vw;
+  background: rgba(10, 12, 22, 0.98);
+  -webkit-backdrop-filter: blur(20px);
+  backdrop-filter: blur(20px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-top: 2px solid rgba(99, 102, 241, 0.6); /* accent top */
+  border-radius: var(--r-xl);
+  box-shadow:
+    -12px 0 48px rgba(0, 0, 0, 0.5),
+    0 0 24px rgba(79, 70, 229, 0.15),
+    0 32px 80px rgba(0, 0, 0, 0.7);
+  overflow: hidden;
+  animation: ap-spring-in 0.24s var(--spring) both;
+}
+
+.ap-modal-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 16px 20px;
+  border-bottom: 1px solid var(--border-soft);
+  background: rgba(255, 255, 255, 0.02);
+}
+.ap-modal-title {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--t1);
+}
+.ap-modal-title svg {
+  color: #a5b4fc;
+}
+
+.ap-modal-body {
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+.ap-modal-foot {
+  padding: 14px 20px;
+  border-top: 1px solid var(--border-soft);
+  background: rgba(255, 255, 255, 0.02);
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+}
+
+.ap-pw-field {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+.ap-pw-field label {
+  font-size: 12.5px;
+  font-weight: 500;
+  color: var(--t3);
+}
+
+.ap-pw-wrap {
+  position: relative;
+}
+.ap-pw-wrap .ap-input {
+  padding-right: 40px;
+}
+.ap-pw-eye {
+  position: absolute;
+  right: 10px;
+  top: 50%;
+  transform: translateY(-50%);
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: var(--t3);
+  display: grid;
+  place-items: center;
+  padding: 0;
+  transition: var(--ease);
+}
+.ap-pw-eye:hover {
+  color: var(--t1);
+}
+
+.ap-error {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 12.5px;
+  color: var(--err-c);
+  background: var(--err-bg);
+  border: 1px solid var(--err-b);
+  padding: 8px 12px;
+  border-radius: var(--r-sm);
+  margin: 0;
+}
+
+/* ─────────────────────────────────────────────────────────────
+   13. TOAST  (bottom-right, matches dashboard notification style)
+───────────────────────────────────────────────────────────── */
+.ap-toast {
+  position: fixed;
+  bottom: 28px;
+  right: 28px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 12px 18px;
+  border-radius: var(--r-md);
+  font-size: 13.5px;
+  font-weight: 500;
+  z-index: 2000;
+  border: 1px solid transparent;
+  -webkit-backdrop-filter: blur(12px);
+  backdrop-filter: blur(12px);
+  animation: ap-slide-up 0.25s var(--spring) both;
+}
+.ap-toast-success {
+  background: var(--ok-bg);
+  color: var(--ok-c);
+  border-color: var(--ok-b);
+  box-shadow:
+    0 8px 30px rgba(0, 0, 0, 0.4),
+    0 0 16px rgba(34, 197, 94, 0.2);
+}
+.ap-toast-error {
+  background: var(--err-bg);
+  color: var(--err-c);
+  border-color: var(--err-b);
+  box-shadow:
+    0 8px 30px rgba(0, 0, 0, 0.4),
+    0 0 16px rgba(239, 68, 68, 0.2);
+}
+
+/* ─────────────────────────────────────────────────────────────
+   14. SCROLLBAR  (matches dashboard dark scrollbar)
+───────────────────────────────────────────────────────────── */
+::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.06);
+  border-radius: 999px;
+  border: 2px solid transparent;
+  background-clip: content-box;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 255, 255, 0.12);
+  background-clip: content-box;
+}
+
+::selection {
+  background: rgba(99, 102, 241, 0.35);
+  color: #fff;
+}
+
+/* ─────────────────────────────────────────────────────────────
+   LIGHT MODE — admin profile
+───────────────────────────────────────────────────────────── */
+html[data-theme='light'],
+html[data-theme='light'] body,
+html[data-theme='light'] #root {
+  background-color: #f4f6fb !important;
+  color: #334155 !important;
+}
+
+html[data-theme='light'] .ap-root {
+  --bg: #f4f6fb;
+  --glass: #ffffff;
+  --glass-hover: #f8fafc;
+  --glass-active: rgba(79, 70, 229, 0.12);
+  --border-soft: rgba(15, 23, 42, 0.1);
+  --border-hover: rgba(99, 102, 241, 0.35);
+  --border-active: rgba(99, 102, 241, 0.3);
+  --c-primary-glow: rgba(79, 70, 229, 0.18);
+  --c-primary-muted: rgba(79, 70, 229, 0.1);
+  --shadow-glow: 0 0 0 1px rgba(99, 102, 241, 0.25), 0 4px 16px rgba(79, 70, 229, 0.15);
+  --t1: #0f172a;
+  --t2: #334155;
+  --t3: #64748b;
+  --t4: #94a3b8;
+  --ok-c: #15803d;
+  --info-c: #1d4ed8;
+  --warn-c: #b45309;
+  --err-c: #b91c1c;
+  background: #f4f6fb;
+  background-image: none;
+  color: var(--t2);
+}
+
+html[data-theme='light'] .ap-card,
+html[data-theme='light'] .ap-header {
+  background: #ffffff;
+  border-color: rgba(15, 23, 42, 0.1);
+  box-shadow: 0 4px 18px rgba(15, 23, 42, 0.06);
+}
+
+html[data-theme='light'] .ap-header-info h1,
+html[data-theme='light'] .ap-card-title h3,
+html[data-theme='light'] .ap-progress-head strong {
+  color: #0f172a !important;
+}
+
+html[data-theme='light'] .ap-btn-primary,
+html[data-theme='light'] .ap-btn-save,
+html[data-theme='light'] .ap-avatar-fallback,
+html[data-theme='light'] .ap-avatar-btn {
+  color: #ffffff !important;
+}
+
+html[data-theme='light'] .ap-btn-outline,
+html[data-theme='light'] .ap-btn-ghost,
+html[data-theme='light'] .ap-icon-btn {
+  background: #f1f5f9;
+  border-color: rgba(15, 23, 42, 0.12);
+  color: #334155 !important;
+}
+
+html[data-theme='light'] .ap-btn-outline:hover,
+html[data-theme='light'] .ap-btn-ghost:hover,
+html[data-theme='light'] .ap-icon-btn:hover {
+  background: #e2e8f0;
+  color: #0f172a !important;
+}
+
+/* ─────────────────────────────────────────────────────────────
+   15. KEYFRAMES
+───────────────────────────────────────────────────────────── */
+@keyframes ap-fade-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+@keyframes ap-slide-up {
+  from {
+    opacity: 0;
+    transform: translateY(16px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+@keyframes ap-spring-in {
+  0% {
+    opacity: 0;
+    transform: scale(0.94);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+@keyframes ap-pulse {
+  0%,
+  100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+  50% {
+    transform: scale(1.4);
+    opacity: 0.55;
+  }
+}
+
+/* ─────────────────────────────────────────────────────────────
+   16. RESPONSIVE
+───────────────────────────────────────────────────────────── */
+@media (max-width: 860px) {
+  .ap-grid {
+    grid-template-columns: 1fr;
+  }
+  .ap-header {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+  .ap-header-right {
+    align-items: flex-start;
+    width: 100%;
+    min-width: unset;
+  }
+  .ap-actions {
+    justify-content: flex-start;
+  }
+  .ap-security-body {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+@media (max-width: 520px) {
+  .ap-root {
+    padding: 16px 12px 60px;
+  }
+  .ap-header-left {
+    flex-direction: column;
+  }
+  .ap-header-info h1 {
+    font-size: 19px;
+  }
+  .ap-security-body {
+    grid-template-columns: 1fr;
+  }
+}
