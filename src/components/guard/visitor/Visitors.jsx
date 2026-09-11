@@ -61,11 +61,13 @@ import {
   apiError,
   checkInVisitor,
   listGuardVisitsByTab,
+  logGuardCall,
   logVisitor,
   markVisitorExit,
   readdRejectedVisit,
   tryGuardApprove,
   tryGuardDeny,
+  verifyVisitorOTP,
 } from "../../../services/guard.service";
 
 const TABS = [
@@ -166,16 +168,38 @@ export default function Visitors({ onNavigateBack }) {
   );
 
   const handleCall = useCallback(
-    (id) => {
+    async (id) => {
       const visitor = pending.find((v) => v.id === id) || approved.find((v) => v.id === id);
-      const phone = visitor?.phone || visitor?.raw?.residentPhone;
+      const phone = visitor?.phone || visitor?.raw?.phone;
       if (!phone) {
         showToast("error", "No phone", "Resident/visitor phone is not available.");
         return;
       }
+      try {
+        await logGuardCall(id, `Called ${visitor?.name || "visitor"}`);
+      } catch {
+        // Dial anyway
+      }
       window.location.href = `tel:${phone}`;
     },
     [pending, approved, showToast],
+  );
+
+  const handleVerifyOtp = useCallback(
+    async (id) => {
+      const otp = window.prompt("Enter visitor OTP");
+      if (!otp) return;
+      try {
+        const row = await verifyVisitorOTP(id, otp.trim());
+        setPending((prev) => prev.filter((x) => x.id !== id));
+        setApproved((prev) => [row, ...prev]);
+        setActiveTab("approved");
+        showToast("success", "OTP verified", `${row.name} checked in`);
+      } catch (err) {
+        showToast("error", "OTP failed", apiError(err, "Invalid OTP"));
+      }
+    },
+    [showToast],
   );
 
   const handleMarkExit = useCallback(
@@ -267,6 +291,7 @@ export default function Visitors({ onNavigateBack }) {
             onApprove={handleApprove}
             onDeny={handleDeny}
             onCall={handleCall}
+            onVerifyOtp={handleVerifyOtp}
           />
         )}
         {activeTab === "approved" && (

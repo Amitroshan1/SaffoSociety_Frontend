@@ -68,6 +68,7 @@
 // ─────────────────────────────────────────────────────────────────────────────
 
 import { useState, useRef, useEffect, useCallback } from "react";
+import { getRecentWalkIns } from "../../../services/guard.service";
 
 const PURPOSES = [
   "Guest",
@@ -165,6 +166,7 @@ export default function AddVisitorForm({ onSubmit, showToast }) {
   const [camModalView, setCamModalView] = useState("choice");
   const [deviceOptions, setDeviceOptions] = useState([]);
   const [enumerating, setEnumerating] = useState(false);
+  const [recentWalkIns, setRecentWalkIns] = useState([]);
   const videoRef = useRef(null);
   const canvasRef = useRef(null);
   const fileRef = useRef(null);
@@ -185,6 +187,21 @@ export default function AddVisitorForm({ onSubmit, showToast }) {
       stopStream();
     };
   }, [stopStream]);
+
+  useEffect(() => {
+    let cancelled = false;
+    (async () => {
+      try {
+        const rows = await getRecentWalkIns(5);
+        if (!cancelled) setRecentWalkIns(rows);
+      } catch {
+        if (!cancelled) setRecentWalkIns([]);
+      }
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, []);
 
   async function listVideoDevices() {
     if (!navigator.mediaDevices?.getUserMedia || !navigator.mediaDevices?.enumerateDevices) {
@@ -461,6 +478,28 @@ export default function AddVisitorForm({ onSubmit, showToast }) {
 
   return (
     <div className="avf-root">
+      {recentWalkIns.length > 0 ? (
+        <div className="avf-card" style={{ marginBottom: 12 }}>
+          <div className="avf-card-title">Recent walk-ins</div>
+          <div className="avf-chips">
+            {recentWalkIns.map((r) => (
+              <button
+                key={r.id}
+                type="button"
+                className="avf-chip"
+                onClick={() => {
+                  setName(r.name || "");
+                  setPhone(String(r.phone || "").replace(/\D/g, "").slice(-10));
+                  setFlat(r.flat && r.flat !== "—" ? r.flat : "");
+                  if (r.purpose) setPurpose(r.purpose);
+                }}
+              >
+                {r.name}
+              </button>
+            ))}
+          </div>
+        </div>
+      ) : null}
       <div className="avf-form-grid">
         {/* Photo — optional */}
         <div className="avf-card avf-card--photo">

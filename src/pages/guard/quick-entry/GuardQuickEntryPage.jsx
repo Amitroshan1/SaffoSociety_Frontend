@@ -10,9 +10,15 @@ import DeliveryEntryForm from '../../../components/guard/quick-entry/DeliveryEnt
 import VisitorTable from '../../../components/guard/visitor/VisitorTable.jsx';
 import {
   apiError,
+  callResidentForDelivery,
   checkInVisitor,
+  holdDeliveryAtGate,
   listQuickEntryByMode,
+  logDelivery,
+  logGuardCall,
   logVisitor,
+  markHeldParcelCollected,
+  markResidentReceived,
   markVisitorExit,
   readdRejectedVisit,
   tryGuardApprove,
@@ -31,26 +37,25 @@ export const QUICK_ENTRY_MODES = {
     tabs: [
       { key: 'add', label: 'Log Delivery', icon: 'plus' },
       { key: 'pending', label: 'At Gate', icon: 'clock' },
-      { key: 'active', label: 'With Resident', icon: 'check' },
-      { key: 'completed', label: 'Delivered', icon: 'done' },
-      { key: 'rejected', label: 'Returned', icon: 'x' },
+      { key: 'rejected', label: 'Received by Guard', icon: 'x' },
+      { key: 'completed', label: 'Received by Resident', icon: 'done' },
     ],
     tableCopy: {
       visitorCol: 'Courier',
-      approve: 'Allow in',
-      deny: 'Return',
+      approve: 'By Resident',
+      deny: 'By Guard',
       checkIn: 'Send to flat',
-      exit: 'Handed over',
-      readd: 'Log again',
-      done: 'Delivered',
+      exit: 'By Resident',
+      readd: 'Mark Collected',
+      done: 'By Resident',
       emptyPending: 'No parcels waiting at gate',
       emptyPendingSub: 'Log a delivery when a courier arrives.',
-      emptyActive: 'No deliveries with resident',
-      emptyActiveSub: 'Allowed-in parcels show here until handed over.',
-      emptyCompleted: 'No delivered parcels yet',
-      emptyCompletedSub: 'Completed handovers appear here.',
-      emptyRejected: 'No returned parcels',
-      emptyRejectedSub: 'Returned / refused parcels appear here.',
+      emptyActive: '—',
+      emptyActiveSub: '—',
+      emptyCompleted: 'No resident handovers yet',
+      emptyCompletedSub: 'When resident takes or accepts the parcel, it shows here.',
+      emptyRejected: 'No parcels with guard',
+      emptyRejectedSub: 'Leave-at-gate parcels kept with security show here.',
     },
   },
   staff: {
@@ -137,10 +142,18 @@ export default function GuardQuickEntryPage({ mode = 'delivery' }) {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const config = QUICK_ENTRY_MODES[mode] || QUICK_ENTRY_MODES.delivery;
+  const tabs = (config.tabs || DEFAULT_TABS).map((t) =>
+    t.key === 'add' && !config.tabs ? { ...t, label: config.addLabel } : t,
+  );
 
-  const initialTab = VALID_TABS.has(searchParams.get('tab'))
-    ? searchParams.get('tab')
-    : 'add';
+  const rawTab = searchParams.get('tab');
+  const mappedTab =
+    mode === 'delivery' && (rawTab === 'at-gate' || rawTab === 'held' || rawTab === 'log')
+      ? rawTab === 'held'
+        ? 'rejected'
+        : 'pending'
+      : rawTab;
+  const initialTab = tabs.some((t) => t.key === mappedTab) ? mappedTab : 'add';
   const [activeTab, setActiveTab] = useState(initialTab);
   const [pending, setPending] = useState([]);
   const [active, setActive] = useState([]);
@@ -158,8 +171,15 @@ export default function GuardQuickEntryPage({ mode = 'delivery' }) {
 
   useEffect(() => {
     const tab = searchParams.get('tab');
-    if (VALID_TABS.has(tab)) setActiveTab(tab);
-  }, [searchParams]);
+    const next =
+      mode === 'delivery' && (tab === 'at-gate' || tab === 'held' || tab === 'log')
+        ? tab === 'held'
+          ? 'rejected'
+          : 'pending'
+        : tab;
+    if (tabs.some((t) => t.key === next)) setActiveTab(next);
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- only react to URL tab changes
+  }, [searchParams, mode]);
 
   const showToast = useCallback((type, title, sub) => {
     setToast({ type, title, sub });
@@ -186,16 +206,11 @@ export default function GuardQuickEntryPage({ mode = 'delivery' }) {
   }, [refreshLists]);
 
   async function handleSubmit(form) {
-    const row = await logVisitor(form);
+    const row = mode === 'delivery' ? await logDelivery(form) : await logVisitor(form);
     await refreshLists();
     if (mode === 'delivery') {
-      if (row.visitStatus === 'waiting') {
-        setActiveTab('pending');
-        showToast('success', 'At gate', `Waiting for flat ${row.flat}`);
-      } else {
-        setActiveTab('active');
-        showToast('success', 'Logged', `Ready to hand over · Flat ${row.flat}`);
-      }
+      setActiveTab('pending');
+      showToast('success', 'At gate', `Waiting for flat ${row.flat}`);
       return;
     }
     if (row.visitStatus === 'waiting') {
@@ -212,16 +227,19 @@ export default function GuardQuickEntryPage({ mode = 'delivery' }) {
       const v = pending.find((x) => x.id === id);
       if (!v) return;
       try {
+        if (mode === 'delivery') {
+          await markResidentReceived(id);
+          await refreshLists();
+          setActiveTab('completed');
+          showToast('success', 'Received by Resident', `${v.name} · Flat ${v.flat}`);
+          return;
+        }
         await tryGuardApprove(v);
         await refreshLists();
         setActiveTab('active');
-        showToast(
-          'success',
-          mode === 'delivery' ? 'Allowed in' : 'Approved',
-          `${v.name} · Flat ${v.flat}`,
-        );
+        showToast('success', 'Approved', `${v.name} · Flat ${v.flat}`);
       } catch (err) {
-        showToast('error', 'Approve failed', apiError(err, 'Please try again.'));
+        showToast('error', 'Action failed', apiError(err, 'Please try again.'));
       }
     },
     [pending, refreshLists, showToast, mode],
@@ -232,31 +250,49 @@ export default function GuardQuickEntryPage({ mode = 'delivery' }) {
       const v = pending.find((x) => x.id === id);
       if (!v) return;
       try {
+        if (mode === 'delivery') {
+          await holdDeliveryAtGate(id, v.raw?.remarks || v.note || '');
+          await refreshLists();
+          setActiveTab('rejected');
+          showToast('success', 'Received by Guard', `Parcel kept at gate · Flat ${v.flat}`);
+          return;
+        }
         await tryGuardDeny(v);
         await refreshLists();
         setActiveTab('rejected');
-        showToast(
-          'error',
-          mode === 'delivery' ? 'Returned' : 'Denied',
-          mode === 'delivery' ? `${v.name} · parcel returned` : `${v.name} turned away`,
-        );
+        showToast('error', 'Denied', `${v.name} turned away`);
       } catch (err) {
-        showToast('error', 'Deny failed', apiError(err, 'Please try again.'));
+        showToast('error', 'Action failed', apiError(err, 'Please try again.'));
       }
     },
     [pending, refreshLists, showToast, mode],
   );
 
   const handleCall = useCallback(
-    (id) => {
+    async (id) => {
       const row = pending.find((v) => v.id === id) || active.find((v) => v.id === id);
-      if (!row?.phone) {
+      if (!row) {
         showToast('error', 'No phone', 'Phone not available.');
         return;
       }
-      window.location.href = `tel:${row.phone}`;
+      try {
+        if (mode === 'delivery') {
+          const { phone, residentName } = await callResidentForDelivery(row);
+          showToast('success', 'Calling resident', `${residentName} · Flat ${row.flat}`);
+          window.location.href = `tel:${phone}`;
+          return;
+        }
+        if (!row.phone) {
+          showToast('error', 'No phone', 'Phone not available.');
+          return;
+        }
+        await logGuardCall(id, `Called ${row.name || 'visitor'}`);
+        window.location.href = `tel:${row.phone}`;
+      } catch (err) {
+        showToast('error', 'Cannot call', apiError(err, 'Phone not available.'));
+      }
     },
-    [pending, active, showToast],
+    [pending, active, showToast, mode],
   );
 
   const handleMarkExit = useCallback(
@@ -267,26 +303,18 @@ export default function GuardQuickEntryPage({ mode = 'delivery' }) {
         if (v.visitStatus === 'approved') {
           await checkInVisitor(id);
           await refreshLists();
-          showToast(
-            'success',
-            mode === 'delivery' ? 'With resident' : 'Checked in',
-            mode === 'delivery' ? `${v.name} going to flat` : `${v.name} is inside`,
-          );
+          showToast('success', 'Checked in', `${v.name} is inside`);
           return;
         }
         await markVisitorExit(id);
         await refreshLists();
         setActiveTab('completed');
-        showToast(
-          'success',
-          mode === 'delivery' ? 'Delivered' : 'Completed',
-          mode === 'delivery' ? `${v.name} · handed over` : `${v.name} marked exit`,
-        );
+        showToast('success', 'Completed', `${v.name} marked exit`);
       } catch (err) {
         showToast('error', 'Action failed', apiError(err, 'Please try again.'));
       }
     },
-    [active, refreshLists, showToast, mode],
+    [active, refreshLists, showToast],
   );
 
   const handleReadd = useCallback(
@@ -294,24 +322,24 @@ export default function GuardQuickEntryPage({ mode = 'delivery' }) {
       const v = rejected.find((x) => x.id === id);
       if (!v) return;
       try {
+        if (mode === 'delivery') {
+          await markHeldParcelCollected(id);
+          await refreshLists();
+          setActiveTab('completed');
+          showToast('success', 'Collected', `Resident picked up · Flat ${v.flat}`);
+          return;
+        }
         await readdRejectedVisit(v);
         await refreshLists();
         setActiveTab('pending');
-        showToast(
-          'success',
-          mode === 'delivery' ? 'Back at gate' : 'Re-added',
-          `${v.name} · Flat ${v.flat}`,
-        );
+        showToast('success', 'Re-added', `${v.name} · Flat ${v.flat}`);
       } catch (err) {
-        showToast('error', 'Re-add failed', apiError(err, 'Please try again.'));
+        showToast('error', 'Action failed', apiError(err, 'Please try again.'));
       }
     },
     [rejected, refreshLists, showToast, mode],
   );
 
-  const tabs = (config.tabs || DEFAULT_TABS).map((t) =>
-    t.key === 'add' && !config.tabs ? { ...t, label: config.addLabel } : t,
-  );
   const tableCopy = config.tableCopy || {};
 
   return (

@@ -2,13 +2,15 @@
 
 import '../../styles/guard/guard-main.css';
 
-/** Shows the top SOS strip when alerts exist. */
-export default function AlertsBanner({ alerts = [], onViewDetails }) {
+/** Shows the top SOS strip when alerts exist (dashboard top). Animates until resolved. */
+export default function AlertsBanner({ alerts = [], onViewDetails, demo = false }) {
   if (!alerts?.length) return null;
   const active = alerts[0];
+  const extra = alerts.length - 1;
 
   return (
-    <div className="gm-sos-banner">
+    <div className="gm-sos-banner" role="alert" aria-live="assertive">
+      <span className="gm-sos-sweep" aria-hidden="true" />
       <div className="gm-sos-left">
         <div className="gm-sos-icon">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
@@ -22,7 +24,11 @@ export default function AlertsBanner({ alerts = [], onViewDetails }) {
           </svg>
         </div>
         <div>
-          <div className="gm-sos-title">SOS ALERT — FLAT {active.flat}</div>
+          <div className="gm-sos-title">
+            SOS ALERT — FLAT {active.flat}
+            {extra > 0 ? `  ·  +${extra} more` : ''}
+            {demo ? '  ·  DEMO' : ''}
+          </div>
           <div className="gm-sos-sub">{active.note || active.message || 'Emergency reported'}</div>
         </div>
       </div>

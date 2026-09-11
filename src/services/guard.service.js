@@ -1,18 +1,7 @@
-// Guard panel API helpers — wraps existing backend routes (no mock data).
-// Features without a guard-accessible backend stay as explicit stubs that throw.
+// Guard panel API helpers — wired to dedicated /guard/* backend routes (no backend changes).
 
 import api from './api';
-import { listOccupancies } from './occupancy.service';
 import { getMyStaff } from './staff.service';
-import {
-  checkInVisit,
-  checkOutVisit,
-  createVisit,
-  listVisits,
-  approveVisit,
-  rejectVisit,
-} from './visit.service';
-import { createVisitor, listVisitors } from './visitor.service';
 import { listGuardNotifications } from './notification.service';
 
 function unwrap(res) {
@@ -30,37 +19,6 @@ function normalizeFlat(value) {
     .replace(/[\s_]+/g, '-');
 }
 
-function formatTime(iso) {
-  if (!iso) return '—';
-  try {
-    return new Date(iso).toLocaleTimeString('en-IN', {
-      hour: '2-digit',
-      minute: '2-digit',
-      hour12: true,
-    });
-  } catch {
-    return '—';
-  }
-}
-
-function minutesBetween(fromIso, to = Date.now()) {
-  if (!fromIso) return 0;
-  const ms = to - new Date(fromIso).getTime();
-  return Math.max(0, Math.floor(ms / 60000));
-}
-
-function formatWait(iso) {
-  const m = minutesBetween(iso);
-  if (m < 60) return `${m}m`;
-  const h = Math.floor(m / 60);
-  const rem = m % 60;
-  return rem ? `${h}h ${rem}m` : `${h}h`;
-}
-
-function formatDuration(iso) {
-  return formatWait(iso);
-}
-
 function initialsOf(name) {
   const parts = String(name || '')
     .trim()
@@ -71,7 +29,7 @@ function initialsOf(name) {
   return `${parts[0][0]}${parts[parts.length - 1][0]}`.toUpperCase();
 }
 
-/** Map UI purpose labels → backend visitorType enum. */
+/** Map UI purpose labels → backend purpose / visitor type. */
 export function mapPurposeToVisitorType(purpose) {
   const key = String(purpose || '')
     .trim()
@@ -85,108 +43,75 @@ export function mapPurposeToVisitorType(purpose) {
   return 'other';
 }
 
-export function mapVisitToUiRow(visit) {
-  const status = visit.status;
-  const timeSource =
-    status === 'checked_in'
-      ? visit.checkInTime
-      : status === 'checked_out'
-        ? visit.checkOutTime || visit.checkInTime
-      : status === 'rejected'
-        ? visit.updatedAt
-        : visit.createdAt;
+/**
+ * Guard list API returns UI statuses: pending | approved | rejected | exited
+ * Map to the visitStatus values used by Visitors / QuickEntry tables.
+ */
+export function mapGuardVisitorToUiRow(row) {
+  const status = String(row?.status || '').toLowerCase();
+  let visitStatus = status;
+  if (status === 'pending') visitStatus = 'waiting';
+  // Guard approve already checks the visitor in → treat as inside
+  else if (status === 'approved') visitStatus = 'checked_in';
+  else if (status === 'exited') visitStatus = 'checked_out';
+  else if (status === 'rejected') visitStatus = 'rejected';
 
   return {
-    id: visit.id,
-    name: visit.visitorName || 'Visitor',
-    phone: visit.visitorPhone || '',
-    flat: visit.flatNo || '—',
-    purpose: visit.purpose || visit.visitorType || '—',
-    persons: visit.numberOfPeople || 1,
-    time: formatTime(timeSource),
-    wait: formatWait(visit.createdAt),
-    duration: formatDuration(visit.checkInTime || visit.createdAt),
-      by:
-      status === 'rejected'
-        ? String(visit.notes || '').toLowerCase().includes('guard')
-          ? 'Guard'
-          : 'Admin / Resident'
-        : '',
-    vehicle: visit.vehicleNumber || '',
-    visitStatus: status,
-    isPreapproved: Boolean(visit.isPreapproved),
-    visitorType: visit.visitorType,
-    occupancyId: visit.occupancyId,
-    visitorId: visit.visitorId,
-    flatId: visit.flatId,
-    createdAt: visit.createdAt,
-    checkInTime: visit.checkInTime,
-    raw: visit,
+    id: row.id || row.visitId || row._id,
+    name: row.name || 'Visitor',
+    phone: row.phone || '',
+    flat: row.flat || '—',
+    purpose: row.purpose || '—',
+    persons: row.persons || 1,
+    time: row.time || '—',
+    wait: row.wait || '0m',
+    duration: row.duration || '0m',
+    by: row.by || (visitStatus === 'rejected' ? 'Guard' : ''),
+    vehicle: row.vehicle || '',
+    visitStatus,
+    isPreapproved: Boolean(row.preApproved),
+    visitorType: mapPurposeToVisitorType(row.purpose),
+    occupancyId: row.occupancyId || null,
+    visitorId: row.visitorId || null,
+    flatId: row.flatId || null,
+    photoUrl: row.photoUrl || row.photo_url || null,
+    createdAt: row.createdAt,
+    checkInTime: row.checkInTime,
+    raw: row,
   };
 }
 
-async function fetchVisits(params = {}) {
-  const res = await listVisits({
-    page: 1,
-    pageSize: 100,
-    sortBy: 'created_at',
-    sortOrder: 'desc',
-    ...params,
+async function fetchGuardVisitors(params = {}) {
+  const res = await api.get('/guard/visitors', {
+    params: {
+      page: 1,
+      pageSize: 100,
+      sortBy: 'created_at',
+      sortOrder: 'desc',
+      ...params,
+    },
   });
-  return unwrap(res)?.visits || [];
+  return unwrap(res)?.visitors || [];
 }
 
-function startOfTodayIso() {
-  const d = new Date();
-  d.setHours(0, 0, 0, 0);
-  return d.toISOString();
-}
-
-/**
- * Resolve occupancyId for a flat number without admin flat list.
- * 1) Match flatNo on recent visits
- * 2) Try GET /occupancies (admin-only today — may 403)
- */
-export async function resolveOccupancyIdByFlat(flatNo) {
-  const needle = normalizeFlat(flatNo);
-  if (!needle) return null;
-
-  const visits = await fetchVisits({ pageSize: 100 });
-  const fromVisit = visits.find((v) => normalizeFlat(v.flatNo) === needle);
-  if (fromVisit?.occupancyId) return fromVisit.occupancyId;
-
-  try {
-    const res = await listOccupancies({ page: 1, pageSize: 100, status: 'active' });
-    const rows = unwrap(res)?.occupancies || [];
-    const hit = rows.find((o) => normalizeFlat(o.flatNo) === needle);
-    if (hit?.id) return hit.id;
-  } catch {
-    // Guard cannot list occupancies — expected until backend grants access.
+function matchesQuickEntryMode(row, mode) {
+  const purpose = String(row.purpose || '').toLowerCase();
+  const type = mapPurposeToVisitorType(row.purpose);
+  if (mode === 'delivery') {
+    return ['delivery', 'courier'].includes(type) || purpose.includes('deliver');
   }
-
-  return null;
-}
-
-async function findOrCreateVisitor({ name, phone, photoSrc, note }) {
-  const listRes = await listVisitors({ phone: phone.trim(), page: 1, pageSize: 10 });
-  const existing = (unwrap(listRes)?.visitors || []).find(
-    (v) => String(v.phone || '').replace(/\D/g, '') === phone.trim().replace(/\D/g, ''),
-  );
-  if (existing) return existing;
-
-  const payload = {
-    name: name.trim(),
-    phone: phone.trim(),
-    notes: note || undefined,
-    metadata: {},
-  };
-  // Backend expects URL string, not a data-URI — keep camera capture local-only.
-  if (photoSrc && /^https?:\/\//i.test(photoSrc)) {
-    payload.photoUrl = photoSrc;
+  if (mode === 'cab') {
+    return purpose.includes('cab') || purpose.includes('taxi') || type === 'driver';
   }
-
-  const created = await createVisitor(payload);
-  return unwrap(created)?.visitor;
+  if (mode === 'staff') {
+    if (purpose.includes('cab') || purpose.includes('taxi')) return false;
+    return (
+      ['maid', 'driver', 'technician'].includes(type) ||
+      purpose.includes('work') ||
+      purpose.includes('service')
+    );
+  }
+  return true;
 }
 
 // ─────────────────────────────────────────────
@@ -224,307 +149,312 @@ export async function updateGuardProfile(data) {
   return unwrap(res);
 }
 
+export async function changeGuardPassword(payload) {
+  const res = await api.patch('/guard/change-password', payload);
+  return unwrap(res);
+}
+
 // ─────────────────────────────────────────────
-// DASHBOARD / VISITS
+// FLATS
 // ─────────────────────────────────────────────
 
-export async function getDashboardBundle() {
-  const today = startOfTodayIso();
-  const [
-    waiting,
-    approved,
-    checkedIn,
-    rejected,
-    recent,
-    deliveriesWaiting,
-    deliveriesApproved,
-  ] = await Promise.all([
-    fetchVisits({ status: 'waiting' }),
-    fetchVisits({ status: 'approved' }),
-    fetchVisits({ status: 'checked_in' }),
-    fetchVisits({ status: 'rejected' }),
-    fetchVisits({ fromDate: today, pageSize: 20 }),
-    fetchVisits({ status: 'waiting', visitorType: 'delivery' }),
-    fetchVisits({ status: 'approved', visitorType: 'delivery' }),
-  ]);
+export async function searchGuardFlats(q, limit = 20) {
+  const res = await api.get('/guard/flats', {
+    params: { q: q || undefined, limit },
+  });
+  return unwrap(res)?.flats || [];
+}
 
-  const courierWaiting = await fetchVisits({ status: 'waiting', visitorType: 'courier' }).catch(
-    () => [],
+export async function getFlatContact(flatId) {
+  const res = await api.get(`/guard/flats/${flatId}/contact`);
+  return unwrap(res);
+}
+
+/** Resolve flat label via GET /guard/flats (preferred over admin occupancies). */
+export async function resolveOccupancyIdByFlat(flatNo) {
+  const needle = normalizeFlat(flatNo);
+  if (!needle) return null;
+  const flats = await searchGuardFlats(flatNo, 50);
+  const hit = flats.find(
+    (f) =>
+      normalizeFlat(f.flat_number) === needle ||
+      normalizeFlat(f.flatNo) === needle ||
+      normalizeFlat(`${f.wingCode}-${f.flatNo}`) === needle,
   );
-  const courierApproved = await fetchVisits({ status: 'approved', visitorType: 'courier' }).catch(
-    () => [],
+  return hit?.occupancyId || null;
+}
+
+export async function resolveFlatForWalkIn(flatNo) {
+  const needle = normalizeFlat(flatNo);
+  if (!needle) return null;
+  const flats = await searchGuardFlats(flatNo, 50);
+  const hit = flats.find(
+    (f) =>
+      normalizeFlat(f.flat_number) === needle ||
+      normalizeFlat(f.flatNo) === needle ||
+      normalizeFlat(`${f.wingCode}-${f.flatNo}`) === needle,
   );
-
-  const latest = latestVisitsOnly([...waiting, ...approved, ...checkedIn, ...rejected]);
-  const pendingLatest = latest.filter((v) => v.status === 'waiting');
-  const insideLatest = latest.filter((v) => v.status === 'checked_in');
-
-  const deliveryVisits = [
-    ...deliveriesWaiting,
-    ...deliveriesApproved,
-    ...courierWaiting,
-    ...courierApproved,
-  ];
-  const uniqueDeliveries = latestVisitsOnly(deliveryVisits).filter((v) =>
-    ['waiting', 'approved'].includes(v.status),
-  );
-
-  const staffInside = insideLatest.filter((v) =>
-    ['maid', 'driver'].includes(String(v.visitorType || '').toLowerCase()),
-  );
-
-  const entriesToday = recent.filter((v) =>
-    ['checked_in', 'checked_out', 'approved', 'waiting'].includes(v.status),
-  );
-
+  if (!hit) return null;
   return {
-    stats: {
-      visitorsInsideCount: insideLatest.length,
-      todaysVisitorCount: entriesToday.length,
-      pendingApprovalsCount: pendingLatest.length,
-      pendingDeliveriesCount: uniqueDeliveries.length,
-      staffInsideCount: staffInside.length,
-      activeSosCount: 0,
-    },
-    pending: pendingLatest.map(mapVisitToUiRow),
-    approved: latest
-      .filter((v) => v.status === 'approved' || v.status === 'checked_in')
-      .map(mapVisitToUiRow),
-    rejected: latest.filter((v) => v.status === 'rejected').map(mapVisitToUiRow),
-    inside: insideLatest.map(mapVisitToUiRow),
-    deliveries: uniqueDeliveries.map((v) => ({
-      id: v.id,
-      person: v.visitorName || 'Courier',
-      flat: v.flatNo || '—',
-      company: v.purpose || v.visitorType || 'Delivery',
-      status: v.status === 'approved' ? 'Approved' : 'At Gate',
-    })),
-    staff: staffInside.map((v) => ({
-      id: v.id,
-      name: v.visitorName || 'Staff',
-      role: v.visitorType || 'Staff',
-      flat: v.flatNo || '—',
-      since: formatTime(v.checkInTime),
-    })),
-    activity: recent.slice(0, 10).map((v) => {
-      const name = v.visitorName || 'Visitor';
-      const flat = v.flatNo || '—';
-      let message = `${name} — ${v.status.replace(/_/g, ' ')} for Flat ${flat}`;
-      let type = 'visitor';
-      if (['delivery', 'courier'].includes(v.visitorType)) {
-        type = 'delivery';
-        message = `Delivery ${name} for Flat ${flat}`;
-      } else if (['maid', 'driver'].includes(v.visitorType)) {
-        type = 'staff';
-        message = `Staff ${name} (${v.visitorType}) — Flat ${flat}`;
-      } else if (v.status === 'checked_out') {
-        type = 'exit';
-        message = `${name} exited Flat ${flat}`;
-      }
-      return {
-        id: v.id,
-        message,
-        time: formatTime(v.updatedAt || v.createdAt),
-        type,
-      };
-    }),
+    flatId: hit.flatId || hit.id,
+    occupancyId: hit.occupancyId || null,
+    flatLabel: hit.flat_number || hit.flatNo,
   };
 }
 
+// ─────────────────────────────────────────────
+// DASHBOARD
+// ─────────────────────────────────────────────
+
+export async function getDashboardBundle() {
+  const [statsRes, sosRes, deliveriesRes, staffRes, activityRes, pendingRows, insideRows] =
+    await Promise.all([
+      api.get('/guard/dashboard/stats'),
+      api.get('/guard/sos').catch(() => ({ data: { data: { alerts: [] } } })),
+      api.get('/guard/deliveries', { params: { collected: false, limit: 20 } }).catch(() => ({
+        data: { data: { deliveries: [] } },
+      })),
+      api.get('/guard/staff-inside', { params: { limit: 20 } }).catch(() => ({
+        data: { data: { staff: [] } },
+      })),
+      api.get('/guard/activity', { params: { limit: 20 } }).catch(() => ({
+        data: { data: { activities: [] } },
+      })),
+      fetchGuardVisitors({ status: 'pending' }),
+      fetchGuardVisitors({ status: 'inside' }),
+    ]);
+
+  const statsRaw = unwrap(statsRes) || {};
+  const alerts = unwrap(sosRes)?.alerts || [];
+  const deliveries = unwrap(deliveriesRes)?.deliveries || [];
+  const staff = unwrap(staffRes)?.staff || [];
+  const activities = unwrap(activityRes)?.activities || [];
+
+  const pending = pendingRows.map(mapGuardVisitorToUiRow);
+  const inside = insideRows.map(mapGuardVisitorToUiRow);
+
+  return {
+    stats: {
+      visitorsInsideCount: statsRaw.visitorsInsideCount ?? statsRaw.activeVisitorsCount ?? 0,
+      todaysVisitorCount: statsRaw.todaysVisitorCount ?? statsRaw.totalEntriesToday ?? 0,
+      pendingApprovalsCount: statsRaw.pendingApprovalsCount ?? 0,
+      pendingDeliveriesCount: statsRaw.pendingDeliveriesCount ?? statsRaw.deliveriesPendingCount ?? 0,
+      staffInsideCount: statsRaw.staffInsideCount ?? 0,
+      activeSosCount: statsRaw.activeSosCount ?? alerts.filter((a) => a.status === 'active').length,
+    },
+    pending,
+    approved: inside,
+    rejected: (await fetchGuardVisitors({ status: 'rejected' }).catch(() => [])).map(
+      mapGuardVisitorToUiRow,
+    ),
+    inside,
+    deliveries,
+    staff,
+    activity: activities,
+    sosAlerts: activeSosFromApi(alerts),
+  };
+}
+
+function activeSosFromApi(alerts) {
+  return (alerts || []).filter((a) => String(a.status || '').toLowerCase() === 'active');
+}
+
 export async function getDashboardStats() {
-  const bundle = await getDashboardBundle();
-  return bundle.stats;
+  const res = await api.get('/guard/dashboard/stats');
+  const s = unwrap(res) || {};
+  return {
+    visitorsInsideCount: s.visitorsInsideCount ?? s.activeVisitorsCount ?? 0,
+    todaysVisitorCount: s.todaysVisitorCount ?? s.totalEntriesToday ?? 0,
+    pendingApprovalsCount: s.pendingApprovalsCount ?? 0,
+    pendingDeliveriesCount: s.pendingDeliveriesCount ?? s.deliveriesPendingCount ?? 0,
+    staffInsideCount: s.staffInsideCount ?? 0,
+    activeSosCount: s.activeSosCount ?? 0,
+  };
 }
 
 export async function getVisitorsInside() {
-  const visits = await fetchVisits({ status: 'checked_in' });
-  return visits.map((v) => {
-    const row = mapVisitToUiRow(v);
+  const rows = await fetchGuardVisitors({ status: 'inside' });
+  return rows.map((row) => {
+    const mapped = mapGuardVisitorToUiRow(row);
     return {
-      _id: row.id,
-      id: row.id,
-      name: row.name,
-      initials: initialsOf(row.name),
-      flat: row.flat,
-      entryTime: row.time,
-      purpose: row.purpose,
-      totalPersons: row.persons,
-      duration: row.duration,
+      _id: mapped.id,
+      id: mapped.id,
+      name: mapped.name,
+      initials: initialsOf(mapped.name),
+      flat: mapped.flat,
+      entryTime: mapped.time,
+      purpose: mapped.purpose,
+      totalPersons: mapped.persons,
+      duration: mapped.duration,
     };
   });
 }
 
-function visitSortTime(visit) {
-  const t = visit.updatedAt || visit.createdAt || 0;
-  return new Date(t).getTime();
-}
-
-/** One row per visitor+flat — keep the newest visit so they don't appear in two tabs. */
-function latestVisitsOnly(visits) {
-  const map = new Map();
-  for (const visit of visits) {
-    const key = `${visit.visitorId || visit.visitorPhone || visit.id}:${visit.occupancyId || visit.flatId || visit.flatNo || ''}`;
-    const prev = map.get(key);
-    if (!prev || visitSortTime(visit) >= visitSortTime(prev)) {
-      map.set(key, visit);
-    }
-  }
-  return [...map.values()];
-}
-
 export async function listGuardVisitsByTab() {
-  const [waiting, approved, checkedIn, rejected] = await Promise.all([
-    fetchVisits({ status: 'waiting' }),
-    fetchVisits({ status: 'approved' }),
-    fetchVisits({ status: 'checked_in' }),
-    fetchVisits({ status: 'rejected' }),
+  const [pending, approved, rejected] = await Promise.all([
+    fetchGuardVisitors({ status: 'pending' }),
+    fetchGuardVisitors({ status: 'approved' }),
+    fetchGuardVisitors({ status: 'rejected' }),
   ]);
-
-  const latest = latestVisitsOnly([...waiting, ...approved, ...checkedIn, ...rejected]);
-
   return {
-    pending: latest.filter((v) => v.status === 'waiting').map(mapVisitToUiRow),
-    approved: latest
-      .filter((v) => v.status === 'approved' || v.status === 'checked_in')
-      .map(mapVisitToUiRow),
-    rejected: latest.filter((v) => v.status === 'rejected').map(mapVisitToUiRow),
+    pending: pending.map(mapGuardVisitorToUiRow),
+    approved: approved.map(mapGuardVisitorToUiRow),
+    rejected: rejected.map(mapGuardVisitorToUiRow),
   };
-}
-
-function matchesQuickEntryMode(visit, mode) {
-  const type = String(visit.visitorType || '').toLowerCase();
-  const purpose = String(visit.purpose || '').toLowerCase();
-  if (mode === 'delivery') {
-    return ['delivery', 'courier'].includes(type) || purpose.includes('deliver');
-  }
-  if (mode === 'cab') {
-    return purpose.includes('cab') || purpose.includes('taxi');
-  }
-  if (mode === 'staff') {
-    if (purpose.includes('cab') || purpose.includes('taxi')) return false;
-    return ['maid', 'driver', 'technician'].includes(type) || purpose.includes('work');
-  }
-  return true;
 }
 
 /** Delivery / Staff / Cab lists — Pending, Active, Completed (+ Rejected). */
 export async function listQuickEntryByMode(mode) {
-  const [waiting, approved, checkedIn, checkedOut, rejected] = await Promise.all([
-    fetchVisits({ status: 'waiting' }),
-    fetchVisits({ status: 'approved' }),
-    fetchVisits({ status: 'checked_in' }),
-    fetchVisits({ status: 'checked_out' }),
-    fetchVisits({ status: 'rejected' }),
+  if (mode === 'delivery') {
+    const buckets = await listDeliveryBuckets();
+    const toRow = (card, extra = {}) => ({
+      id: card.id,
+      name: card.courierName || 'Courier',
+      phone: card.phone || '',
+      flat: card.flat || '—',
+      purpose: 'Delivery',
+      persons: 1,
+      time: card.time || '—',
+      wait: card.raw?.wait || card.time || '0m',
+      duration: '—',
+      by: card.held ? 'Guard' : '',
+      vehicle: '',
+      visitStatus: card.visitStatus || 'waiting',
+      visitorId: card.visitorId || null,
+      flatId: card.flatId || card.raw?.flatId || null,
+      raw: card.raw || card,
+      ...extra,
+    });
+    return {
+      pending: buckets.atGate.map((c) => toRow(c)),
+      active: [],
+      completed: buckets.completed.map((c) =>
+        toRow(c, { visitStatus: 'checked_out', by: '' }),
+      ),
+      rejected: buckets.held.map((c) =>
+        toRow(c, { visitStatus: 'rejected', by: 'Guard', held: true }),
+      ),
+    };
+  }
+
+  const [pending, active, completed, rejected] = await Promise.all([
+    fetchGuardVisitors({ status: 'pending' }),
+    fetchGuardVisitors({ status: 'approved' }),
+    fetchGuardVisitors({ status: 'exited' }),
+    fetchGuardVisitors({ status: 'rejected' }),
   ]);
 
-  const scoped = latestVisitsOnly([
-    ...waiting,
-    ...approved,
-    ...checkedIn,
-    ...checkedOut,
-    ...rejected,
-  ]).filter((v) => matchesQuickEntryMode(v, mode));
+  const filter = (rows) =>
+    rows.filter((r) => matchesQuickEntryMode(r, mode)).map(mapGuardVisitorToUiRow);
 
   return {
-    pending: scoped.filter((v) => v.status === 'waiting').map(mapVisitToUiRow),
-    active: scoped
-      .filter((v) => v.status === 'approved' || v.status === 'checked_in')
-      .map(mapVisitToUiRow),
-    completed: scoped.filter((v) => v.status === 'checked_out').map(mapVisitToUiRow),
-    rejected: scoped.filter((v) => v.status === 'rejected').map(mapVisitToUiRow),
+    pending: filter(pending),
+    active: filter(active),
+    completed: filter(completed),
+    rejected: filter(rejected),
   };
 }
 
 /**
- * Create visitor identity + visit for a flat.
- * Requires occupancyId — resolved from prior visits or occupancies list.
+ * Create walk-in via POST /guard/visitors (flat label or flatId/occupancyId).
  */
 export async function logVisitor(form) {
-  const occupancyId = await resolveOccupancyIdByFlat(form.flat);
-  if (!occupancyId) {
-    const err = new Error(
-      `Cannot resolve flat "${form.flat}" to an occupancy. Guard cannot list flats/occupancies until that backend access exists (or the flat has a prior visit).`,
-    );
+  const flatLabel = String(form.flat || '').trim();
+  if (!flatLabel) {
+    const err = new Error('Flat is required.');
     err.code = 'FLAT_OCCUPANCY_UNAVAILABLE';
     throw err;
   }
 
-  const visitor = await findOrCreateVisitor({
-    name: form.name,
-    phone: form.phone,
-    photoSrc: form.photoSrc,
-    note: form.note,
-  });
-  if (!visitor?.id) throw new Error('Failed to create visitor');
+  const flatInfo = await resolveFlatForWalkIn(flatLabel).catch(() => null);
 
-  const isPreapproved = Boolean(form.preapprove);
-  const visitRes = await createVisit({
-    occupancyId,
-    visitorId: visitor.id,
+  let photoUrl = null;
+  const photoSrc = form.photoSrc;
+  if (photoSrc && /^https?:\/\//i.test(photoSrc)) {
+    photoUrl = photoSrc;
+  } else if (photoSrc && String(photoSrc).startsWith('data:')) {
+    try {
+      const up = await api.post('/guard/visitors/photo', { photo: photoSrc });
+      photoUrl = unwrap(up)?.photoUrl || unwrap(up)?.photo_url || null;
+    } catch {
+      // Fall through — create accepts inline photo field too
+    }
+  }
+
+  const payload = {
+    name: form.name?.trim(),
+    phone: form.phone?.trim(),
     purpose: form.purpose || 'Guest',
-    visitorType: form.visitorType || mapPurposeToVisitorType(form.purpose),
-    status: 'waiting',
-    vehicleNumber: form.vehicle || undefined,
-    numberOfPeople: Number(form.persons) || 1,
-    isPreapproved,
-    notes: form.note || undefined,
-    metadata: {
-      notifyResident: form.notify !== false,
-      vehicleType: form.vtype || undefined,
-      source: 'guard_panel',
-    },
-  });
+    persons: Number(form.persons) || 1,
+    vehicle: form.vehicle || undefined,
+    vehicleType: form.vtype || undefined,
+    flat: flatLabel,
+    flatId: flatInfo?.flatId || undefined,
+    occupancyId: flatInfo?.occupancyId || undefined,
+    remarks: form.note || undefined,
+    notify: form.notify !== false,
+    preapprove: Boolean(form.preapprove),
+    photoUrl: photoUrl || undefined,
+    photo: !photoUrl && photoSrc?.startsWith?.('data:') ? photoSrc : undefined,
+  };
 
-  const visit = unwrap(visitRes)?.visit;
-  if (!visit) throw new Error('Visit create failed');
-  return mapVisitToUiRow(visit);
+  const res = await api.post('/guard/visitors', payload);
+  const visitor = unwrap(res)?.visitor;
+  if (!visitor) throw new Error('Visit create failed');
+  return mapGuardVisitorToUiRow(visitor);
 }
 
+/** Guard approve → PATCH /guard/visitors/:id/approve (checks visitor in). */
+export async function tryGuardApprove(visitRow) {
+  const res = await api.patch(`/guard/visitors/${visitRow.id}/approve`);
+  return mapGuardVisitorToUiRow(unwrap(res)?.visitor || { ...visitRow.raw, status: 'approved' });
+}
+
+/** Guard deny → PATCH /guard/visitors/:id/deny */
+export async function tryGuardDeny(visitRow) {
+  const res = await api.patch(`/guard/visitors/${visitRow.id}/deny`, {
+    rejectedBy: 'Guard',
+    notes: 'Rejected by guard',
+  });
+  return mapGuardVisitorToUiRow(unwrap(res)?.visitor || { ...visitRow.raw, status: 'rejected' });
+}
+
+/** Already-approved path: no separate check-in needed on guard API. */
 export async function checkInVisitor(visitId) {
-  const res = await checkInVisit(visitId, {});
-  return mapVisitToUiRow(unwrap(res)?.visit || { id: visitId, status: 'checked_in' });
+  const res = await api.patch(`/guard/visitors/${visitId}/approve`);
+  return mapGuardVisitorToUiRow(unwrap(res)?.visitor || { id: visitId, status: 'approved' });
 }
 
 export async function markVisitorExit(visitId) {
-  const res = await checkOutVisit(visitId, {});
-  return unwrap(res)?.visit;
+  const res = await api.patch(`/guard/visitors/${visitId}/exit`);
+  return unwrap(res)?.visitor;
 }
 
-/**
- * Guard approve — POST /visits/:id/approve
- */
-export async function tryGuardApprove(visitRow) {
-  const res = await approveVisit(visitRow.id, { notes: 'Approved by guard' });
-  return mapVisitToUiRow(unwrap(res)?.visit || { ...visitRow.raw, status: 'approved' });
-}
-
-/**
- * Guard deny — POST /visits/:id/reject
- */
-export async function tryGuardDeny(visitRow) {
-  const res = await rejectVisit(visitRow.id, { notes: 'Rejected by guard' });
-  return mapVisitToUiRow(unwrap(res)?.visit || { ...visitRow.raw, status: 'rejected' });
-}
-
-/** Re-queue a rejected visit by creating a new waiting visit with same links. */
+/** Re-queue rejected visit → PATCH /guard/visitors/:id/readd */
 export async function readdRejectedVisit(visitRow) {
-  if (!visitRow.occupancyId || !visitRow.visitorId) {
-    throw new Error('Missing occupancy/visitor ids to re-add');
-  }
-  const visitRes = await createVisit({
-    occupancyId: visitRow.occupancyId,
-    visitorId: visitRow.visitorId,
-    purpose: visitRow.purpose || 'Guest',
-    visitorType: mapPurposeToVisitorType(visitRow.purpose || visitRow.visitorType),
-    status: 'waiting',
-    vehicleNumber: visitRow.vehicle || undefined,
-    numberOfPeople: visitRow.persons || 1,
-    isPreapproved: false,
-    metadata: { source: 'guard_readd', previousVisitId: visitRow.id },
+  const res = await api.patch(`/guard/visitors/${visitRow.id}/readd`);
+  const visitor = unwrap(res)?.visitor;
+  if (!visitor) throw new Error('Re-add failed');
+  return mapGuardVisitorToUiRow(visitor);
+}
+
+export async function verifyVisitorOTP(visitId, otp) {
+  const res = await api.post(`/guard/visitors/${visitId}/verify-otp`, { otp });
+  return mapGuardVisitorToUiRow(unwrap(res)?.visitor || { id: visitId, status: 'approved' });
+}
+
+export async function logGuardCall(visitorId, notes) {
+  if (!visitorId) return null;
+  const res = await api.post('/guard/call-logs', {
+    visitorId,
+    notes: notes || undefined,
   });
-  const visit = unwrap(visitRes)?.visit;
-  if (!visit) throw new Error('Re-add failed');
-  return mapVisitToUiRow(visit);
+  return unwrap(res);
+}
+
+export async function getRecentWalkIns(limit = 5) {
+  const res = await api.get('/guard/visitors/recent', { params: { limit } });
+  return (unwrap(res)?.visitors || unwrap(res)?.items || []).map(mapGuardVisitorToUiRow);
 }
 
 export async function getUnreadNotificationCount() {
@@ -538,42 +468,221 @@ export async function getUnreadNotificationCount() {
 }
 
 // ─────────────────────────────────────────────
-// UNAVAILABLE BACKEND (explicit stubs)
+// DELIVERIES / SOS
 // ─────────────────────────────────────────────
 
-export async function verifyVisitorOTP() {
-  throw Object.assign(new Error('Visitor OTP verify API is not available on backend.'), {
-    code: 'BACKEND_UNAVAILABLE',
-  });
-}
-
 export async function getPendingDeliveries() {
-  const bundle = await getDashboardBundle();
-  return bundle.deliveries;
+  const res = await api.get('/guard/deliveries', { params: { collected: false, limit: 50 } });
+  return unwrap(res)?.deliveries || [];
 }
 
-export async function logDelivery() {
-  throw Object.assign(
-    new Error('Dedicated deliveries API is not available — use Add Visitor with purpose Delivery.'),
-    { code: 'BACKEND_UNAVAILABLE' },
-  );
+export async function getCollectedDeliveries(limit = 50) {
+  const res = await api.get('/guard/deliveries', { params: { collected: true, limit } });
+  return unwrap(res)?.deliveries || [];
 }
 
-export async function markDeliveryCollected() {
-  throw Object.assign(new Error('Delivery collect API is not available on backend.'), {
-    code: 'BACKEND_UNAVAILABLE',
+export async function markDeliveryCollected(deliveryId) {
+  const res = await api.patch(`/guard/deliveries/${deliveryId}/collect`);
+  return unwrap(res)?.delivery;
+}
+
+const HELD_MARKER = 'HELD_AT_GATE';
+const HELD_BY = 'GateHold';
+
+function parseDeliveryMeta(remarks = '') {
+  const text = String(remarks || '');
+  const company = text.match(/Company:\s*([^|]+)/i)?.[1]?.trim() || '';
+  const tracking = text.match(/Tracking:\s*([^|]+)/i)?.[1]?.trim() || '';
+  const parts = text
+    .split('|')
+    .map((p) => p.trim())
+    .filter(
+      (p) =>
+        p &&
+        !/^Company:/i.test(p) &&
+        !/^Tracking:/i.test(p) &&
+        !/^HELD_AT_GATE$/i.test(p),
+    );
+  return { company: company || 'Delivery', tracking, parcelNote: parts.join(' · ') };
+}
+
+function isHeldDelivery(row) {
+  const by = String(row.by || row.raw?.by || '');
+  const remarks = String(row.raw?.remarks || row.note || '');
+  return by === HELD_BY || remarks.includes(HELD_MARKER);
+}
+
+function isDeliveryRow(row) {
+  return matchesQuickEntryMode(row.raw || row, 'delivery') || matchesQuickEntryMode(row, 'delivery');
+}
+
+function toDeliveryCard(row) {
+  const meta = parseDeliveryMeta(row.raw?.remarks || row.note || '');
+  return {
+    id: row.id,
+    courierName: row.name || 'Courier',
+    phone: row.phone || '',
+    flat: row.flat || '—',
+    flatId: row.flatId || row.raw?.flatId || null,
+    company: meta.company,
+    tracking: meta.tracking,
+    parcelNote: meta.parcelNote,
+    time: row.time || '—',
+    visitStatus: row.visitStatus,
+    visitorId: row.visitorId,
+    held: isHeldDelivery(row),
+    raw: row.raw || row,
+  };
+}
+
+/**
+ * Gate-level delivery buckets (FE convention on existing visit APIs):
+ * - atGate: waiting/inside delivery, not collected, not held
+ * - held: denied with GateHold / HELD_AT_GATE marker
+ * - completed: collect API (collected=true)
+ */
+export async function listDeliveryBuckets() {
+  const [pending, approved, rejected, collectedApi] = await Promise.all([
+    fetchGuardVisitors({ status: 'pending' }),
+    fetchGuardVisitors({ status: 'approved' }),
+    fetchGuardVisitors({ status: 'rejected' }),
+    getCollectedDeliveries(100).catch(() => []),
+  ]);
+
+  const mapUi = (rows) => rows.map(mapGuardVisitorToUiRow).filter(isDeliveryRow);
+
+  // Held uses deny+GateHold. Backend treats rejected as "collected", so keep held
+  // out of Completed until Mark Collected (readd → collect) runs on the FE.
+  const heldRows = mapUi(rejected).filter((r) => isHeldDelivery(r));
+  const heldIds = new Set(heldRows.map((r) => r.id));
+  const collectedIds = new Set((collectedApi || []).map((d) => d.id));
+
+  const atGate = mapUi([...pending, ...approved])
+    .filter((r) => !isHeldDelivery(r) && !collectedIds.has(r.id) && !heldIds.has(r.id))
+    .map(toDeliveryCard);
+
+  const held = heldRows.map(toDeliveryCard);
+
+  const completed = (collectedApi || [])
+    .filter((d) => !heldIds.has(d.id))
+    .map((d) => ({
+      id: d.id,
+      courierName: d.person || d.courier || 'Courier',
+      phone: '',
+      flat: d.flat || '—',
+      flatId: null,
+      company: d.company || 'Delivery',
+      tracking: '',
+      parcelNote: '',
+      time: d.arrivedTime || '—',
+      visitStatus: 'checked_out',
+      held: false,
+      completedLabel: 'Collected',
+      raw: d,
+    }));
+
+  return { atGate, held, completed };
+}
+
+/** Resident confirmed receipt — uses existing collect API (no courier-inside tracking). */
+export async function markResidentReceived(deliveryId) {
+  return markDeliveryCollected(deliveryId);
+}
+
+/** Parcel stays with security — reuse deny + GateHold marker (no new BE route). */
+export async function holdDeliveryAtGate(deliveryId, existingRemarks = '') {
+  const base = String(existingRemarks || '')
+    .replace(/\s*\|\s*HELD_AT_GATE\b/gi, '')
+    .trim();
+  const notes = base ? `${base} | ${HELD_MARKER}` : HELD_MARKER;
+  const res = await api.patch(`/guard/visitors/${deliveryId}/deny`, {
+    rejectedBy: HELD_BY,
+    notes,
+  });
+  return unwrap(res)?.visitor;
+}
+
+/**
+ * Resident collected a held parcel.
+ * Backend treats rejected as already-collected, so re-open (readd) then collect.
+ */
+export async function markHeldParcelCollected(deliveryId) {
+  await api.patch(`/guard/visitors/${deliveryId}/readd`);
+  return markDeliveryCollected(deliveryId);
+}
+
+/** Call resident for a delivery — logs call; does NOT change delivery status. */
+export async function callResidentForDelivery(card) {
+  let phone = '';
+  let residentName = 'Resident';
+  let flatId = card?.flatId || card?.raw?.flatId || null;
+
+  if (!flatId && card?.flat && card.flat !== '—') {
+    try {
+      const info = await resolveFlatForWalkIn(card.flat);
+      flatId = info?.flatId || null;
+    } catch {
+      // fall through
+    }
+  }
+
+  if (flatId) {
+    try {
+      const contact = await getFlatContact(flatId);
+      phone = String(contact?.phone || '').replace(/[^\d+]/g, '');
+      residentName = contact?.name || residentName;
+    } catch {
+      // fall through to courier phone
+    }
+  }
+
+  // Fallback: dial courier if resident contact is missing (call must still work)
+  if (!phone) {
+    phone = String(card?.phone || card?.raw?.phone || '').replace(/[^\d+]/g, '');
+    if (phone) residentName = card?.name || 'Courier';
+  }
+
+  if (!phone) {
+    const err = new Error('No phone available for this delivery.');
+    err.code = 'NO_PHONE';
+    throw err;
+  }
+
+  try {
+    await logGuardCall(
+      card.id,
+      `Called ${residentName} · Flat ${card.flat || ''} · delivery`,
+    );
+  } catch {
+    // Dial anyway
+  }
+  return { phone, residentName };
+}
+
+/** Prefer logVisitor with purpose Delivery — dedicated create not required. */
+export async function logDelivery(form) {
+  return logVisitor({
+    ...form,
+    purpose: form.purpose || 'Delivery',
+    visitorType: 'delivery',
+    // Always land in At Gate — Guard confirms outcome later
+    preapprove: false,
   });
 }
 
 export async function getSosAlerts() {
-  return [];
+  const res = await api.get('/guard/sos');
+  return unwrap(res)?.alerts || [];
 }
 
-export async function respondToSOS() {
-  throw Object.assign(new Error('SOS alerts API is not available on backend.'), {
-    code: 'BACKEND_UNAVAILABLE',
-  });
+export async function respondToSOS(sosId) {
+  const res = await api.patch(`/guard/sos/${sosId}/respond`);
+  return unwrap(res)?.alert;
 }
+
+// ─────────────────────────────────────────────
+// UNAVAILABLE ON BACKEND (keep explicit stubs)
+// ─────────────────────────────────────────────
 
 export async function submitShiftHandover() {
   throw Object.assign(new Error('Shift handover API is not available on backend.'), {

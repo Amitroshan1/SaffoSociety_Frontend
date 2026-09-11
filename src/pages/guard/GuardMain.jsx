@@ -16,8 +16,11 @@ import { navigateGuard } from '../../constants/guardRoutes.js';
 import {
   apiError,
   getDashboardBundle,
+  logGuardCall,
+  markDeliveryCollected,
   markVisitorExit,
 } from '../../services/guard.service';
+import { DEMO_SOS_ALERTS, activeSosAlerts } from '../../constants/guardSosDemo.js';
 
 export default function GuardMain() {
   const navigate = useNavigate();
@@ -85,7 +88,7 @@ export default function GuardMain() {
       {
         label: 'Deliveries at Gate',
         value: s.pendingDeliveriesCount,
-        sub: 'Waiting / leave at gate',
+        sub: 'Waiting at gate',
         subClass: '',
         colorClass: 'orange',
         onClick: () => navigate('/guard/delivery?tab=pending'),
@@ -110,27 +113,36 @@ export default function GuardMain() {
     }
   }
 
-  function handleCall(item) {
-    const raw = String(item?.phone || item?.raw?.residentPhone || '').replace(/[^\d+]/g, '');
+  async function handleCall(item) {
+    const raw = String(item?.phone || item?.raw?.phone || '').replace(/[^\d+]/g, '');
     if (!raw) {
       setError('No phone number available for this visitor');
       return;
     }
+    try {
+      if (item?.id) {
+        await logGuardCall(item.id, `Called ${item.name || 'visitor'}`);
+      }
+    } catch {
+      // Dial anyway even if call-log fails
+    }
     window.location.href = `tel:${raw}`;
   }
 
-  // Dummy row so Call can be tested when no live pending visits exist.
-  const DEMO_APPROVAL = {
-    id: 'demo-call',
-    name: 'Nilesh Gupta',
-    phone: '8097836069',
-    flat: 'A-101',
-    purpose: 'Friend',
-    time: 'Now',
-  };
+  async function handleCollectDelivery(id) {
+    try {
+      await markDeliveryCollected(id);
+      await load();
+    } catch (err) {
+      setError(apiError(err, 'Collect failed'));
+    }
+  }
 
-  const approvalRows =
-    bundle?.pending?.length > 0 ? bundle.pending : [DEMO_APPROVAL];
+  const approvalRows = bundle?.pending || [];
+  // Live active SOS first; if none, show demo so top banner is visible for UI check
+  const liveSos = activeSosAlerts(bundle?.sosAlerts || []);
+  const sosAlerts = liveSos.length > 0 ? liveSos : activeSosAlerts(DEMO_SOS_ALERTS);
+  const sosIsDemo = liveSos.length === 0;
 
   return (
     <div className="gm-root">
@@ -150,18 +162,9 @@ export default function GuardMain() {
           ) : null}
 
           <AlertsBanner
-            alerts={
-              bundle?.sosAlerts?.length
-                ? bundle.sosAlerts
-                : [
-                    {
-                      id: 'demo-sos',
-                      flat: 'B-204',
-                      note: 'Resident pressed SOS — respond immediately',
-                    },
-                  ]
-            }
-            onViewDetails={() => navigate('/guard/notifications')}
+            alerts={sosAlerts}
+            demo={sosIsDemo}
+            onViewDetails={() => navigate('/guard/sos')}
           />
 
           <QuickActions onAction={handleQuickAction} />
@@ -191,7 +194,12 @@ export default function GuardMain() {
           </div>
 
           <div className="gm-three-col">
-            <DeliverySection data={bundle?.deliveries || []} loading={loading} />
+            <DeliverySection
+              data={bundle?.deliveries || []}
+              loading={loading}
+              onCollect={handleCollectDelivery}
+              onViewAll={() => navigate('/guard/delivery?tab=pending')}
+            />
             <StaffSection data={bundle?.staff || []} loading={loading} />
             <RecentActivity data={bundle?.activity || []} loading={loading} />
           </div>

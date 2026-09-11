@@ -2,7 +2,7 @@
 export const GUARD_ROUTES = {
   Dashboard: '/guard/dashboard',
   Visitors: '/guard/visitors',
-  'Add Delivery': '/guard/delivery',
+  'Add Delivery': '/guard/delivery?tab=add',
   'Staff Entry': '/guard/staff-entry',
   Staff: '/guard/staff-entry',
   'Cab Entry': '/guard/cab-entry',
@@ -13,6 +13,8 @@ export const GUARD_ROUTES = {
   Bookings: '/guard/bookings',
   Parking: '/guard/parking',
   Analytics: '/guard/analytics',
+  'SOS Alerts': '/guard/sos',
+  'My Profile': '/guard/profile',
 };
 
 export function navigateGuard(navigate, label) {

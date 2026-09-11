@@ -11,6 +11,7 @@ const NAV_GROUPS = [
     items: [
       { label: 'Dashboard', icon: 'dashboard' },
       { label: 'Visitors', icon: 'users' },
+      { label: 'SOS Alerts', icon: 'shield' },
       { label: 'My Shifts', icon: 'door' },
       { label: 'Clock In/Out', icon: 'hardhat' },
     ],
@@ -22,6 +23,7 @@ const NAV_GROUPS = [
       { label: 'Parking', icon: 'car' },
       { label: 'Documents', icon: 'scroll' },
       { label: 'Analytics', icon: 'bar-chart' },
+      { label: 'My Profile', icon: 'users' },
     ],
   },
 ];

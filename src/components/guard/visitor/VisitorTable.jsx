@@ -47,6 +47,7 @@ export default function VisitorTable({
   onCall,
   onMarkExit,
   onReadd,
+  onVerifyOtp,
   actionLabels = {},
 }) {
   const [search,  setSearch]  = useState("");
@@ -113,7 +114,7 @@ export default function VisitorTable({
           {variant === "approved" && <><span className="vtbl-hide">Entry time</span><span className="vtbl-hide">Duration</span></>}
           {variant === "completed" && <><span className="vtbl-hide">Exit time</span><span className="vtbl-hide">Duration</span></>}
           {variant === "rejected" && <><span className="vtbl-hide">Time</span><span className="vtbl-hide">By</span></>}
-          <span style={{ textAlign: "right" }}>Actions</span>
+          <span className="vtbl-actions-head">Actions</span>
         </div>
 
         {/* Loading state */}
@@ -206,39 +207,6 @@ export default function VisitorTable({
               <div className="vtbl-actions">
                 {variant === "pending" && (
                   <>
-                    {/*
-                      BACKEND: PATCH /api/visitors/:id/approve
-                      Body: {}
-                      Action: UPDATE visitors SET status='approved', entry_time=NOW(),
-                              approved_by=guard_id WHERE id=:id
-                              Then: send push notification to resident via FCM/Expo
-                    */}
-                    <button
-                      className="vtbl-act vtbl-act--approve"
-                      onClick={() => onApprove(v.id)}
-                    >
-                      {labels.approve}
-                    </button>
-
-                    {/*
-                      BACKEND: PATCH /api/visitors/:id/deny
-                      Body: { rejected_by: "Guard" }
-                      Action: UPDATE visitors SET status='rejected',
-                              rejected_at=NOW(), rejected_by='Guard' WHERE id=:id
-                              Then: send rejection notification to resident
-                    */}
-                    <button
-                      className="vtbl-act vtbl-act--deny"
-                      onClick={() => onDeny(v.id)}
-                    >
-                      {labels.deny}
-                    </button>
-
-                    {/*
-                      BACKEND: GET /api/flats/:flatId/resident-phone
-                      Or just use the phone stored in visitors.resident_phone (denormalized)
-                      Frontend: open tel: link  window.location.href = `tel:${resident.phone}`
-                    */}
                     <button
                       className="vtbl-act vtbl-act--call"
                       title="Call resident"
@@ -246,6 +214,29 @@ export default function VisitorTable({
                     >
                       <PhoneIcon />
                     </button>
+                    <button
+                      className="vtbl-act vtbl-act--approve"
+                      title="Received by Resident"
+                      onClick={() => onApprove(v.id)}
+                    >
+                      {labels.approve}
+                    </button>
+                    <button
+                      className="vtbl-act vtbl-act--deny"
+                      title="Received by Guard"
+                      onClick={() => onDeny(v.id)}
+                    >
+                      {labels.deny}
+                    </button>
+                    {onVerifyOtp ? (
+                      <button
+                        className="vtbl-act vtbl-act--readd"
+                        title="Verify OTP"
+                        onClick={() => onVerifyOtp(v.id)}
+                      >
+                        OTP
+                      </button>
+                    ) : null}
                   </>
                 )}
 

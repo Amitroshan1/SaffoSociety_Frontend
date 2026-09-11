@@ -2,7 +2,12 @@
 
 import '../../styles/guard/guard-main.css';
 
-export default function DeliverySection({ data = [], loading = false }) {
+export default function DeliverySection({
+  data = [],
+  loading = false,
+  onCollect,
+  onViewAll,
+}) {
   const deliveries = data;
 
   return (
@@ -17,6 +22,7 @@ export default function DeliverySection({ data = [], loading = false }) {
         <span>Flat No.</span>
         <span>Company</span>
         <span>Status</span>
+        {onCollect ? <span>Action</span> : null}
       </div>
 
       <div className="gm-table-body">
@@ -33,18 +39,35 @@ export default function DeliverySection({ data = [], loading = false }) {
         {!loading &&
           deliveries.map((d) => (
             <div key={d.id} className="gm-table-row gm-delivery-grid">
-              <span className="gm-visitor-name">{d.person}</span>
+              <span className="gm-visitor-name">{d.person || d.courier}</span>
               <span className="gm-cell-center">{d.flat}</span>
               <span className="gm-cell-center">{d.company}</span>
-              <span className="gm-badge gm-badge-warning">{d.status}</span>
+              <span className="gm-badge gm-badge-warning">{d.status || 'At Gate'}</span>
+              {onCollect ? (
+                <div>
+                  <button
+                    type="button"
+                    className="gm-exit-btn"
+                    onClick={() => onCollect(d.id)}
+                    title="Resident confirmed they received the parcel"
+                  >
+                    Received
+                  </button>
+                </div>
+              ) : null}
             </div>
           ))}
       </div>
 
       <div className="gm-panel-footer">
-        <span className="gm-view-all" style={{ cursor: 'default', opacity: 0.7 }}>
-          Sourced from visit type delivery/courier
-        </span>
+        <button
+          type="button"
+          className="gm-view-all"
+          onClick={onViewAll}
+          style={{ background: 'none', border: 'none', padding: 0, font: 'inherit' }}
+        >
+          Open deliveries →
+        </button>
       </div>
     </div>
   );

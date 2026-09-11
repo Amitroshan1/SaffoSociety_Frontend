@@ -16,6 +16,7 @@ const COURIER_COMPANIES = [
 
 /**
  * Delivery-only gate form — courier + parcel fields (no vehicle/persons clutter).
+ * Always lands in At Gate; Guard confirms Resident Received or Hold at Gate later.
  */
 export default function DeliveryEntryForm({
   title = 'Log Delivery',
@@ -29,7 +30,6 @@ export default function DeliveryEntryForm({
   const [trackingId, setTrackingId] = useState('');
   const [flat, setFlat] = useState('');
   const [parcelNote, setParcelNote] = useState('');
-  const [leaveAtGate, setLeaveAtGate] = useState(true);
   const [submitting, setSubmitting] = useState(false);
 
   async function handleSubmit() {
@@ -60,7 +60,7 @@ export default function DeliveryEntryForm({
         vtype: '',
         note: noteParts.join(' | '),
         notify: true,
-        preapprove: leaveAtGate,
+        preapprove: false,
         visitorType: 'delivery',
         photoSrc: null,
       });
@@ -70,7 +70,6 @@ export default function DeliveryEntryForm({
       setTrackingId('');
       setFlat('');
       setParcelNote('');
-      setLeaveAtGate(true);
     } catch (err) {
       showToast?.(
         'error',
@@ -166,18 +165,9 @@ export default function DeliveryEntryForm({
               placeholder="e.g. Grocery bag, documents, fragile"
             />
           </div>
-          <div className="avf-toggle-row" style={{ marginTop: 8 }}>
-            <div>
-              <div className="avf-tr-title">Leave at gate</div>
-              <div className="avf-tr-sub">No resident wait — ready to hand over at gate</div>
-            </div>
-            <button
-              type="button"
-              className={`avf-toggle${leaveAtGate ? ' avf-toggle--on' : ''}`}
-              onClick={() => setLeaveAtGate((v) => !v)}
-              aria-label="Toggle leave at gate"
-            />
-          </div>
+          <p className="avf-tr-sub" style={{ marginTop: 8 }}>
+            After logging, parcel stays At Gate. Then mark Received by Resident or Received by Guard.
+          </p>
         </div>
 
         <button

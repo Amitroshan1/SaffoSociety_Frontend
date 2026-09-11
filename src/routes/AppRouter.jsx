@@ -147,6 +147,8 @@ import GuardDocumentsPage from '../pages/guard/documents/GuardDocumentsPage';
 import GuardBookingsPage from '../pages/guard/facilities/GuardBookingsPage';
 import GuardParkingPage from '../pages/guard/parking/GuardParkingPage';
 import GuardNotificationsPage from '../pages/guard/notifications/GuardNotificationsPage';
+import GuardProfilePage from '../pages/guard/profile/GuardProfilePage';
+import GuardSosPage from '../pages/guard/sos/GuardSosPage';
 
 import SuperAdminLayout from '../layout/superadmin/SuperAdminLayout';
 import PlatformDashboardPage from '../pages/superadmin/PlatformDashboardPage';
@@ -446,6 +448,8 @@ const AppRouter = () => (
       <Route path="/guard/parking" element={<GuardParkingPage />} />
       <Route path="/guard/notifications" element={<GuardNotificationsPage />} />
       <Route path="/guard/analytics" element={<GuardAnalyticsPage />} />
+      <Route path="/guard/profile" element={<GuardProfilePage />} />
+      <Route path="/guard/sos" element={<GuardSosPage />} />
     </Route>
 
     <Route element={<ProtectedRoute allowedRoles={PLATFORM_ROLES} />}>
