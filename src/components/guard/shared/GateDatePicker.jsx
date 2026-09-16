@@ -29,10 +29,11 @@ function parseIsoKey(iso) {
   return Number.isNaN(d.getTime()) ? null : d;
 }
 
-function formatDisplay(iso) {
+function formatDisplay(iso, displayFormat = 'dmy') {
   if (!iso) return 'Select date';
   const [y, m, d] = iso.split('-');
   if (!y || !m || !d) return 'Select date';
+  if (displayFormat === 'mdy') return `${m}/${d}/${y}`;
   return `${d}-${m}-${y}`;
 }
 
@@ -86,6 +87,7 @@ export default function GateDatePicker({
   max,
   className = '',
   allowClear = true,
+  displayFormat = 'dmy',
 }) {
   const rootRef = useRef(null);
   const [open, setOpen] = useState(false);
@@ -166,7 +168,7 @@ export default function GateDatePicker({
         onClick={() => setOpen((o) => !o)}
       >
         {label ? <span className="gdp-trigger-label">{label}</span> : null}
-        <span className="gdp-trigger-value">{formatDisplay(value)}</span>
+        <span className="gdp-trigger-value">{formatDisplay(value, displayFormat)}</span>
         <CalendarIcon />
       </button>
 

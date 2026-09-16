@@ -1,12 +1,12 @@
-// client/src/components/guard/visitor/AddVisitorForm.jsx
-// ─────────────────────────────────────────────────────────────────────────────
+﻿// client/src/components/guard/visitor/AddVisitorForm.jsx
+// â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 // Form for creating a new visitor entry.
 //
 // Props:
-//   onSubmit  : (entry) => void — called after successful form submission
-//   showToast : (type, title, sub) => void — for error/success feedback
+//   onSubmit  : (entry) => void â€” called after successful form submission
+//   showToast : (type, title, sub) => void â€” for error/success feedback
 //
-// ── BACKEND INTEGRATION NOTES ─────────────────────────────────────────────────
+// â”€â”€ BACKEND INTEGRATION NOTES â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 //
 // 1. PHOTO UPLOAD
 //    On capturePhoto() or handleFileUpload():
@@ -16,7 +16,7 @@
 //             .from('visitor-photos')
 //             .upload(`${societyId}/${Date.now()}.jpg`, blob, { contentType: 'image/jpeg' })
 //         OR upload to S3 via presigned URL:
-//           POST /api/upload/presign → { url, key }
+//           POST /api/upload/presign â†’ { url, key }
 //           PUT <url> with blob body
 //      c. Store returned URL in photoUrl state
 //      d. Send photoUrl in the POST /api/visitors body
@@ -25,7 +25,7 @@
 //    Replace the plain text input for "Visiting flat" with an autocomplete:
 //      GET /api/flats?societyId=X&q=B-1
 //      Returns: [{ id, flat_number, resident_name }]
-//    Store flat_id (not flat_number string) in form state — the backend needs flat_id.
+//    Store flat_id (not flat_number string) in form state â€” the backend needs flat_id.
 //
 // 3. RECENT VISITORS
 //    Replace hardcoded RECENT_VISITORS array with:
@@ -35,7 +35,7 @@
 //
 // 4. GUARD INFO
 //    Replace hardcoded "Rajesh Kumar" in preview card with:
-//      const { user } = useAuth()  →  user.name
+//      const { user } = useAuth()  â†’  user.name
 //    And send guard_id in the POST body from user.id
 //
 // 5. NOTIFY RESIDENT
@@ -47,14 +47,14 @@
 //      Backend sets status='approved' and entry_time=NOW() immediately on INSERT
 //      (skip the pending state entirely)
 //
-// 7. FORM SUBMIT → POST /api/visitors
+// 7. FORM SUBMIT â†’ POST /api/visitors
 //    Body shape:
 //    {
 //      society_id     : number,    // from user.society_id (useAuth)
 //      flat_id        : number,    // selected flat's DB id
 //      guard_id       : number,    // user.id (useAuth)
 //      name           : string,
-//      phone          : string,    // without country code — backend prepends +91
+//      phone          : string,    // without country code â€” backend prepends +91
 //      purpose        : string,
 //      persons_count  : number,
 //      vehicle_number : string,
@@ -65,7 +65,7 @@
 //      remarks        : string,
 //    }
 //    Returns: { visitor: { id, ...allFields, status, created_at } }
-// ─────────────────────────────────────────────────────────────────────────────
+// â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 import { useState, useRef, useEffect, useCallback } from "react";
 import { searchRecentWalkIns } from "../../../services/guard.service";
@@ -77,7 +77,7 @@ const PURPOSES = [
   "Other",
 ];
 
-/** Heuristic: label looks like a phone / Phone Link / Continuity–style camera. */
+/** Heuristic: label looks like a phone / Phone Link / Continuityâ€“style camera. */
 function isPhoneCameraLabel(label = "") {
   const l = String(label).toLowerCase();
   if (!l.trim()) return false;
@@ -138,7 +138,7 @@ function friendlyDeviceName(device, index, kindHint) {
 }
 
 export default function AddVisitorForm({ onSubmit, showToast }) {
-  // ── Form state ─────────────────────────────────────────────────────────────
+  // â”€â”€ Form state â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
   const [name, setName] = useState("");
   const [phone, setPhone] = useState("");
   const [flat, setFlat] = useState("");
@@ -152,7 +152,7 @@ export default function AddVisitorForm({ onSubmit, showToast }) {
   const [preapprove, setPreapprove] = useState(false);
   const [submitting, setSubmitting] = useState(false); // prevent double-submit
 
-  // ── Photo state ────────────────────────────────────────────────────────────
+  // â”€â”€ Photo state â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
   const [photoSrc, setPhotoSrc] = useState(null);
   // TODO: track the uploaded URL separately
   // const [photoUrl, setPhotoUrl] = useState(null);
@@ -220,7 +220,7 @@ export default function AddVisitorForm({ onSubmit, showToast }) {
   function applyRecentVisitor(r) {
     setName(r.name || "");
     setPhone(String(r.phone || "").replace(/\D/g, "").slice(-10));
-    setFlat(r.flat && r.flat !== "—" ? r.flat : "");
+    setFlat(r.flat && r.flat !== "â€”" ? r.flat : "");
     if (r.purpose) setPurpose(r.purpose);
     if (r.persons) setPersons(Number(r.persons) || 1);
     if (r.vehicle) setVehicle(r.vehicle);
@@ -230,7 +230,7 @@ export default function AddVisitorForm({ onSubmit, showToast }) {
     if (!navigator.mediaDevices?.getUserMedia || !navigator.mediaDevices?.enumerateDevices) {
       throw new Error("Camera APIs are not available in this browser.");
     }
-    // Permission first — labels are often empty until granted
+    // Permission first â€” labels are often empty until granted
     const warm = await navigator.mediaDevices.getUserMedia({
       video: true,
       audio: false,
@@ -241,7 +241,7 @@ export default function AddVisitorForm({ onSubmit, showToast }) {
     return all.filter((d) => d.kind === "videoinput");
   }
 
-  /* ── Camera ── */
+  /* â”€â”€ Camera â”€â”€ */
   async function startCameraWithDevice(deviceId, label) {
     if (photoSrc) return;
     setCamLoading(true);
@@ -408,7 +408,7 @@ export default function AddVisitorForm({ onSubmit, showToast }) {
     const v = videoRef.current,
       c = canvasRef.current;
     if (!v?.videoWidth) return;
-    // Downscale for preview circle — full native res is slow to encode
+    // Downscale for preview circle â€” full native res is slow to encode
     const maxSide = 480;
     const scale = Math.min(1, maxSide / Math.max(v.videoWidth, v.videoHeight));
     c.width = Math.round(v.videoWidth * scale);
@@ -446,7 +446,7 @@ export default function AddVisitorForm({ onSubmit, showToast }) {
     // setPhotoUrl(url);
   }
 
-  /* ── Submit ── */
+  /* â”€â”€ Submit â”€â”€ */
   async function handleSubmit() {
     if (!name.trim() || !phone.trim() || !flat.trim()) {
       showToast(
@@ -508,7 +508,7 @@ export default function AddVisitorForm({ onSubmit, showToast }) {
               type="search"
               value={recentQ}
               onChange={(e) => setRecentQ(e.target.value)}
-              placeholder="Search by name or phone…"
+              placeholder="Search by name or phoneâ€¦"
               autoComplete="off"
             />
           </div>
@@ -516,7 +516,7 @@ export default function AddVisitorForm({ onSubmit, showToast }) {
             {recentQ.trim() ? (
               <>
                 {recentLoading ? (
-                  <div className="avf-recent-empty">Searching…</div>
+                  <div className="avf-recent-empty">Searchingâ€¦</div>
                 ) : null}
                 {!recentLoading && recentWalkIns.length === 0 ? (
                   <div className="avf-recent-empty">
@@ -534,9 +534,9 @@ export default function AddVisitorForm({ onSubmit, showToast }) {
                       <div className="avf-recent-item-main">
                         <span className="avf-recent-name">{r.name || "Visitor"}</span>
                         <span className="avf-recent-meta">
-                          {[r.phone, r.flat && r.flat !== "—" ? `Flat ${r.flat}` : null]
+                          {[r.phone, r.flat && r.flat !== "â€”" ? `Flat ${r.flat}` : null]
                             .filter(Boolean)
-                            .join(" · ")}
+                            .join(" Â· ")}
                         </span>
                       </div>
                       <span className="avf-recent-use">Use</span>
@@ -547,7 +547,7 @@ export default function AddVisitorForm({ onSubmit, showToast }) {
           </div>
         </div>
       <div className="avf-form-grid">
-        {/* Photo — optional */}
+        {/* Photo â€” optional */}
         <div className="avf-card avf-card--photo">
           <div className="avf-card-title">
             Visitor photo
@@ -600,7 +600,7 @@ export default function AddVisitorForm({ onSubmit, showToast }) {
                     <circle cx="12" cy="13" r="4" />
                   </svg>
                   <span className="avf-photo-hint-text">
-                    {camLoading ? "…" : "Tap"}
+                    {camLoading ? "â€¦" : "Tap"}
                   </span>
                 </>
               )}
@@ -621,7 +621,7 @@ export default function AddVisitorForm({ onSubmit, showToast }) {
                       onClick={openCameraPicker}
                       disabled={camLoading}
                     >
-                      <CamIcon /> {camLoading ? "Opening…" : "Take Photo"}
+                      <CamIcon /> {camLoading ? "Openingâ€¦" : "Take Photo"}
                     </button>
                     <button
                       type="button"
@@ -679,7 +679,7 @@ export default function AddVisitorForm({ onSubmit, showToast }) {
                 Phone <span className="avf-req">*</span>
               </label>
               <div className="avf-phone-wrap">
-                <div className="avf-phone-cc">🇮🇳 +91</div>
+                <div className="avf-phone-cc">ðŸ‡®ðŸ‡³ +91</div>
                 <input
                   type="tel"
                   value={phone}
@@ -730,7 +730,7 @@ export default function AddVisitorForm({ onSubmit, showToast }) {
                   className="avf-cnt-btn"
                   onClick={() => setPersons((p) => Math.max(1, p - 1))}
                 >
-                  −
+                  âˆ’
                 </button>
                 <div className="avf-cnt-val">{persons}</div>
                 <button
@@ -745,7 +745,7 @@ export default function AddVisitorForm({ onSubmit, showToast }) {
           </div>
         </div>
 
-        {/* Vehicle — optional */}
+        {/* Vehicle â€” optional */}
         <div className="avf-card avf-card--vehicle">
           <div className="avf-card-title">
             Vehicle <span className="avf-optional-tag">optional</span>
@@ -820,7 +820,7 @@ export default function AddVisitorForm({ onSubmit, showToast }) {
           </div>
         </div>
 
-        {/* Remarks — optional */}
+        {/* Remarks â€” optional */}
         <div className="avf-card avf-card--remarks">
           <div className="avf-card-title">
             Remarks <span className="avf-optional-tag">optional</span>
@@ -829,7 +829,7 @@ export default function AddVisitorForm({ onSubmit, showToast }) {
             <textarea
               value={note}
               onChange={(e) => setNote(e.target.value)}
-              placeholder="Any special instructions or notes…"
+              placeholder="Any special instructions or notesâ€¦"
               rows={3}
             />
           </div>
@@ -842,7 +842,7 @@ export default function AddVisitorForm({ onSubmit, showToast }) {
           disabled={submitting}
         >
           <SendIcon />
-          {submitting ? "Adding…" : "Add & Notify Resident"}
+          {submitting ? "Addingâ€¦" : "Add & Notify Resident"}
         </button>
       </div>
 
@@ -875,7 +875,7 @@ export default function AddVisitorForm({ onSubmit, showToast }) {
                     disabled={enumerating || camLoading}
                   >
                     <span className="avf-cam-choice-emoji" aria-hidden>
-                      📱
+                      ðŸ“±
                     </span>
                     <span className="avf-cam-choice-label">
                       Connected Phone Camera
@@ -891,7 +891,7 @@ export default function AddVisitorForm({ onSubmit, showToast }) {
                     disabled={enumerating || camLoading}
                   >
                     <span className="avf-cam-choice-emoji" aria-hidden>
-                      💻
+                      ðŸ’»
                     </span>
                     <span className="avf-cam-choice-label">Browser Camera</span>
                     <span className="avf-cam-choice-hint">
@@ -900,7 +900,7 @@ export default function AddVisitorForm({ onSubmit, showToast }) {
                   </button>
                 </div>
                 {(enumerating || camLoading) && (
-                  <p className="avf-cam-modal-status">Checking cameras…</p>
+                  <p className="avf-cam-modal-status">Checking camerasâ€¦</p>
                 )}
                 <button
                   type="button"
@@ -929,7 +929,7 @@ export default function AddVisitorForm({ onSubmit, showToast }) {
                     onClick={retryPhoneCameraDetect}
                     disabled={enumerating || camLoading}
                   >
-                    {enumerating ? "Checking…" : "Try Again"}
+                    {enumerating ? "Checkingâ€¦" : "Try Again"}
                   </button>
                   <button
                     type="button"
@@ -951,7 +951,7 @@ export default function AddVisitorForm({ onSubmit, showToast }) {
                     : "Select browser camera"}
                 </h3>
                 <p className="avf-cam-modal-sub">
-                  Multiple cameras found — pick one to continue.
+                  Multiple cameras found â€” pick one to continue.
                 </p>
                 <div className="avf-cam-device-list">
                   {deviceOptions.map((d) => (
@@ -983,7 +983,7 @@ export default function AddVisitorForm({ onSubmit, showToast }) {
   );
 }
 
-/* ── Icons ── */
+/* â”€â”€ Icons â”€â”€ */
 const icon = (d) => () => (
   <svg
     width="16"
@@ -1058,602 +1058,3 @@ const ShieldIcon = () => (
     <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
   </svg>
 );
-
-// // client/src/components/guard/AddVisitorForm.jsx
-
-// import { useState, useRef } from "react";
-
-// const PURPOSES = [
-//   "Guest",
-//   "Work / Service",
-//   "Delivery",
-//   "Cab",
-//   "Medical",
-//   "Other",
-// ];
-// const AVATAR_COLORS = [
-//   "#5b52f0",
-//   "#20c997",
-//   "#f5a623",
-//   "#f05353",
-//   "#a855f7",
-//   "#3b82f6",
-// ];
-
-// function avColor(name) {
-//   return AVATAR_COLORS[name.charCodeAt(0) % AVATAR_COLORS.length];
-// }
-// function initials(name) {
-//   const p = name.trim().split(" ");
-//   return p.length >= 2 ? p[0][0] + p[p.length - 1][0] : p[0].substring(0, 2);
-// }
-
-// export default function AddVisitorForm({ onSubmit, showToast }) {
-//   const [name, setName] = useState("");
-//   const [phone, setPhone] = useState("");
-//   const [flat, setFlat] = useState("");
-//   const [purpose, setPurpose] = useState("Guest");
-//   const [persons, setPersons] = useState(1);
-//   const [vehicle, setVehicle] = useState("");
-//   const [vtype, setVtype] = useState("");
-//   const [note, setNote] = useState("");
-//   const [notify, setNotify] = useState(true);
-//   const [preapprove, setPreapprove] = useState(false);
-
-//   /* photo */
-//   const [photoSrc, setPhotoSrc] = useState(null);
-//   const [camActive, setCamActive] = useState(false);
-//   const videoRef = useRef(null);
-//   const canvasRef = useRef(null);
-//   const fileRef = useRef(null);
-//   const streamRef = useRef(null);
-
-//   async function startCamera() {
-//     if (photoSrc) return;
-//     try {
-//       const s = await navigator.mediaDevices.getUserMedia({
-//         video: { facingMode: "user" },
-//         audio: false,
-//       });
-//       streamRef.current = s;
-//       videoRef.current.srcObject = s;
-//       setCamActive(true);
-//     } catch {
-//       showToast("error", "Camera denied", "Use the upload option instead.");
-//     }
-//   }
-
-//   function capturePhoto() {
-//     const v = videoRef.current,
-//       c = canvasRef.current;
-//     c.width = v.videoWidth;
-//     c.height = v.videoHeight;
-//     c.getContext("2d").drawImage(v, 0, 0);
-//     setPhotoSrc(c.toDataURL("image/jpeg", 0.88));
-//     setCamActive(false);
-//     if (streamRef.current)
-//       streamRef.current.getTracks().forEach((t) => t.stop());
-//   }
-
-//   function retakePhoto() {
-//     setPhotoSrc(null);
-//     setCamActive(false);
-//     if (streamRef.current)
-//       streamRef.current.getTracks().forEach((t) => t.stop());
-//   }
-
-//   function handleFileUpload(e) {
-//     const file = e.target.files[0];
-//     if (!file) return;
-//     setPhotoSrc(URL.createObjectURL(file));
-//     setCamActive(false);
-//   }
-
-//   function handleSubmit() {
-//     if (!name.trim() || !phone.trim() || !flat.trim()) {
-//       showToast(
-//         "error",
-//         "Missing fields",
-//         "Name, phone and flat are required.",
-//       );
-//       return;
-//     }
-//     const entry = {
-//       id: Date.now(),
-//       name: name.trim(),
-//       phone: phone.trim(),
-//       flat: flat.trim(),
-//       purpose,
-//       persons,
-//       time: new Date().toLocaleTimeString("en-IN", {
-//         hour: "2-digit",
-//         minute: "2-digit",
-//         hour12: true,
-//       }),
-//       wait: "0m",
-//       vehicle,
-//     };
-//     onSubmit(entry);
-//     /* reset */
-//     setName("");
-//     setPhone("");
-//     setFlat("");
-//     setVehicle("");
-//     setVtype("");
-//     setNote("");
-//     setPersons(1);
-//     setPurpose("Guest");
-//     retakePhoto();
-//   }
-
-//   const prevInitials = name ? initials(name).toUpperCase() : "?";
-//   const prevColor = name ? avColor(name) : "var(--vp-s4)";
-
-//   return (
-//     <div className="avf-root">
-//       {/* ─── FORM COLUMN ─── */}
-//       <div className="avf-form-col">
-//         {/* Photo — optional */}
-//         <div className="avf-card">
-//           <div className="avf-card-title">
-//             Visitor photo
-//             <span className="avf-optional-tag">optional</span>
-//           </div>
-//           <div className="avf-photo-zone">
-//             <div
-//               className="avf-photo-circle"
-//               onClick={!camActive && !photoSrc ? startCamera : undefined}
-//             >
-//               <canvas ref={canvasRef} style={{ display: "none" }} />
-//               <video
-//                 ref={videoRef}
-//                 autoPlay
-//                 playsInline
-//                 muted
-//                 style={{
-//                   display: camActive ? "block" : "none",
-//                   width: "100%",
-//                   height: "100%",
-//                   objectFit: "cover",
-//                   borderRadius: "50%",
-//                 }}
-//               />
-//               {photoSrc && !camActive && (
-//                 <img
-//                   src={photoSrc}
-//                   alt="visitor"
-//                   style={{
-//                     width: "100%",
-//                     height: "100%",
-//                     objectFit: "cover",
-//                     borderRadius: "50%",
-//                   }}
-//                 />
-//               )}
-//               {!camActive && !photoSrc && (
-//                 <>
-//                   <svg
-//                     width="22"
-//                     height="22"
-//                     viewBox="0 0 24 24"
-//                     fill="none"
-//                     stroke="var(--vp-tx3)"
-//                     strokeWidth="1.5"
-//                   >
-//                     <path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z" />
-//                     <circle cx="12" cy="13" r="4" />
-//                   </svg>
-//                   <span className="avf-photo-hint-text">Tap to open</span>
-//                 </>
-//               )}
-//             </div>
-
-//             <div className="avf-photo-actions">
-//               <p className="avf-photo-note">
-//                 {photoSrc
-//                   ? "Photo set — retake if needed."
-//                   : "Photo is optional. You can still add the visitor without it."}
-//               </p>
-//               <div className="avf-photo-btns">
-//                 {!camActive && !photoSrc && (
-//                   <>
-//                     <button className="avf-btn-sm" onClick={startCamera}>
-//                       <CamIcon /> Camera
-//                     </button>
-//                     <button
-//                       className="avf-btn-sm"
-//                       onClick={() => fileRef.current.click()}
-//                     >
-//                       <UploadIcon /> Upload
-//                     </button>
-//                   </>
-//                 )}
-//                 {camActive && (
-//                   <button
-//                     className="avf-btn-sm avf-btn-capture"
-//                     onClick={capturePhoto}
-//                   >
-//                     <CircleIcon /> Capture now
-//                   </button>
-//                 )}
-//                 {(photoSrc || camActive) && (
-//                   <button className="avf-btn-sm" onClick={retakePhoto}>
-//                     <RetakeIcon /> Retake
-//                   </button>
-//                 )}
-//               </div>
-//               <input
-//                 ref={fileRef}
-//                 type="file"
-//                 accept="image/*"
-//                 style={{ display: "none" }}
-//                 onChange={handleFileUpload}
-//               />
-//             </div>
-//           </div>
-//         </div>
-
-//         {/* Personal details */}
-//         <div className="avf-card">
-//           <div className="avf-card-title">Personal details</div>
-//           <div className="avf-grid-2">
-//             <div className="avf-field">
-//               <label>
-//                 Full name <span className="avf-req">*</span>
-//               </label>
-//               <input
-//                 type="text"
-//                 value={name}
-//                 onChange={(e) => setName(e.target.value)}
-//                 placeholder="e.g. Amit Sharma"
-//               />
-//             </div>
-//             <div className="avf-field">
-//               <label>
-//                 Phone <span className="avf-req">*</span>
-//               </label>
-//               <div className="avf-phone-wrap">
-//                 <div className="avf-phone-cc">🇮🇳 +91</div>
-//                 <input
-//                   type="tel"
-//                   value={phone}
-//                   onChange={(e) => setPhone(e.target.value)}
-//                   placeholder="98765 43210"
-//                   maxLength={10}
-//                 />
-//               </div>
-//             </div>
-//           </div>
-//         </div>
-
-//         {/* Visit details */}
-//         <div className="avf-card">
-//           <div className="avf-card-title">Visit details</div>
-
-//           <div className="avf-field" style={{ marginBottom: 12 }}>
-//             <label>
-//               Purpose <span className="avf-req">*</span>
-//             </label>
-//             <div className="avf-chips">
-//               {PURPOSES.map((p) => (
-//                 <div
-//                   key={p}
-//                   className={`avf-chip${purpose === p ? " avf-chip--sel" : ""}`}
-//                   onClick={() => setPurpose(p)}
-//                 >
-//                   {p}
-//                 </div>
-//               ))}
-//             </div>
-//           </div>
-
-//           <div className="avf-grid-2">
-//             <div className="avf-field">
-//               <label>
-//                 Visiting flat <span className="avf-req">*</span>
-//               </label>
-//               <input
-//                 type="text"
-//                 value={flat}
-//                 onChange={(e) => setFlat(e.target.value)}
-//                 placeholder="e.g. B-102"
-//               />
-//             </div>
-//             <div className="avf-field">
-//               <label>No. of persons</label>
-//               <div className="avf-count-row">
-//                 <button
-//                   className="avf-cnt-btn"
-//                   onClick={() => setPersons((p) => Math.max(1, p - 1))}
-//                 >
-//                   −
-//                 </button>
-//                 <div className="avf-cnt-val">{persons}</div>
-//                 <button
-//                   className="avf-cnt-btn"
-//                   onClick={() => setPersons((p) => Math.min(20, p + 1))}
-//                 >
-//                   +
-//                 </button>
-//               </div>
-//             </div>
-//           </div>
-//         </div>
-
-//         {/* Vehicle */}
-//         <div className="avf-card">
-//           <div className="avf-card-title">
-//             Vehicle
-//             <span className="avf-optional-tag">optional</span>
-//           </div>
-//           <div className="avf-grid-2">
-//             <div className="avf-field">
-//               <label>Vehicle number</label>
-//               <input
-//                 type="text"
-//                 value={vehicle}
-//                 onChange={(e) => setVehicle(e.target.value.toUpperCase())}
-//                 placeholder="MH 01 AB 1234"
-//                 style={{
-//                   fontFamily: "var(--vp-mono)",
-//                   letterSpacing: "0.05em",
-//                 }}
-//               />
-//             </div>
-//             <div className="avf-field">
-//               <label>Vehicle type</label>
-//               <select value={vtype} onChange={(e) => setVtype(e.target.value)}>
-//                 <option value="">Select</option>
-//                 <option>2-wheeler</option>
-//                 <option>4-wheeler</option>
-//                 <option>Auto / Rickshaw</option>
-//                 <option>Truck / Van</option>
-//               </select>
-//             </div>
-//           </div>
-//         </div>
-
-//         {/* Notifications */}
-//         <div className="avf-card">
-//           <div className="avf-card-title">Notifications</div>
-//           <div className="avf-toggle-row">
-//             <div className="avf-tr-left">
-//               <div className="avf-tr-icon avf-tr-icon--indigo">
-//                 <PhoneIcon />
-//               </div>
-//               <div>
-//                 <div className="avf-tr-title">Notify resident</div>
-//                 <div className="avf-tr-sub">
-//                   Send approval request to flat owner
-//                 </div>
-//               </div>
-//             </div>
-//             <div
-//               className={`avf-toggle${notify ? " avf-toggle--on" : ""}`}
-//               onClick={() => setNotify((v) => !v)}
-//             >
-//               <div className="avf-toggle-thumb" />
-//             </div>
-//           </div>
-//           <div className="avf-toggle-row" style={{ marginTop: 8 }}>
-//             <div className="avf-tr-left">
-//               <div className="avf-tr-icon avf-tr-icon--amber">
-//                 <ShieldIcon />
-//               </div>
-//               <div>
-//                 <div className="avf-tr-title">Pre-approved</div>
-//                 <div className="avf-tr-sub">
-//                   Allow entry without resident approval
-//                 </div>
-//               </div>
-//             </div>
-//             <div
-//               className={`avf-toggle${preapprove ? " avf-toggle--on" : ""}`}
-//               onClick={() => setPreapprove((v) => !v)}
-//             >
-//               <div className="avf-toggle-thumb" />
-//             </div>
-//           </div>
-//         </div>
-
-//         {/* Remarks */}
-//         <div className="avf-card">
-//           <div className="avf-card-title">
-//             Remarks
-//             <span className="avf-optional-tag">optional</span>
-//           </div>
-//           <div className="avf-field">
-//             <textarea
-//               value={note}
-//               onChange={(e) => setNote(e.target.value)}
-//               placeholder="Any special instructions or notes…"
-//             />
-//           </div>
-//         </div>
-
-//         <button className="avf-submit-btn" onClick={handleSubmit}>
-//           <SendIcon />
-//           Add &amp; Notify Resident
-//         </button>
-//       </div>
-
-//       {/* ─── QUICK-FILL COLUMN ─── */}
-//       <div className="avf-side-col">
-//         {/* Mini preview card */}
-//         <div className="avf-card avf-preview-card">
-//           <div className="avf-card-title">Preview</div>
-//           <div className="avf-prev-visitor">
-//             <div
-//               className="avf-prev-av"
-//               style={{
-//                 background: `${prevColor}22`,
-//                 color: prevColor,
-//                 borderColor: `${prevColor}55`,
-//               }}
-//             >
-//               {prevInitials}
-//             </div>
-//             <div className="avf-prev-info">
-//               <div className="avf-prev-name">{name || "Visitor name"}</div>
-//               <div className="avf-prev-meta">
-//                 {purpose} · Flat {flat || "—"} · {persons} person
-//                 {persons > 1 ? "s" : ""}
-//               </div>
-//             </div>
-//             <span className="avf-badge avf-badge--pending">Pending</span>
-//           </div>
-//           <div className="avf-sum-rows">
-//             {[
-//               ["Phone", phone ? `+91 ${phone}` : "—"],
-//               ["Flat", flat || "—"],
-//               ["Persons", String(persons)],
-//               ["Guard", "Rajesh Kumar"], // TODO: replace with guard.name from useAuth()
-//             ].map(([k, v]) => (
-//               <div className="avf-sum-row" key={k}>
-//                 <span className="avf-sum-key">{k}</span>
-//                 <span className="avf-sum-val">{v}</span>
-//               </div>
-//             ))}
-//           </div>
-//         </div>
-
-//         {/* Recent visitors quick fill */}
-//         <div className="avf-card">
-//           <div className="avf-card-title">Recent visitors</div>
-//           <div className="avf-qf-list">
-//             {[
-//               {
-//                 name: "Amit Sharma",
-//                 phone: "9876543210",
-//                 flat: "B-102",
-//                 purpose: "Guest",
-//               },
-//               {
-//                 name: "Pooja Patel",
-//                 phone: "8765432109",
-//                 flat: "C-304",
-//                 purpose: "Guest",
-//               },
-//               {
-//                 name: "Suresh Nair",
-//                 phone: "7654321098",
-//                 flat: "A-205",
-//                 purpose: "Work",
-//               },
-//               {
-//                 name: "Meera Das",
-//                 phone: "6654321987",
-//                 flat: "F-101",
-//                 purpose: "Guest",
-//               },
-//             ].map((r) => (
-//               <div
-//                 key={r.phone}
-//                 className="avf-qf-item"
-//                 onClick={() => {
-//                   setName(r.name);
-//                   setPhone(r.phone);
-//                   setFlat(r.flat);
-//                   setPurpose(r.purpose);
-//                 }}
-//               >
-//                 <div
-//                   className="avf-qf-av"
-//                   style={{
-//                     background: `${avColor(r.name)}22`,
-//                     color: avColor(r.name),
-//                     borderColor: `${avColor(r.name)}44`,
-//                   }}
-//                 >
-//                   {initials(r.name)}
-//                 </div>
-//                 <div className="avf-qf-info">
-//                   <div className="avf-qf-name">{r.name}</div>
-//                   <div className="avf-qf-meta">{r.purpose}</div>
-//                 </div>
-//                 <div className="avf-qf-flat">{r.flat}</div>
-//               </div>
-//             ))}
-//           </div>
-//         </div>
-//       </div>
-//     </div>
-//   );
-// }
-
-// /* ── Icons ── */
-// const icon = (d) => (p) => (
-//   <svg
-//     width="13"
-//     height="13"
-//     viewBox="0 0 24 24"
-//     fill="none"
-//     stroke="currentColor"
-//     strokeWidth="2"
-//     {...p}
-//   >
-//     {d}
-//   </svg>
-// );
-// const CamIcon = icon(
-//   <>
-//     <path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z" />
-//     <circle cx="12" cy="13" r="4" />
-//   </>,
-// );
-// const UploadIcon = icon(
-//   <>
-//     <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
-//     <polyline points="17 8 12 3 7 8" />
-//     <line x1="12" y1="3" x2="12" y2="15" />
-//   </>,
-// );
-// const CircleIcon = icon(
-//   <>
-//     <circle cx="12" cy="12" r="10" />
-//     <circle cx="12" cy="12" r="3" />
-//   </>,
-// );
-// const RetakeIcon = icon(
-//   <>
-//     <polyline points="1 4 1 10 7 10" />
-//     <path d="M3.51 15a9 9 0 1 0 .49-4" />
-//   </>,
-// );
-// const SendIcon = () => (
-//   <svg
-//     width="15"
-//     height="15"
-//     viewBox="0 0 24 24"
-//     fill="none"
-//     stroke="currentColor"
-//     strokeWidth="2"
-//   >
-//     <path d="M22 2L11 13" />
-//     <path d="M22 2L15 22 11 13 2 9l20-7z" />
-//   </svg>
-// );
-// const PhoneIcon = () => (
-//   <svg
-//     width="14"
-//     height="14"
-//     viewBox="0 0 24 24"
-//     fill="none"
-//     stroke="currentColor"
-//     strokeWidth="2"
-//   >
-//     <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07A19.5 19.5 0 0 1 4.99 12a19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 3.9 1.17h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L8.09 8.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 22 16.92z" />
-//   </svg>
-// );
-// const ShieldIcon = () => (
-//   <svg
-//     width="14"
-//     height="14"
-//     viewBox="0 0 24 24"
-//     fill="none"
-//     stroke="currentColor"
-//     strokeWidth="2"
-//   >
-//     <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
-//   </svg>
-// );

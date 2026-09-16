@@ -17,8 +17,7 @@ const NAV_GROUPS = [
       { label: 'Dashboard', icon: 'dashboard' },
       { label: 'Visitors', icon: 'users' },
       { label: 'SOS Alerts', icon: 'shield' },
-      { label: 'My Shifts', icon: 'door' },
-      { label: 'Clock In/Out', icon: 'hardhat' },
+      { label: 'My Schedule', icon: 'door' },
     ],
   },
   {
@@ -41,13 +40,6 @@ function Icon({ name }) {
         <path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2" />
         <circle cx="9" cy="7" r="4" />
         <path d="M23 21v-2a4 4 0 00-3-3.87M16 3.13a4 4 0 010 7.75" />
-      </>
-    ),
-    hardhat: (
-      <>
-        <path d="M2 18a1 1 0 001 1h18a1 1 0 001-1v-2a1 1 0 00-1-1H3a1 1 0 00-1 1v2z" />
-        <path d="M10 10V5a1 1 0 011-1h2a1 1 0 011 1v5" />
-        <path d="M4 15v-3a8 8 0 0116 0v3" />
       </>
     ),
     car: (

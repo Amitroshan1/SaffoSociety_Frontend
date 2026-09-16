@@ -5,103 +5,61 @@ import '../../../styles/guard/guard-main.css';
 import '../../../styles/guard/visitor/visitors.css';
 import Sidebar from '../../../components/guard/Sidebar';
 import DashboardHeader from '../../../components/guard/DashboardHeader';
-import QuickGateEntryForm from '../../../components/guard/quick-entry/QuickGateEntryForm.jsx';
 import DeliveryEntryForm from '../../../components/guard/quick-entry/DeliveryEntryForm.jsx';
 import VisitorTable from '../../../components/guard/visitor/VisitorTable.jsx';
 import {
   apiError,
   callResidentForDelivery,
-  checkInVisitor,
   holdDeliveryAtGate,
   listQuickEntryByMode,
   logDelivery,
-  logGuardCall,
-  logVisitor,
   markHeldParcelCollected,
   markResidentReceived,
-  markVisitorExit,
-  readdRejectedVisit,
-  tryGuardApprove,
-  tryGuardDeny,
 } from '../../../services/guard.service';
 
-export const QUICK_ENTRY_MODES = {
-  delivery: {
-    title: 'Deliveries',
-    addLabel: 'Log Delivery',
-    lockedPurpose: 'Delivery',
-    defaultVisitorType: 'delivery',
-    requireVehicle: false,
-    showStaffRole: false,
-    submitLabel: 'Log delivery',
-    filterBy: 'company',
-    filterAllLabel: 'All companies',
-    filterOptions: [
-      'Amazon',
-      'Flipkart',
-      'Blinkit',
-      'Zepto',
-      'Swiggy Instamart',
-      'Dunzo',
-      'Delhivery',
-      'Blue Dart',
-      'India Post',
-      'Other',
-    ],
-    tabs: [
-      { key: 'add', label: 'Log Delivery', icon: 'plus' },
-      { key: 'pending', label: 'At Gate', icon: 'clock' },
-      { key: 'rejected', label: 'Received by Guard', icon: 'x' },
-      { key: 'completed', label: 'Received by Resident', icon: 'done' },
-    ],
-    tableCopy: {
-      visitorCol: 'Courier',
-      purposeCol: 'Company',
-      approve: 'By Resident',
-      deny: 'By Guard',
-      checkIn: 'Send to flat',
-      exit: 'By Resident',
-      readd: 'Mark Collected',
-      done: 'By Resident',
-      emptyPending: 'No parcels waiting at gate',
-      emptyPendingSub: 'Log a delivery when a courier arrives.',
-      emptyActive: '—',
-      emptyActiveSub: '—',
-      emptyCompleted: 'No resident handovers yet',
-      emptyCompletedSub: 'When resident takes or accepts the parcel, it shows here.',
-      emptyRejected: 'No parcels with guard',
-      emptyRejectedSub: 'Leave-at-gate parcels kept with security show here.',
-    },
-  },
-  staff: {
-    title: 'Staff Entry',
-    addLabel: 'Add Staff',
-    lockedPurpose: 'Work / Service',
-    defaultVisitorType: 'maid',
-    requireVehicle: false,
-    showStaffRole: true,
-    submitLabel: 'Log staff entry',
-  },
-  cab: {
-    title: 'Cab Entry',
-    addLabel: 'Add Cab',
-    lockedPurpose: 'Cab',
-    defaultVisitorType: 'driver',
-    requireVehicle: true,
-    showStaffRole: false,
-    submitLabel: 'Log cab entry',
+const DELIVERY_CONFIG = {
+  title: 'Deliveries',
+  addLabel: 'Log Delivery',
+  submitLabel: 'Log delivery',
+  filterBy: 'company',
+  filterAllLabel: 'All companies',
+  filterOptions: [
+    'Amazon',
+    'Flipkart',
+    'Blinkit',
+    'Zepto',
+    'Swiggy Instamart',
+    'Dunzo',
+    'Delhivery',
+    'Blue Dart',
+    'India Post',
+    'Other',
+  ],
+  tabs: [
+    { key: 'add', label: 'Log Delivery', icon: 'plus' },
+    { key: 'pending', label: 'At Gate', icon: 'clock' },
+    { key: 'rejected', label: 'Received by Guard', icon: 'x' },
+    { key: 'completed', label: 'Received by Resident', icon: 'done' },
+  ],
+  tableCopy: {
+    visitorCol: 'Courier',
+    purposeCol: 'Company',
+    approve: 'By Resident',
+    deny: 'By Guard',
+    checkIn: 'Send to flat',
+    exit: 'By Resident',
+    readd: 'Mark Collected',
+    done: 'By Resident',
+    emptyPending: 'No parcels waiting at gate',
+    emptyPendingSub: 'Log a delivery when a courier arrives.',
+    emptyActive: '—',
+    emptyActiveSub: '—',
+    emptyCompleted: 'No resident handovers yet',
+    emptyCompletedSub: 'When resident takes or accepts the parcel, it shows here.',
+    emptyRejected: 'No parcels with guard',
+    emptyRejectedSub: 'Leave-at-gate parcels kept with security show here.',
   },
 };
-
-const DEFAULT_TABS = [
-  { key: 'add', label: null, icon: 'plus' },
-  { key: 'pending', label: 'Pending', icon: 'clock' },
-  { key: 'active', label: 'Active', icon: 'check' },
-  { key: 'completed', label: 'Completed', icon: 'done' },
-  { key: 'rejected', label: 'Rejected', icon: 'x' },
-];
-
-const VALID_TABS = new Set(DEFAULT_TABS.map((t) => t.key));
 
 function TabIcon({ name }) {
   const props = {
@@ -127,13 +85,6 @@ function TabIcon({ name }) {
       </svg>
     );
   }
-  if (name === 'check') {
-    return (
-      <svg {...props}>
-        <polyline points="20 6 9 17 4 12" />
-      </svg>
-    );
-  }
   if (name === 'done') {
     return (
       <svg {...props}>
@@ -153,25 +104,22 @@ function TabIcon({ name }) {
   return null;
 }
 
-export default function GuardQuickEntryPage({ mode = 'delivery' }) {
+function mapDeliveryTab(tab) {
+  if (tab === 'at-gate' || tab === 'log') return 'pending';
+  if (tab === 'held') return 'rejected';
+  return tab;
+}
+
+export default function GuardQuickEntryPage() {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
-  const config = QUICK_ENTRY_MODES[mode] || QUICK_ENTRY_MODES.delivery;
-  const tabs = (config.tabs || DEFAULT_TABS).map((t) =>
-    t.key === 'add' && !config.tabs ? { ...t, label: config.addLabel } : t,
-  );
+  const config = DELIVERY_CONFIG;
+  const tabs = config.tabs;
 
-  const rawTab = searchParams.get('tab');
-  const mappedTab =
-    mode === 'delivery' && (rawTab === 'at-gate' || rawTab === 'held' || rawTab === 'log')
-      ? rawTab === 'held'
-        ? 'rejected'
-        : 'pending'
-      : rawTab;
+  const mappedTab = mapDeliveryTab(searchParams.get('tab'));
   const initialTab = tabs.some((t) => t.key === mappedTab) ? mappedTab : 'add';
   const [activeTab, setActiveTab] = useState(initialTab);
   const [pending, setPending] = useState([]);
-  const [active, setActive] = useState([]);
   const [completed, setCompleted] = useState([]);
   const [rejected, setRejected] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -185,16 +133,9 @@ export default function GuardQuickEntryPage({ mode = 'delivery' }) {
   }, [config.title]);
 
   useEffect(() => {
-    const tab = searchParams.get('tab');
-    const next =
-      mode === 'delivery' && (tab === 'at-gate' || tab === 'held' || tab === 'log')
-        ? tab === 'held'
-          ? 'rejected'
-          : 'pending'
-        : tab;
+    const next = mapDeliveryTab(searchParams.get('tab'));
     if (tabs.some((t) => t.key === next)) setActiveTab(next);
-    // eslint-disable-next-line react-hooks/exhaustive-deps -- only react to URL tab changes
-  }, [searchParams, mode]);
+  }, [searchParams, tabs]);
 
   const showToast = useCallback((type, title, sub) => {
     setToast({ type, title, sub });
@@ -204,9 +145,8 @@ export default function GuardQuickEntryPage({ mode = 'delivery' }) {
   const refreshLists = useCallback(async () => {
     setLoading(true);
     try {
-      const data = await listQuickEntryByMode(mode);
+      const data = await listQuickEntryByMode('delivery');
       setPending(data.pending);
-      setActive(data.active);
       setCompleted(data.completed);
       setRejected(data.rejected);
     } catch (err) {
@@ -214,27 +154,17 @@ export default function GuardQuickEntryPage({ mode = 'delivery' }) {
     } finally {
       setLoading(false);
     }
-  }, [mode, showToast]);
+  }, [showToast]);
 
   useEffect(() => {
     refreshLists();
   }, [refreshLists]);
 
   async function handleSubmit(form) {
-    const row = mode === 'delivery' ? await logDelivery(form) : await logVisitor(form);
+    const row = await logDelivery(form);
     await refreshLists();
-    if (mode === 'delivery') {
-      setActiveTab('pending');
-      showToast('success', 'At gate', `Waiting for flat ${row.flat}`);
-      return;
-    }
-    if (row.visitStatus === 'waiting') {
-      setActiveTab('pending');
-      showToast('success', 'Saved', `Waiting approval · Flat ${row.flat}`);
-    } else {
-      setActiveTab('active');
-      showToast('success', 'Saved', `Ready / active · Flat ${row.flat}`);
-    }
+    setActiveTab('pending');
+    showToast('success', 'At gate', `Waiting for flat ${row.flat}`);
   }
 
   const handleApprove = useCallback(
@@ -242,22 +172,15 @@ export default function GuardQuickEntryPage({ mode = 'delivery' }) {
       const v = pending.find((x) => x.id === id);
       if (!v) return;
       try {
-        if (mode === 'delivery') {
-          await markResidentReceived(id);
-          await refreshLists();
-          setActiveTab('completed');
-          showToast('success', 'Received by Resident', `${v.name} · Flat ${v.flat}`);
-          return;
-        }
-        await tryGuardApprove(v);
+        await markResidentReceived(id);
         await refreshLists();
-        setActiveTab('active');
-        showToast('success', 'Approved', `${v.name} · Flat ${v.flat}`);
+        setActiveTab('completed');
+        showToast('success', 'Received by Resident', `${v.name} · Flat ${v.flat}`);
       } catch (err) {
         showToast('error', 'Action failed', apiError(err, 'Please try again.'));
       }
     },
-    [pending, refreshLists, showToast, mode],
+    [pending, refreshLists, showToast],
   );
 
   const handleDeny = useCallback(
@@ -265,71 +188,33 @@ export default function GuardQuickEntryPage({ mode = 'delivery' }) {
       const v = pending.find((x) => x.id === id);
       if (!v) return;
       try {
-        if (mode === 'delivery') {
-          await holdDeliveryAtGate(id, v.raw?.remarks || v.note || '');
-          await refreshLists();
-          setActiveTab('rejected');
-          showToast('success', 'Received by Guard', `Parcel kept at gate · Flat ${v.flat}`);
-          return;
-        }
-        await tryGuardDeny(v);
+        await holdDeliveryAtGate(id, v.raw?.remarks || v.note || '');
         await refreshLists();
         setActiveTab('rejected');
-        showToast('error', 'Denied', `${v.name} turned away`);
+        showToast('success', 'Received by Guard', `Parcel kept at gate · Flat ${v.flat}`);
       } catch (err) {
         showToast('error', 'Action failed', apiError(err, 'Please try again.'));
       }
     },
-    [pending, refreshLists, showToast, mode],
+    [pending, refreshLists, showToast],
   );
 
   const handleCall = useCallback(
     async (id) => {
-      const row = pending.find((v) => v.id === id) || active.find((v) => v.id === id);
+      const row = pending.find((v) => v.id === id);
       if (!row) {
         showToast('error', 'No phone', 'Phone not available.');
         return;
       }
       try {
-        if (mode === 'delivery') {
-          const { phone, residentName } = await callResidentForDelivery(row);
-          showToast('success', 'Calling resident', `${residentName} · Flat ${row.flat}`);
-          window.location.href = `tel:${phone}`;
-          return;
-        }
-        if (!row.phone) {
-          showToast('error', 'No phone', 'Phone not available.');
-          return;
-        }
-        await logGuardCall(id, `Called ${row.name || 'visitor'}`);
-        window.location.href = `tel:${row.phone}`;
+        const { phone, residentName } = await callResidentForDelivery(row);
+        showToast('success', 'Calling resident', `${residentName} · Flat ${row.flat}`);
+        window.location.href = `tel:${phone}`;
       } catch (err) {
         showToast('error', 'Cannot call', apiError(err, 'Phone not available.'));
       }
     },
-    [pending, active, showToast, mode],
-  );
-
-  const handleMarkExit = useCallback(
-    async (id) => {
-      const v = active.find((x) => x.id === id);
-      if (!v) return;
-      try {
-        if (v.visitStatus === 'approved') {
-          await checkInVisitor(id);
-          await refreshLists();
-          showToast('success', 'Checked in', `${v.name} is inside`);
-          return;
-        }
-        await markVisitorExit(id);
-        await refreshLists();
-        setActiveTab('completed');
-        showToast('success', 'Completed', `${v.name} marked exit`);
-      } catch (err) {
-        showToast('error', 'Action failed', apiError(err, 'Please try again.'));
-      }
-    },
-    [active, refreshLists, showToast],
+    [pending, showToast],
   );
 
   const handleReadd = useCallback(
@@ -337,25 +222,18 @@ export default function GuardQuickEntryPage({ mode = 'delivery' }) {
       const v = rejected.find((x) => x.id === id);
       if (!v) return;
       try {
-        if (mode === 'delivery') {
-          await markHeldParcelCollected(id);
-          await refreshLists();
-          setActiveTab('completed');
-          showToast('success', 'Collected', `Resident picked up · Flat ${v.flat}`);
-          return;
-        }
-        await readdRejectedVisit(v);
+        await markHeldParcelCollected(id);
         await refreshLists();
-        setActiveTab('pending');
-        showToast('success', 'Re-added', `${v.name} · Flat ${v.flat}`);
+        setActiveTab('completed');
+        showToast('success', 'Collected', `Resident picked up · Flat ${v.flat}`);
       } catch (err) {
         showToast('error', 'Action failed', apiError(err, 'Please try again.'));
       }
     },
-    [rejected, refreshLists, showToast, mode],
+    [rejected, refreshLists, showToast],
   );
 
-  const tableCopy = config.tableCopy || {};
+  const tableCopy = config.tableCopy;
 
   return (
     <div className="gm-root">
@@ -384,18 +262,16 @@ export default function GuardQuickEntryPage({ mode = 'delivery' }) {
                 const count =
                   tab.key === 'pending'
                     ? pending.length
-                    : tab.key === 'active'
-                      ? active.length
-                      : tab.key === 'completed'
-                        ? completed.length
-                        : tab.key === 'rejected'
-                          ? rejected.length
-                          : null;
+                    : tab.key === 'completed'
+                      ? completed.length
+                      : tab.key === 'rejected'
+                        ? rejected.length
+                        : null;
                 return (
                   <button
                     key={tab.key}
                     type="button"
-                    className={`vp-tab vp-tab--${tab.key === 'active' ? 'approved' : tab.key === 'completed' ? 'approved' : tab.key}${
+                    className={`vp-tab vp-tab--${tab.key === 'completed' ? 'approved' : tab.key}${
                       activeTab === tab.key ? ' vp-tab--active' : ''
                     }`}
                     onClick={() => setActiveTab(tab.key)}
@@ -403,7 +279,11 @@ export default function GuardQuickEntryPage({ mode = 'delivery' }) {
                     <TabIcon name={tab.icon} />
                     <span>{tab.label}</span>
                     {count !== null ? (
-                      <span className={`vp-tab-count vp-tab-count--${tab.key === 'active' || tab.key === 'completed' ? 'approved' : tab.key}`}>
+                      <span
+                        className={`vp-tab-count vp-tab-count--${
+                          tab.key === 'completed' ? 'approved' : tab.key
+                        }`}
+                      >
                         {count}
                       </span>
                     ) : null}
@@ -414,26 +294,12 @@ export default function GuardQuickEntryPage({ mode = 'delivery' }) {
 
             <div className="vp-panel">
               {activeTab === 'add' ? (
-                mode === 'delivery' ? (
-                  <DeliveryEntryForm
-                    title={config.addLabel}
-                    submitLabel={config.submitLabel}
-                    onSubmit={handleSubmit}
-                    showToast={showToast}
-                  />
-                ) : (
-                  <QuickGateEntryForm
-                    mode={mode}
-                    title={config.addLabel}
-                    lockedPurpose={config.lockedPurpose}
-                    defaultVisitorType={config.defaultVisitorType}
-                    requireVehicle={config.requireVehicle}
-                    showStaffRole={config.showStaffRole}
-                    submitLabel={config.submitLabel}
-                    onSubmit={handleSubmit}
-                    showToast={showToast}
-                  />
-                )
+                <DeliveryEntryForm
+                  title={config.addLabel}
+                  submitLabel={config.submitLabel}
+                  onSubmit={handleSubmit}
+                  showToast={showToast}
+                />
               ) : null}
 
               {activeTab === 'pending' ? (
@@ -445,20 +311,7 @@ export default function GuardQuickEntryPage({ mode = 'delivery' }) {
                   onDeny={handleDeny}
                   onCall={handleCall}
                   actionLabels={tableCopy}
-                  filterBy={config.filterBy || 'purpose'}
-                  filterOptions={config.filterOptions}
-                  filterAllLabel={config.filterAllLabel}
-                />
-              ) : null}
-
-              {activeTab === 'active' ? (
-                <VisitorTable
-                  variant="approved"
-                  data={active}
-                  loading={loading}
-                  onMarkExit={handleMarkExit}
-                  actionLabels={tableCopy}
-                  filterBy={config.filterBy || 'purpose'}
+                  filterBy={config.filterBy}
                   filterOptions={config.filterOptions}
                   filterAllLabel={config.filterAllLabel}
                 />
@@ -470,7 +323,7 @@ export default function GuardQuickEntryPage({ mode = 'delivery' }) {
                   data={completed}
                   loading={loading}
                   actionLabels={tableCopy}
-                  filterBy={config.filterBy || 'purpose'}
+                  filterBy={config.filterBy}
                   filterOptions={config.filterOptions}
                   filterAllLabel={config.filterAllLabel}
                 />
@@ -483,7 +336,7 @@ export default function GuardQuickEntryPage({ mode = 'delivery' }) {
                   loading={loading}
                   onReadd={handleReadd}
                   actionLabels={tableCopy}
-                  filterBy={config.filterBy || 'purpose'}
+                  filterBy={config.filterBy}
                   filterOptions={config.filterOptions}
                   filterAllLabel={config.filterAllLabel}
                 />

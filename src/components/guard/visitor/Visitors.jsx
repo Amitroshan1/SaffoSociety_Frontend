@@ -1,10 +1,10 @@
-
+﻿
 // client/src/components/guard/visitor/Visitors.jsx
-// ─────────────────────────────────────────────────────────────────────────────
-// Inner content component — tabs, data state, and panel logic.
+// â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// Inner content component â€” tabs, data state, and panel logic.
 // Rendered inside VisitorsPage.jsx which provides the Sidebar + DashboardHeader.
 //
-// ── DB SCHEMA (reference) ─────────────────────────────────────────────────────
+// â”€â”€ DB SCHEMA (reference) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 //
 //  TABLE visitors (
 //    id              SERIAL PRIMARY KEY,
@@ -23,35 +23,35 @@
 //    pre_approved    BOOLEAN DEFAULT FALSE,
 //    remarks         TEXT,
 //    created_at      TIMESTAMPTZ DEFAULT NOW(),         -- used as "requested time"
-//    entry_time      TIMESTAMPTZ,                       -- set when status → approved
+//    entry_time      TIMESTAMPTZ,                       -- set when status â†’ approved
 //    exit_time       TIMESTAMPTZ,                       -- set when Mark Exit is clicked
 //    rejected_at     TIMESTAMPTZ,
 //    rejected_by     VARCHAR(20)                        -- 'Guard' | 'Resident'
 //  );
 //
-// ── API ENDPOINTS (to be implemented in visitor.service.js / visitor.routes.js) ─
+// â”€â”€ API ENDPOINTS (to be implemented in visitor.service.js / visitor.routes.js) â”€
 //
-//  GET    /api/visitors?status=pending&societyId=X     → array of visitor rows
-//  GET    /api/visitors?status=approved&societyId=X    → array
-//  GET    /api/visitors?status=rejected&societyId=X    → array
-//  POST   /api/visitors                                → create new visitor (returns created row)
-//  PATCH  /api/visitors/:id/approve                   → status=approved, entry_time=NOW()
-//  PATCH  /api/visitors/:id/deny                      → status=rejected, rejected_at, rejected_by
-//  PATCH  /api/visitors/:id/exit                      → status=exited, exit_time=NOW()
-//  PATCH  /api/visitors/:id/readd                     → status=pending, clear rejected fields
-//  GET    /api/visitors/recent?guardId=X&limit=5      → last 5 entries by this guard (for quick-fill)
+//  GET    /api/visitors?status=pending&societyId=X     â†’ array of visitor rows
+//  GET    /api/visitors?status=approved&societyId=X    â†’ array
+//  GET    /api/visitors?status=rejected&societyId=X    â†’ array
+//  POST   /api/visitors                                â†’ create new visitor (returns created row)
+//  PATCH  /api/visitors/:id/approve                   â†’ status=approved, entry_time=NOW()
+//  PATCH  /api/visitors/:id/deny                      â†’ status=rejected, rejected_at, rejected_by
+//  PATCH  /api/visitors/:id/exit                      â†’ status=exited, exit_time=NOW()
+//  PATCH  /api/visitors/:id/readd                     â†’ status=pending, clear rejected fields
+//  GET    /api/visitors/recent?guardId=X&limit=5      â†’ last 5 entries by this guard (for quick-fill)
 //
-// ── REAL-TIME (optional, recommended for pending tab) ─────────────────────────
+// â”€â”€ REAL-TIME (optional, recommended for pending tab) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 //  Use Supabase Realtime OR Socket.IO room per societyId:
 //    supabase.channel('visitors').on('postgres_changes', ...).subscribe()
-//  On INSERT → add to pending list
-//  On UPDATE → move row between tabs based on new status
+//  On INSERT â†’ add to pending list
+//  On UPDATE â†’ move row between tabs based on new status
 //
-// ── AUTH ──────────────────────────────────────────────────────────────────────
-//  Guard ID comes from useAuth() hook → decoded JWT → user.id
-//  Society ID comes from guard's profile → user.society_id
+// â”€â”€ AUTH â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+//  Guard ID comes from useAuth() hook â†’ decoded JWT â†’ user.id
+//  Society ID comes from guard's profile â†’ user.society_id
 //  Attach to every API call as header: Authorization: Bearer <token>
-// ─────────────────────────────────────────────────────────────────────────────
+// â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 import { useState, useCallback, useEffect } from "react";
 import { useSearchParams } from "react-router-dom";
@@ -242,9 +242,9 @@ export default function Visitors({ onNavigateBack }) {
 
   return (
     <div className="vp-root">
-      {/* ── PAGE HEADER ── */}
+      {/* â”€â”€ PAGE HEADER â”€â”€ */}
       <div className="vp-header">
-        {/* Back button — use navigate('/guard/dashboard') in real app */}
+        {/* Back button â€” use navigate('/guard/dashboard') in real app */}
         <button className="vp-back-btn" onClick={onNavigateBack}>
           <BackIcon />
           Dashboard
@@ -254,7 +254,7 @@ export default function Visitors({ onNavigateBack }) {
         </div>
       </div>
 
-      {/* ── TABS ── */}
+      {/* â”€â”€ TABS â”€â”€ */}
       <div className="vp-tabs">
         {TABS.map((tab) => {
           const count =
@@ -278,7 +278,7 @@ export default function Visitors({ onNavigateBack }) {
         })}
       </div>
 
-      {/* ── PANELS ── */}
+      {/* â”€â”€ PANELS â”€â”€ */}
       <div className="vp-panel">
         {activeTab === "add" && (
           <AddVisitorForm onSubmit={handleAddVisitor} showToast={showToast} />
@@ -312,7 +312,7 @@ export default function Visitors({ onNavigateBack }) {
         )}
       </div>
 
-      {/* ── TOAST ── */}
+      {/* â”€â”€ TOAST â”€â”€ */}
       {toast && (
         <div className={`vp-toast vp-toast--${toast.type}`}>
           <div className={`vp-toast-icon vp-toast-icon--${toast.type}`}>
@@ -328,7 +328,7 @@ export default function Visitors({ onNavigateBack }) {
   );
 }
 
-/* ── Icons ── */
+/* â”€â”€ Icons â”€â”€ */
 function TabIcon({ name }) {
   const props = { className: "vp-tab-icon", viewBox: "0 0 24 24", fill: "none", stroke: "currentColor", strokeWidth: "2" };
   if (name === "plus")  return <svg {...props}><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>;
@@ -346,439 +346,3 @@ function CheckIcon() {
 function XIcon() {
   return <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" width="12" height="12"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>;
 }
-
-
-
-// // client/src/components/guard/Visitors.jsx
-// // ─────────────────────────────────────────────────────────────
-// // Inner content component — tabs, data state, and panel logic.
-// // Rendered inside VisitorsPage.jsx which provides the
-// // Sidebar + DashboardHeader shell.
-// //
-// // TODO (Backend):
-// //   Replace INITIAL_* mock arrays with API calls from
-// //   visitor.service.js inside useEffect hooks.
-// // ─────────────────────────────────────────────────────────────
-
-// import { useState, useCallback } from "react";
-// import AddVisitorForm from "./AddVisitorForm";
-// import VisitorTable from "./VisitorTable";
-
-// const INITIAL_PENDING = [
-//   {
-//     id: 1,
-//     name: "Amit Sharma",
-//     phone: "9876543210",
-//     flat: "B-102",
-//     purpose: "Guest",
-//     persons: 1,
-//     time: "11:48 AM",
-//     wait: "2m",
-//     vehicle: "",
-//   },
-//   {
-//     id: 2,
-//     name: "Pooja Patel",
-//     phone: "8765432109",
-//     flat: "C-304",
-//     purpose: "Guest",
-//     persons: 2,
-//     time: "11:47 AM",
-//     wait: "3m",
-//     vehicle: "",
-//   },
-//   {
-//     id: 3,
-//     name: "Suresh Nair",
-//     phone: "7654321098",
-//     flat: "A-205",
-//     purpose: "Work",
-//     persons: 1,
-//     time: "11:40 AM",
-//     wait: "11m",
-//     vehicle: "MH04BV2210",
-//   },
-//   {
-//     id: 4,
-//     name: "Delivery Boy",
-//     phone: "9988776655",
-//     flat: "D-101",
-//     purpose: "Delivery",
-//     persons: 1,
-//     time: "11:35 AM",
-//     wait: "16m",
-//     vehicle: "",
-//   },
-//   {
-//     id: 5,
-//     name: "Rahul Mehta",
-//     phone: "8899001122",
-//     flat: "E-402",
-//     purpose: "Cab",
-//     persons: 3,
-//     time: "11:30 AM",
-//     wait: "21m",
-//     vehicle: "MH01AB5678",
-//   },
-// ];
-
-// const INITIAL_APPROVED = [
-//   {
-//     id: 6,
-//     name: "Sanjay Mehta",
-//     phone: "9123456780",
-//     flat: "A-101",
-//     purpose: "Guest",
-//     persons: 2,
-//     time: "10:20 AM",
-//     duration: "1h 29m",
-//     vehicle: "",
-//   },
-//   {
-//     id: 7,
-//     name: "Rohit Verma",
-//     phone: "8012345679",
-//     flat: "D-203",
-//     purpose: "Work",
-//     persons: 1,
-//     time: "09:15 AM",
-//     duration: "2h 34m",
-//     vehicle: "MH02CD3456",
-//   },
-//   {
-//     id: 8,
-//     name: "Karan Singh",
-//     phone: "7901234568",
-//     flat: "B-402",
-//     purpose: "Guest",
-//     persons: 3,
-//     time: "08:45 AM",
-//     duration: "3h 04m",
-//     vehicle: "",
-//   },
-//   {
-//     id: 9,
-//     name: "Vikram Reddy",
-//     phone: "6890123457",
-//     flat: "C-301",
-//     purpose: "Guest",
-//     persons: 2,
-//     time: "08:10 AM",
-//     duration: "3h 39m",
-//     vehicle: "MH03EF7890",
-//   },
-//   {
-//     id: 10,
-//     name: "Priya Sharma",
-//     phone: "9911223344",
-//     flat: "F-501",
-//     purpose: "Delivery",
-//     persons: 1,
-//     time: "10:55 AM",
-//     duration: "46m",
-//     vehicle: "",
-//   },
-// ];
-
-// const INITIAL_REJECTED = [
-//   {
-//     id: 11,
-//     name: "Unknown Caller",
-//     phone: "9000000001",
-//     flat: "B-501",
-//     purpose: "Other",
-//     persons: 1,
-//     time: "09:45 AM",
-//     by: "Resident",
-//   },
-//   {
-//     id: 12,
-//     name: "Salesman XYZ",
-//     phone: "8000000002",
-//     flat: "C-102",
-//     purpose: "Other",
-//     persons: 1,
-//     time: "10:30 AM",
-//     by: "Guard",
-//   },
-//   {
-//     id: 13,
-//     name: "Wrong Flat",
-//     phone: "7000000003",
-//     flat: "D-404",
-//     purpose: "Delivery",
-//     persons: 1,
-//     time: "08:00 AM",
-//     by: "Resident",
-//   },
-// ];
-
-// const TABS = [
-//   { key: "add", label: "Add Visitor", icon: "plus" },
-//   { key: "pending", label: "Pending", icon: "clock" },
-//   { key: "approved", label: "Approved", icon: "check" },
-//   { key: "rejected", label: "Rejected", icon: "x" },
-// ];
-
-// export default function Visitors() {
-//   const [activeTab, setActiveTab] = useState("add");
-//   const [pending, setPending] = useState(INITIAL_PENDING);
-//   const [approved, setApproved] = useState(INITIAL_APPROVED);
-//   const [rejected, setRejected] = useState(INITIAL_REJECTED);
-//   const [toast, setToast] = useState(null);
-
-//   /* ── Toast helper ── */
-//   const showToast = useCallback((type, title, sub) => {
-//     setToast({ type, title, sub });
-//     setTimeout(() => setToast(null), 3500);
-//   }, []);
-
-//   /* ── Actions ── */
-//   const handleAddVisitor = useCallback(
-//     (entry) => {
-//       setPending((prev) => [entry, ...prev]);
-//       showToast(
-//         "success",
-//         "Visitor added",
-//         `Notification sent to flat ${entry.flat}.`,
-//       );
-//       setActiveTab("pending");
-//     },
-//     [showToast],
-//   );
-
-//   const handleApprove = useCallback(
-//     (id) => {
-//       setPending((prev) => {
-//         const v = prev.find((x) => x.id === id);
-//         if (!v) return prev;
-//         const now = new Date().toLocaleTimeString("en-IN", {
-//           hour: "2-digit",
-//           minute: "2-digit",
-//           hour12: true,
-//         });
-//         setApproved((a) => [{ ...v, duration: "0m", time: now }, ...a]);
-//         showToast(
-//           "success",
-//           "Visitor approved",
-//           `${v.name} approved for Flat ${v.flat}.`,
-//         );
-//         return prev.filter((x) => x.id !== id);
-//       });
-//     },
-//     [showToast],
-//   );
-
-//   const handleDeny = useCallback(
-//     (id) => {
-//       setPending((prev) => {
-//         const v = prev.find((x) => x.id === id);
-//         if (!v) return prev;
-//         const now = new Date().toLocaleTimeString("en-IN", {
-//           hour: "2-digit",
-//           minute: "2-digit",
-//           hour12: true,
-//         });
-//         setRejected((r) => [{ ...v, by: "Guard", time: now }, ...r]);
-//         showToast("error", "Visitor denied", `${v.name} has been turned away.`);
-//         return prev.filter((x) => x.id !== id);
-//       });
-//     },
-//     [showToast],
-//   );
-
-//   const handleMarkExit = useCallback(
-//     (id) => {
-//       setApproved((prev) => prev.filter((x) => x.id !== id));
-//       showToast("success", "Exit marked", "Visitor has exited the premises.");
-//     },
-//     [showToast],
-//   );
-
-//   const handleReadd = useCallback(
-//     (id) => {
-//       setRejected((prev) => {
-//         const v = prev.find((x) => x.id === id);
-//         if (!v) return prev;
-//         setPending((p) => [{ ...v, wait: "0m" }, ...p]);
-//         showToast(
-//           "success",
-//           "Moved to pending",
-//           `${v.name} added back to pending queue.`,
-//         );
-//         return prev.filter((x) => x.id !== id);
-//       });
-//     },
-//     [showToast],
-//   );
-
-//   return (
-//     <div className="vp-root">
-//       {/* ── PAGE HEADER ── */}
-//       <div className="vp-header">
-//         <div className="vp-header-left">
-//           <h1 className="vp-page-title">Visitors</h1>
-//           <span className="vp-page-sub">Manage all visitor entries</span>
-//         </div>
-//       </div>
-
-//       {/* ── TABS ── */}
-//       <div className="vp-tabs">
-//         {TABS.map((tab) => {
-//           const count =
-//             tab.key === "pending"
-//               ? pending.length
-//               : tab.key === "approved"
-//                 ? approved.length
-//                 : tab.key === "rejected"
-//                   ? rejected.length
-//                   : null;
-
-//           return (
-//             <button
-//               key={tab.key}
-//               className={`vp-tab vp-tab--${tab.key}${activeTab === tab.key ? " vp-tab--active" : ""}`}
-//               onClick={() => setActiveTab(tab.key)}
-//             >
-//               <TabIcon name={tab.icon} />
-//               <span>{tab.label}</span>
-//               {count !== null && (
-//                 <span className={`vp-tab-count vp-tab-count--${tab.key}`}>
-//                   {count}
-//                 </span>
-//               )}
-//             </button>
-//           );
-//         })}
-//       </div>
-
-//       {/* ── PANELS ── */}
-//       <div className="vp-panel">
-//         {activeTab === "add" && (
-//           <AddVisitorForm onSubmit={handleAddVisitor} showToast={showToast} />
-//         )}
-//         {activeTab === "pending" && (
-//           <VisitorTable
-//             variant="pending"
-//             data={pending}
-//             onApprove={handleApprove}
-//             onDeny={handleDeny}
-//           />
-//         )}
-//         {activeTab === "approved" && (
-//           <VisitorTable
-//             variant="approved"
-//             data={approved}
-//             onMarkExit={handleMarkExit}
-//           />
-//         )}
-//         {activeTab === "rejected" && (
-//           <VisitorTable
-//             variant="rejected"
-//             data={rejected}
-//             onReadd={handleReadd}
-//           />
-//         )}
-//       </div>
-
-//       {/* ── TOAST ── */}
-//       {toast && (
-//         <div className={`vp-toast vp-toast--${toast.type}`}>
-//           <div className={`vp-toast-icon vp-toast-icon--${toast.type}`}>
-//             {toast.type === "success" ? <CheckIcon /> : <XIcon />}
-//           </div>
-//           <div>
-//             <div className="vp-toast-title">{toast.title}</div>
-//             <div className="vp-toast-sub">{toast.sub}</div>
-//           </div>
-//         </div>
-//       )}
-//     </div>
-//   );
-// }
-
-// /* ── Tab icon helper ── */
-// function TabIcon({ name }) {
-//   if (name === "plus")
-//     return (
-//       <svg
-//         className="vp-tab-icon"
-//         viewBox="0 0 24 24"
-//         fill="none"
-//         stroke="currentColor"
-//         strokeWidth="2"
-//       >
-//         <line x1="12" y1="5" x2="12" y2="19" />
-//         <line x1="5" y1="12" x2="19" y2="12" />
-//       </svg>
-//     );
-//   if (name === "clock")
-//     return (
-//       <svg
-//         className="vp-tab-icon"
-//         viewBox="0 0 24 24"
-//         fill="none"
-//         stroke="currentColor"
-//         strokeWidth="2"
-//       >
-//         <circle cx="12" cy="12" r="10" />
-//         <polyline points="12 6 12 12 16 14" />
-//       </svg>
-//     );
-//   if (name === "check")
-//     return (
-//       <svg
-//         className="vp-tab-icon"
-//         viewBox="0 0 24 24"
-//         fill="none"
-//         stroke="currentColor"
-//         strokeWidth="2"
-//       >
-//         <polyline points="20 6 9 17 4 12" />
-//       </svg>
-//     );
-//   if (name === "x")
-//     return (
-//       <svg
-//         className="vp-tab-icon"
-//         viewBox="0 0 24 24"
-//         fill="none"
-//         stroke="currentColor"
-//         strokeWidth="2"
-//       >
-//         <line x1="18" y1="6" x2="6" y2="18" />
-//         <line x1="6" y1="6" x2="18" y2="18" />
-//       </svg>
-//     );
-//   return null;
-// }
-
-// function CheckIcon() {
-//   return (
-//     <svg
-//       viewBox="0 0 24 24"
-//       fill="none"
-//       stroke="currentColor"
-//       strokeWidth="2.5"
-//       width="14"
-//       height="14"
-//     >
-//       <polyline points="20 6 9 17 4 12" />
-//     </svg>
-//   );
-// }
-// function XIcon() {
-//   return (
-//     <svg
-//       viewBox="0 0 24 24"
-//       fill="none"
-//       stroke="currentColor"
-//       strokeWidth="2"
-//       width="14"
-//       height="14"
-//     >
-//       <line x1="18" y1="6" x2="6" y2="18" />
-//       <line x1="6" y1="6" x2="18" y2="18" />
-//     </svg>
-//   );
-// }

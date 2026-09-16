@@ -111,16 +111,8 @@ function matchesQuickEntryMode(row, mode) {
       purpose.startsWith('pickup') ||
       purpose.startsWith('drop') ||
       ['uber', 'ola', 'rapido', 'local', 'cab'].includes(vehicleType) ||
-      (type === 'driver' && (purpose.includes('cab') || vehicleType.includes('uber') || vehicleType.includes('ola')))
-    );
-  }
-  if (mode === 'staff') {
-    if (purpose.includes('cab') || purpose.includes('taxi') || purpose.includes('deliver')) return false;
-    if (['uber', 'ola', 'rapido', 'local', 'cab'].includes(vehicleType)) return false;
-    return (
-      ['maid', 'driver', 'technician'].includes(type) ||
-      purpose.includes('work') ||
-      purpose.includes('service')
+      (type === 'driver' &&
+        (purpose.includes('cab') || vehicleType.includes('uber') || vehicleType.includes('ola')))
     );
   }
   return true;
@@ -213,20 +205,6 @@ export async function getFlatContact(flatId) {
   return unwrap(res);
 }
 
-/** Resolve flat label via GET /guard/flats (preferred over admin occupancies). */
-export async function resolveOccupancyIdByFlat(flatNo) {
-  const needle = normalizeFlat(flatNo);
-  if (!needle) return null;
-  const flats = await searchGuardFlats(flatNo, 50);
-  const hit = flats.find(
-    (f) =>
-      normalizeFlat(f.flat_number) === needle ||
-      normalizeFlat(f.flatNo) === needle ||
-      normalizeFlat(`${f.wingCode}-${f.flatNo}`) === needle,
-  );
-  return hit?.occupancyId || null;
-}
-
 export async function resolveFlatForWalkIn(flatNo) {
   const needle = normalizeFlat(flatNo);
   if (!needle) return null;
@@ -303,37 +281,6 @@ function activeSosFromApi(alerts) {
   return (alerts || []).filter((a) => String(a.status || '').toLowerCase() === 'active');
 }
 
-export async function getDashboardStats() {
-  const res = await api.get('/guard/dashboard/stats');
-  const s = unwrap(res) || {};
-  return {
-    visitorsInsideCount: s.visitorsInsideCount ?? s.activeVisitorsCount ?? 0,
-    todaysVisitorCount: s.todaysVisitorCount ?? s.totalEntriesToday ?? 0,
-    pendingApprovalsCount: s.pendingApprovalsCount ?? 0,
-    pendingDeliveriesCount: s.pendingDeliveriesCount ?? s.deliveriesPendingCount ?? 0,
-    staffInsideCount: s.staffInsideCount ?? 0,
-    activeSosCount: s.activeSosCount ?? 0,
-  };
-}
-
-export async function getVisitorsInside() {
-  const rows = await fetchGuardVisitors({ status: 'inside' });
-  return rows.map((row) => {
-    const mapped = mapGuardVisitorToUiRow(row);
-    return {
-      _id: mapped.id,
-      id: mapped.id,
-      name: mapped.name,
-      initials: initialsOf(mapped.name),
-      flat: mapped.flat,
-      entryTime: mapped.time,
-      purpose: mapped.purpose,
-      totalPersons: mapped.persons,
-      duration: mapped.duration,
-    };
-  });
-}
-
 export async function listGuardVisitsByTab() {
   const [pending, approved, rejected] = await Promise.all([
     fetchGuardVisitors({ status: 'pending' }),
@@ -348,56 +295,41 @@ export async function listGuardVisitsByTab() {
   };
 }
 
-/** Delivery / Staff / Cab lists — Pending, Active, Completed (+ Rejected). */
-export async function listQuickEntryByMode(mode) {
-  if (mode === 'delivery') {
-    const buckets = await listDeliveryBuckets();
-    const toRow = (card, extra = {}) => ({
-      id: card.id,
-      name: card.courierName || 'Courier',
-      phone: card.phone || '',
-      flat: card.flat || '—',
-      purpose: card.company || 'Delivery',
-      company: card.company || 'Delivery',
-      persons: 1,
-      time: card.time || '—',
-      wait: card.raw?.wait || card.time || '0m',
-      duration: '—',
-      by: card.held ? 'Guard' : '',
-      vehicle: '',
-      visitStatus: card.visitStatus || 'waiting',
-      visitorId: card.visitorId || null,
-      flatId: card.flatId || card.raw?.flatId || null,
-      raw: card.raw || card,
-      ...extra,
-    });
-    return {
-      pending: buckets.atGate.map((c) => toRow(c)),
-      active: [],
-      completed: buckets.completed.map((c) =>
-        toRow(c, { visitStatus: 'checked_out', by: '' }),
-      ),
-      rejected: buckets.held.map((c) =>
-        toRow(c, { visitStatus: 'rejected', by: 'Guard', held: true }),
-      ),
-    };
+/** Delivery lists — At Gate, Held, Completed. */
+export async function listQuickEntryByMode(mode = 'delivery') {
+  if (mode !== 'delivery') {
+    return { pending: [], active: [], completed: [], rejected: [] };
   }
 
-  const [pending, active, completed, rejected] = await Promise.all([
-    fetchGuardVisitors({ status: 'pending' }),
-    fetchGuardVisitors({ status: 'approved' }),
-    fetchGuardVisitors({ status: 'exited' }),
-    fetchGuardVisitors({ status: 'rejected' }),
-  ]);
-
-  const filter = (rows) =>
-    rows.filter((r) => matchesQuickEntryMode(r, mode)).map(mapGuardVisitorToUiRow);
-
+  const buckets = await listDeliveryBuckets();
+  const toRow = (card, extra = {}) => ({
+    id: card.id,
+    name: card.courierName || 'Courier',
+    phone: card.phone || '',
+    flat: card.flat || '—',
+    purpose: card.company || 'Delivery',
+    company: card.company || 'Delivery',
+    persons: 1,
+    time: card.time || '—',
+    wait: card.raw?.wait || card.time || '0m',
+    duration: '—',
+    by: card.held ? 'Guard' : '',
+    vehicle: '',
+    visitStatus: card.visitStatus || 'waiting',
+    visitorId: card.visitorId || null,
+    flatId: card.flatId || card.raw?.flatId || null,
+    raw: card.raw || card,
+    ...extra,
+  });
   return {
-    pending: filter(pending),
-    active: filter(active),
-    completed: filter(completed),
-    rejected: filter(rejected),
+    pending: buckets.atGate.map((c) => toRow(c)),
+    active: [],
+    completed: buckets.completed.map((c) =>
+      toRow(c, { visitStatus: 'checked_out', by: '' }),
+    ),
+    rejected: buckets.held.map((c) =>
+      toRow(c, { visitStatus: 'rejected', by: 'Guard', held: true }),
+    ),
   };
 }
 
@@ -498,11 +430,6 @@ export async function logGuardCall(visitorId, notes) {
   return unwrap(res);
 }
 
-export async function getRecentWalkIns(limit = 5) {
-  const rows = await searchRecentWalkIns({ days: 40, limit, q: '' });
-  return rows.slice(0, limit);
-}
-
 /**
  * Recent unique visitors for Add Visitor quick-fill.
  * FE-only: uses existing GET /guard/visitors (+ optional search), then filters
@@ -567,11 +494,6 @@ export async function getUnreadNotificationCount() {
 // ─────────────────────────────────────────────
 // DELIVERIES / SOS
 // ─────────────────────────────────────────────
-
-export async function getPendingDeliveries() {
-  const res = await api.get('/guard/deliveries', { params: { collected: false, limit: 50 } });
-  return unwrap(res)?.deliveries || [];
-}
 
 export async function getCollectedDeliveries(limit = 50) {
   const res = await api.get('/guard/deliveries', { params: { collected: true, limit } });
@@ -846,30 +768,6 @@ export async function logCabEntry(form) {
     visitorType: 'driver',
     photoSrc: form.photoSrc || null,
   });
-}
-
-export async function getSosAlerts() {
-  const res = await api.get('/guard/sos');
-  return unwrap(res)?.alerts || [];
-}
-
-export async function respondToSOS(sosId) {
-  const res = await api.patch(`/guard/sos/${sosId}/respond`);
-  return unwrap(res)?.alert;
-}
-
-// ─────────────────────────────────────────────
-// UNAVAILABLE ON BACKEND (keep explicit stubs)
-// ─────────────────────────────────────────────
-
-export async function submitShiftHandover() {
-  throw Object.assign(new Error('Shift handover API is not available on backend.'), {
-    code: 'BACKEND_UNAVAILABLE',
-  });
-}
-
-export async function getHandoverHistory() {
-  return [];
 }
 
 export { apiError };

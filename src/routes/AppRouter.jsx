@@ -141,8 +141,7 @@ import GuardVisitorsPage from '../pages/guard/visitors/VisitorsPage';
 import GuardDeliveryPage from '../pages/guard/delivery/GuardDeliveryPage';
 import GuardStaffEntryPage from '../pages/guard/staff-entry/GuardStaffEntryPage';
 import GuardCabEntryPage from '../pages/guard/cab-entry/GuardCabEntryPage';
-import GuardShiftsPage from '../pages/guard/shifts/ShiftsPage';
-import GuardAttendancePage from '../pages/guard/attendance/AttendancePage';
+import MySchedulePage from '../pages/guard/schedule/MySchedulePage.jsx';
 import GuardDocumentsPage from '../pages/guard/documents/GuardDocumentsPage';
 import GuardBookingsPage from '../pages/guard/facilities/GuardBookingsPage';
 import GuardParkingPage from '../pages/guard/parking/GuardParkingPage';
@@ -441,8 +440,9 @@ const AppRouter = () => (
       <Route path="/guard/delivery" element={<GuardDeliveryPage />} />
       <Route path="/guard/staff-entry" element={<GuardStaffEntryPage />} />
       <Route path="/guard/cab-entry" element={<GuardCabEntryPage />} />
-      <Route path="/guard/shifts" element={<GuardShiftsPage />} />
-      <Route path="/guard/attendance" element={<GuardAttendancePage />} />
+      <Route path="/guard/schedule" element={<MySchedulePage />} />
+      <Route path="/guard/shifts" element={<Navigate to="/guard/schedule" replace />} />
+      <Route path="/guard/attendance" element={<Navigate to="/guard/schedule" replace />} />
       <Route path="/guard/documents" element={<GuardDocumentsPage />} />
       <Route path="/guard/bookings" element={<GuardBookingsPage />} />
       <Route path="/guard/parking" element={<GuardParkingPage />} />
