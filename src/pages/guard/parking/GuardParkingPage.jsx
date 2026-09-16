@@ -263,7 +263,7 @@ export default function GuardParkingPage() {
               <SearchInput
                 value={search}
                 onChange={setSearch}
-                placeholder="Search vehicle number / slot"
+                placeholder="Search vehicle number / Parking No"
                 debounceMs={0}
               />
             </div>
@@ -303,7 +303,7 @@ export default function GuardParkingPage() {
                     <th>Vehicle number</th>
                     <th>Type</th>
                     <th>Resident</th>
-                    <th>Slot</th>
+                    <th>Parking No</th>
                     <th>Status</th>
                   </tr>
                 </thead>
@@ -368,9 +368,9 @@ export default function GuardParkingPage() {
                   {activePanel === 'entry' && (
                     <div className="gm-park-card-body-grid">
                       <SearchableParkingCode
-                        label="Slot no"
-                        placeholder="Search slot no…"
-                        emptyText="No matching slots"
+                        label="Parking No"
+                        placeholder="Search Parking No…"
+                        emptyText="No matching Parking No"
                         value={entryForm.slotId}
                         options={entrySlotOptions}
                         onChange={onPickEntrySlot}
@@ -386,9 +386,9 @@ export default function GuardParkingPage() {
                   {activePanel === 'exit' && (
                     <div className="gm-park-card-body-grid">
                       <SearchableParkingCode
-                        label="Slot no"
-                        placeholder="Search slot no…"
-                        emptyText="No matching slots"
+                        label="Parking No"
+                        placeholder="Search Parking No…"
+                        emptyText="No matching Parking No"
                         value={exitForm.slotId}
                         options={exitSlotOptions}
                         onChange={onPickExitSlot}
@@ -416,7 +416,7 @@ export default function GuardParkingPage() {
                         onChange={(v) => setVisitorForm((s) => ({ ...s, vehicleType: v }))}
                       />
                       <FormField
-                        label="Slot ID"
+                        label="Parking No"
                         value={visitorForm.slotId}
                         onChange={(v) => setVisitorForm((s) => ({ ...s, slotId: v }))}
                       />

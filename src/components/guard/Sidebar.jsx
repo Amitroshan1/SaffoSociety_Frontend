@@ -1,6 +1,11 @@
 import { useEffect, useState } from 'react';
 import { useAuth } from '../../hooks/useAuth';
 import { GUARD_ROUTES } from '../../constants/guardRoutes.js';
+import {
+  closeGuardMobileNav,
+  isGuardMobileNavOpen,
+  subscribeGuardMobileNav,
+} from '../../utils/guardMobileNav.js';
 import '../../styles/guard/guard-main.css';
 
 const COLLAPSE_KEY = 'guard-sidebar-collapsed';
@@ -142,6 +147,7 @@ function initials(name = '') {
 export default function Sidebar({ activePage, onNavigate }) {
   const { user } = useAuth();
   const [active, setActive] = useState(activePage || 'Dashboard');
+  const [mobileOpen, setMobileOpen] = useState(() => isGuardMobileNavOpen());
   const [collapsed, setCollapsed] = useState(() => {
     try {
       return localStorage.getItem(COLLAPSE_KEY) === 'true';
@@ -162,83 +168,123 @@ export default function Sidebar({ activePage, onNavigate }) {
     }
   }, [collapsed]);
 
+  useEffect(() => subscribeGuardMobileNav(setMobileOpen), []);
+
+  useEffect(() => {
+    if (!mobileOpen) return undefined;
+    function onKey(e) {
+      if (e.key === 'Escape') closeGuardMobileNav();
+    }
+    document.addEventListener('keydown', onKey);
+    const prev = document.body.style.overflow;
+    document.body.style.overflow = 'hidden';
+    return () => {
+      document.removeEventListener('keydown', onKey);
+      document.body.style.overflow = prev;
+    };
+  }, [mobileOpen]);
+
+  // Drawer always shows labels on phone/tablet
+  const showLabels = !collapsed || mobileOpen;
+
   function handleClick(label) {
     setActive(label);
+    closeGuardMobileNav();
     if (onNavigate) onNavigate(label);
   }
 
   return (
-    <aside className={`gm-sidebar${collapsed ? ' gm-sidebar--collapsed' : ''}`}>
-      <div className="gm-sidebar-top">
-        <div className="gm-sidebar-logo">
-          <div
-            className="gm-sidebar-logo-icon"
-            style={{ padding: 0, overflow: 'hidden', background: 'transparent' }}
-          >
-            <img
-              src="/logo.png"
-              alt="Saffo Society"
-              style={{ width: '100%', height: '100%', objectFit: 'cover' }}
-            />
-          </div>
-          {!collapsed ? (
-            <div className="gm-sidebar-logo-text">
-              <div className="gm-sidebar-society-name">Saffo Society</div>
-              <div className="gm-sidebar-society-sub">Guard Panel</div>
+    <>
+      <div
+        className={`gm-sidebar-backdrop${mobileOpen ? ' gm-sidebar-backdrop--open' : ''}`}
+        onClick={closeGuardMobileNav}
+        aria-hidden={!mobileOpen}
+      />
+      <aside
+        className={`gm-sidebar${collapsed && !mobileOpen ? ' gm-sidebar--collapsed' : ''}${
+          mobileOpen ? ' gm-sidebar--mobile-open' : ''
+        }`}
+      >
+        <div className="gm-sidebar-top">
+          <div className="gm-sidebar-logo">
+            <div
+              className="gm-sidebar-logo-icon"
+              style={{ padding: 0, overflow: 'hidden', background: 'transparent' }}
+            >
+              <img
+                src="/logo.png"
+                alt="Saffo Society"
+                style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+              />
             </div>
-          ) : null}
-        </div>
-
-        <button
-          type="button"
-          className="gm-sidebar-collapse-btn"
-          onClick={() => setCollapsed((v) => !v)}
-          title={collapsed ? 'Expand sidebar' : 'Collapse sidebar'}
-          aria-label={collapsed ? 'Expand sidebar' : 'Collapse sidebar'}
-        >
-          <CollapseIcon collapsed={collapsed} />
-        </button>
-      </div>
-
-      <nav className="gm-sidebar-nav">
-        {NAV_GROUPS.map((group) => (
-          <div key={group.label} className="gm-nav-group">
-            {!collapsed ? <div className="gm-nav-group-label">{group.label}</div> : null}
-            {group.items.map((item) => {
-              const wired = Boolean(GUARD_ROUTES[item.label]);
-              return (
-                <button
-                  key={item.label}
-                  type="button"
-                  className={`gm-nav-btn ${active === item.label ? 'active' : ''}`}
-                  onClick={() => wired && handleClick(item.label)}
-                  disabled={!wired}
-                  title={item.label}
-                >
-                  <Icon name={item.icon} />
-                  {!collapsed ? <span className="gm-nav-btn-label">{item.label}</span> : null}
-                </button>
-              );
-            })}
-          </div>
-        ))}
-      </nav>
-
-      <div className="gm-sidebar-profile">
-        <div className="gm-sidebar-profile-inner" title={user?.name || 'Guard'}>
-          <div className="gm-profile-avatar">{initials(user?.name)}</div>
-          {!collapsed ? (
-            <div style={{ minWidth: 0, flex: 1 }}>
-              <div className="gm-profile-name">{user?.name || 'Guard'}</div>
-              <div className="gm-profile-role">Security Guard</div>
-              <div className="gm-profile-status">
-                <span className="gm-status-dot" />
-                <span className="gm-status-label">Online</span>
+            {showLabels ? (
+              <div className="gm-sidebar-logo-text">
+                <div className="gm-sidebar-society-name">Saffo Society</div>
+                <div className="gm-sidebar-society-sub">Guard Panel</div>
               </div>
-            </div>
-          ) : null}
+            ) : null}
+          </div>
+
+          <button
+            type="button"
+            className="gm-sidebar-collapse-btn gm-sidebar-collapse-btn--desktop"
+            onClick={() => setCollapsed((v) => !v)}
+            title={collapsed ? 'Expand sidebar' : 'Collapse sidebar'}
+            aria-label={collapsed ? 'Expand sidebar' : 'Collapse sidebar'}
+          >
+            <CollapseIcon collapsed={collapsed} />
+          </button>
+
+          <button
+            type="button"
+            className="gm-sidebar-close-mobile"
+            onClick={closeGuardMobileNav}
+            aria-label="Close menu"
+          >
+            ✕
+          </button>
         </div>
-      </div>
-    </aside>
+
+        <nav className="gm-sidebar-nav">
+          {NAV_GROUPS.map((group) => (
+            <div key={group.label} className="gm-nav-group">
+              {showLabels ? <div className="gm-nav-group-label">{group.label}</div> : null}
+              {group.items.map((item) => {
+                const wired = Boolean(GUARD_ROUTES[item.label]);
+                return (
+                  <button
+                    key={item.label}
+                    type="button"
+                    className={`gm-nav-btn ${active === item.label ? 'active' : ''}`}
+                    onClick={() => wired && handleClick(item.label)}
+                    disabled={!wired}
+                    title={item.label}
+                  >
+                    <Icon name={item.icon} />
+                    {showLabels ? <span className="gm-nav-btn-label">{item.label}</span> : null}
+                  </button>
+                );
+              })}
+            </div>
+          ))}
+        </nav>
+
+        <div className="gm-sidebar-profile">
+          <div className="gm-sidebar-profile-inner" title={user?.name || 'Guard'}>
+            <div className="gm-profile-avatar">{initials(user?.name)}</div>
+            {showLabels ? (
+              <div style={{ minWidth: 0, flex: 1 }}>
+                <div className="gm-profile-name">{user?.name || 'Guard'}</div>
+                <div className="gm-profile-role">Security Guard</div>
+                <div className="gm-profile-status">
+                  <span className="gm-status-dot" />
+                  <span className="gm-status-label">Online</span>
+                </div>
+              </div>
+            ) : null}
+          </div>
+        </div>
+      </aside>
+    </>
   );
 }

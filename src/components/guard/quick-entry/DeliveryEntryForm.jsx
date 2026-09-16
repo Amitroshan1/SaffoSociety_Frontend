@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import '../../../styles/guard/visitor/visitors.css';
+import GatePhotoCapture from '../shared/GatePhotoCapture';
 
 const COURIER_COMPANIES = [
   'Amazon',
@@ -17,6 +18,7 @@ const COURIER_COMPANIES = [
 /**
  * Delivery-only gate form — courier + parcel fields (no vehicle/persons clutter).
  * Always lands in At Gate; Guard confirms Resident Received or Hold at Gate later.
+ * Photo is optional (frontend); uses existing visitor photo upload path when present.
  */
 export default function DeliveryEntryForm({
   title = 'Log Delivery',
@@ -30,6 +32,7 @@ export default function DeliveryEntryForm({
   const [trackingId, setTrackingId] = useState('');
   const [flat, setFlat] = useState('');
   const [parcelNote, setParcelNote] = useState('');
+  const [photoSrc, setPhotoSrc] = useState(null);
   const [submitting, setSubmitting] = useState(false);
 
   async function handleSubmit() {
@@ -62,7 +65,7 @@ export default function DeliveryEntryForm({
         notify: true,
         preapprove: false,
         visitorType: 'delivery',
-        photoSrc: null,
+        photoSrc: photoSrc || null,
       });
       setCourierName('');
       setPhone('');
@@ -70,6 +73,7 @@ export default function DeliveryEntryForm({
       setTrackingId('');
       setFlat('');
       setParcelNote('');
+      setPhotoSrc(null);
     } catch (err) {
       showToast?.(
         'error',
@@ -94,6 +98,14 @@ export default function DeliveryEntryForm({
       ) : null}
 
       <div className="avf-form-grid">
+        <GatePhotoCapture
+          value={photoSrc}
+          onChange={setPhotoSrc}
+          showToast={showToast}
+          title="Courier photo"
+          subject="courier"
+        />
+
         <div className="avf-card">
           <div className="avf-card-title">Courier</div>
           <div className="avf-grid-2">
@@ -165,9 +177,6 @@ export default function DeliveryEntryForm({
               placeholder="e.g. Grocery bag, documents, fragile"
             />
           </div>
-          <p className="avf-tr-sub" style={{ marginTop: 8 }}>
-            After logging, parcel stays At Gate. Then mark Received by Resident or Received by Guard.
-          </p>
         </div>
 
         <button

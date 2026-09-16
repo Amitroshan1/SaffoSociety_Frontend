@@ -29,11 +29,12 @@ export default function AlertsBanner({ alerts = [], onViewDetails, demo = false 
             <path d="M20 11h2"/>
           </svg>
         </div>
-        <div>
-          <div className="gm-sos-title">
-            SOS ALERT — FLAT {active.flat}
-            {extra > 0 ? `  ·  +${extra} more` : ''}
-            {demo ? '  ·  DEMO' : ''}
+        <div className="gm-sos-copy">
+          <div className="gm-sos-title">SOS ALERT</div>
+          <div className="gm-sos-flat">
+            Flat {active.flat}
+            {extra > 0 ? ` · +${extra} more` : ''}
+            {demo ? ' · DEMO' : ''}
           </div>
           <div className="gm-sos-sub">{active.note || active.message || 'Emergency reported'}</div>
         </div>

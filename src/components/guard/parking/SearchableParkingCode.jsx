@@ -1,17 +1,17 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 
 /**
- * Searchable single-select (slot no / parking code style).
+ * Searchable single-select (Parking No / parking code style).
  * options: [{ id?, code, label, vehicleNumber?, kind?, status? }]
  * value matches option.id if present, otherwise option.code
  */
 export default function SearchableParkingCode({
-  label = 'Slot no',
+  label = 'Parking No',
   value,
   options = [],
   onChange,
-  placeholder = 'Search slot no…',
-  emptyText = 'No matching slots',
+  placeholder = 'Search Parking No…',
+  emptyText = 'No matching Parking No',
 }) {
   const [open, setOpen] = useState(false);
   const [query, setQuery] = useState('');

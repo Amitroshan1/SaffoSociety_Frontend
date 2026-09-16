@@ -68,7 +68,7 @@
 // ─────────────────────────────────────────────────────────────────────────────
 
 import { useState, useRef, useEffect, useCallback } from "react";
-import { getRecentWalkIns } from "../../../services/guard.service";
+import { searchRecentWalkIns } from "../../../services/guard.service";
 
 const PURPOSES = [
   "Guest",
@@ -165,6 +165,8 @@ export default function AddVisitorForm({ onSubmit, showToast }) {
   const [deviceOptions, setDeviceOptions] = useState([]);
   const [enumerating, setEnumerating] = useState(false);
   const [recentWalkIns, setRecentWalkIns] = useState([]);
+  const [recentQ, setRecentQ] = useState("");
+  const [recentLoading, setRecentLoading] = useState(true);
   const videoRef = useRef(null);
   const canvasRef = useRef(null);
   const fileRef = useRef(null);
@@ -188,18 +190,41 @@ export default function AddVisitorForm({ onSubmit, showToast }) {
 
   useEffect(() => {
     let cancelled = false;
-    (async () => {
+    const q = recentQ.trim();
+    if (!q) {
+      setRecentWalkIns([]);
+      setRecentLoading(false);
+      return undefined;
+    }
+    const timer = setTimeout(async () => {
+      setRecentLoading(true);
       try {
-        const rows = await getRecentWalkIns(5);
+        const rows = await searchRecentWalkIns({
+          q,
+          days: 40,
+          limit: 30,
+        });
         if (!cancelled) setRecentWalkIns(rows);
       } catch {
         if (!cancelled) setRecentWalkIns([]);
+      } finally {
+        if (!cancelled) setRecentLoading(false);
       }
-    })();
+    }, 280);
     return () => {
       cancelled = true;
+      clearTimeout(timer);
     };
-  }, []);
+  }, [recentQ]);
+
+  function applyRecentVisitor(r) {
+    setName(r.name || "");
+    setPhone(String(r.phone || "").replace(/\D/g, "").slice(-10));
+    setFlat(r.flat && r.flat !== "—" ? r.flat : "");
+    if (r.purpose) setPurpose(r.purpose);
+    if (r.persons) setPersons(Number(r.persons) || 1);
+    if (r.vehicle) setVehicle(r.vehicle);
+  }
 
   async function listVideoDevices() {
     if (!navigator.mediaDevices?.getUserMedia || !navigator.mediaDevices?.enumerateDevices) {
@@ -476,28 +501,51 @@ export default function AddVisitorForm({ onSubmit, showToast }) {
 
   return (
     <div className="avf-root">
-      {recentWalkIns.length > 0 ? (
-        <div className="avf-card" style={{ marginBottom: 12 }}>
+      <div className="avf-card avf-recent-card" style={{ marginBottom: 12 }}>
           <div className="avf-card-title">Recent walk-ins</div>
-          <div className="avf-chips">
-            {recentWalkIns.map((r) => (
-              <button
-                key={r.id}
-                type="button"
-                className="avf-chip"
-                onClick={() => {
-                  setName(r.name || "");
-                  setPhone(String(r.phone || "").replace(/\D/g, "").slice(-10));
-                  setFlat(r.flat && r.flat !== "—" ? r.flat : "");
-                  if (r.purpose) setPurpose(r.purpose);
-                }}
-              >
-                {r.name}
-              </button>
-            ))}
+          <div className="avf-recent-search">
+            <input
+              type="search"
+              value={recentQ}
+              onChange={(e) => setRecentQ(e.target.value)}
+              placeholder="Search by name or phone…"
+              autoComplete="off"
+            />
+          </div>
+          <div className="avf-recent-list">
+            {recentQ.trim() ? (
+              <>
+                {recentLoading ? (
+                  <div className="avf-recent-empty">Searching…</div>
+                ) : null}
+                {!recentLoading && recentWalkIns.length === 0 ? (
+                  <div className="avf-recent-empty">
+                    No matching visitors in the last 40 days
+                  </div>
+                ) : null}
+                {!recentLoading &&
+                  recentWalkIns.map((r) => (
+                    <button
+                      key={r.id || `${r.phone}-${r.name}`}
+                      type="button"
+                      className="avf-recent-item"
+                      onClick={() => applyRecentVisitor(r)}
+                    >
+                      <div className="avf-recent-item-main">
+                        <span className="avf-recent-name">{r.name || "Visitor"}</span>
+                        <span className="avf-recent-meta">
+                          {[r.phone, r.flat && r.flat !== "—" ? `Flat ${r.flat}` : null]
+                            .filter(Boolean)
+                            .join(" · ")}
+                        </span>
+                      </div>
+                      <span className="avf-recent-use">Use</span>
+                    </button>
+                  ))}
+              </>
+            ) : null}
           </div>
         </div>
-      ) : null}
       <div className="avf-form-grid">
         {/* Photo — optional */}
         <div className="avf-card avf-card--photo">

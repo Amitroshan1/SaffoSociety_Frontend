@@ -499,11 +499,59 @@ export async function logGuardCall(visitorId, notes) {
 }
 
 export async function getRecentWalkIns(limit = 5) {
-  const res = await api.get('/guard/visitors/recent', { params: { limit: Math.max(limit * 3, 15) } });
-  return (unwrap(res)?.visitors || unwrap(res)?.items || [])
-    .map(mapGuardVisitorToUiRow)
-    .filter(isRegularVisitor)
-    .slice(0, limit);
+  const rows = await searchRecentWalkIns({ days: 40, limit, q: '' });
+  return rows.slice(0, limit);
+}
+
+/**
+ * Recent unique visitors for Add Visitor quick-fill.
+ * FE-only: uses existing GET /guard/visitors (+ optional search), then filters
+ * last `days` (default 40, clamp 30–50) and dedupes by phone/visitorId.
+ * Backend date-window support can replace this later.
+ */
+export async function searchRecentWalkIns({ q = '', days = 40, limit = 30 } = {}) {
+  const daysN = Math.min(50, Math.max(30, Number(days) || 40));
+  const limitN = Math.min(40, Math.max(1, Number(limit) || 30));
+  const query = String(q || '').trim();
+  const since = Date.now() - daysN * 24 * 60 * 60 * 1000;
+
+  const raw = await fetchGuardVisitors({
+    page: 1,
+    pageSize: 100,
+    ...(query ? { search: query } : {}),
+  }).catch(() => []);
+
+  const mapped = (raw || []).map(mapGuardVisitorToUiRow).filter(isRegularVisitor);
+
+  const inWindow = mapped.filter((r) => {
+    const stamp = r.createdAt || r.checkInTime;
+    if (!stamp) return true;
+    const t = new Date(stamp).getTime();
+    return Number.isFinite(t) ? t >= since : true;
+  });
+
+  // Extra client filter when API search is empty / partial
+  const needle = query.toLowerCase();
+  const digits = query.replace(/\D/g, '');
+  const matched = !needle
+    ? inWindow
+    : inWindow.filter((r) => {
+        const name = String(r.name || '').toLowerCase();
+        const phone = String(r.phone || '').replace(/\D/g, '');
+        return name.includes(needle) || (digits && phone.includes(digits));
+      });
+
+  const seen = new Set();
+  const unique = [];
+  for (const row of matched) {
+    const phoneKey = String(row.phone || '').replace(/\D/g, '').slice(-10);
+    const key = phoneKey || row.visitorId || row.id;
+    if (!key || seen.has(key)) continue;
+    seen.add(key);
+    unique.push(row);
+    if (unique.length >= limitN) break;
+  }
+  return unique;
 }
 
 export async function getUnreadNotificationCount() {
@@ -759,6 +807,10 @@ export async function listCabEntries() {
         purpose: meta.tripPurpose,
         entryTime: row.time || '—',
         createdAt: row.createdAt || row.checkInTime || null,
+        visitStatus: row.visitStatus || '',
+        phone: row.phone || '',
+        flatId: row.flatId || row.raw?.flatId || null,
+        visitorId: row.visitorId || null,
         raw: row,
       };
     });
@@ -775,7 +827,7 @@ export async function listCabEntries() {
 /**
  * Log cab at gate. Reuses POST /guard/visitors.
  * Phone is required by API — send placeholder; not shown in UI.
- * preapprove + notify false → no approval/OTP workflow.
+ * Lands in At Gate (pending) so guard can Call / Allow / Deny.
  */
 export async function logCabEntry(form) {
   const service = form.service || 'Local / Other';
@@ -790,9 +842,9 @@ export async function logCabEntry(form) {
     vtype: service,
     note: `Service: ${service} | Trip: ${tripPurpose}`,
     notify: false,
-    preapprove: true,
+    preapprove: false,
     visitorType: 'driver',
-    photoSrc: null,
+    photoSrc: form.photoSrc || null,
   });
 }
 

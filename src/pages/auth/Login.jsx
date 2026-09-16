@@ -1,27 +1,24 @@
 import { useState } from 'react';
-import { useNavigate, useSearchParams, Link } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { Eye, EyeOff, ArrowLeft, Lock, Mail, Sparkles } from 'lucide-react';
 import { useAuth } from '../../hooks/useAuth';
 import ThemeToggle from '../../components/common/ThemeToggle';
 
-const ROLES = [
-  { value: 'super_admin', label: 'Super Admin', color: 'from-teal-500 to-cyan-600', glow: 'rgba(20,184,166,0.4)' },
-  { value: 'admin',    label: 'Admin',    color: 'from-violet-500 to-indigo-600', glow: 'rgba(139,92,246,0.4)' },
-  { value: 'finance',  label: 'Finance',  color: 'from-cyan-500 to-blue-600',     glow: 'rgba(56,189,248,0.4)' },
-  { value: 'resident', label: 'Resident', color: 'from-emerald-500 to-green-600', glow: 'rgba(52,211,153,0.4)' },
-  { value: 'guard',    label: 'Guard',    color: 'from-amber-500 to-orange-500',  glow: 'rgba(251,191,36,0.4)'  },
-];
-
 const ROLE_REDIRECT = {
-  admin:    '/admin/dashboard',
-  finance:  '/finance/dashboard',
+  admin: '/admin/dashboard',
+  finance: '/finance/dashboard',
   resident: '/resident/dashboard',
-  guard:    '/guard/dashboard',
+  guard: '/guard/dashboard',
   super_admin: '/superadmin/dashboard',
   platform_support: '/superadmin/dashboard',
   platform_auditor: '/superadmin/dashboard',
   platform_billing: '/superadmin/dashboard',
+};
+
+const ACCENT = {
+  color: 'from-violet-500 to-indigo-600',
+  glow: 'rgba(139,92,246,0.4)',
 };
 
 function FloatingOrb({ size, color, top, left, delay }) {
@@ -41,19 +38,13 @@ function FloatingOrb({ size, color, top, left, delay }) {
 
 const Login = () => {
   const { login, clearLocalSession, user, ROLE_REDIRECT: authRedirects } = useAuth();
-  const navigate       = useNavigate();
-  const [searchParams] = useSearchParams();
+  const navigate = useNavigate();
 
-  const initialRole    = searchParams.get('panel') || 'admin';
-  const validRole      = ROLES.find(r => r.value === initialRole) ? initialRole : 'admin';
-
-  const [selectedRole, setSelectedRole] = useState(validRole);
   const [form, setForm]                 = useState({ email: '', password: '' });
   const [showPassword, setShowPassword] = useState(false);
   const [error, setError]               = useState('');
   const [loading, setLoading]           = useState(false);
 
-  const selectedRoleData = ROLES.find(r => r.value === selectedRole);
   const redirects = authRedirects || ROLE_REDIRECT;
 
   const handleChange = (e) => {
@@ -76,7 +67,7 @@ const Login = () => {
       if (user) {
         await clearLocalSession();
       }
-      const loggedIn = await login(email, password, selectedRole);
+      const loggedIn = await login(email, password);
       navigate(redirects[loggedIn.role] || '/dashboard', { replace: true });
     } catch (err) {
       setError(err.response?.data?.message || 'Invalid email or password');
@@ -102,13 +93,9 @@ const Login = () => {
           initial={{ opacity: 0, y: 40, scale: 0.95 }}
           animate={{ opacity: 1, y: 0, scale: 1 }}
           transition={{ duration: 0.6, ease: 'easeOut' }}
-          style={{ boxShadow: `0 30px 60px ${selectedRoleData.glow}30, 0 0 0 1px rgba(255,255,255,0.05)` }}
+          style={{ boxShadow: `0 30px 60px ${ACCENT.glow}30, 0 0 0 1px rgba(255,255,255,0.05)` }}
         >
-          <motion.div
-            className={`h-1.5 w-full bg-gradient-to-r ${selectedRoleData.color}`}
-            layout
-            transition={{ duration: 0.4 }}
-          />
+          <div className={`h-1.5 w-full bg-gradient-to-r ${ACCENT.color}`} />
 
           <div className="p-8 auth-login-content">
             <motion.div
@@ -126,7 +113,7 @@ const Login = () => {
             <div className="text-center mb-8 auth-login-hero">
               <motion.div
                 className="w-20 h-20 rounded-full overflow-hidden mx-auto mb-4 shadow-xl pulse-glow"
-                style={{ boxShadow: `0 0 30px ${selectedRoleData.glow}` }}
+                style={{ boxShadow: `0 0 30px ${ACCENT.glow}` }}
               >
                 <img src="/logo.png" alt="Saffo Society" className="w-full h-full object-cover" />
               </motion.div>
@@ -135,30 +122,6 @@ const Login = () => {
             </div>
 
             <form onSubmit={handleSubmit} className="space-y-5 auth-login-form" noValidate>
-              <div>
-                <label className="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-2 block">
-                  Select Your Role
-                </label>
-                <div className="grid auth-role-grid gap-2">
-                  {ROLES.map(role => (
-                    <motion.button
-                      key={role.value}
-                      type="button"
-                      onClick={() => setSelectedRole(role.value)}
-                      className={`py-2.5 px-1 rounded-xl text-xs font-semibold transition-all ${
-                        selectedRole === role.value
-                          ? `bg-gradient-to-br ${role.color} text-white shadow-lg`
-                          : 'glass-card-light text-slate-400 hover:text-white'
-                      }`}
-                      whileHover={{ scale: 1.05 }}
-                      whileTap={{ scale: 0.95 }}
-                    >
-                      {role.label}
-                    </motion.button>
-                  ))}
-                </div>
-              </div>
-
               <div>
                 <label className="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-2 block">
                   Email Address
@@ -225,10 +188,10 @@ const Login = () => {
               <motion.button
                 type="submit"
                 disabled={loading}
-                className={`w-full py-4 rounded-xl font-bold text-white text-sm bg-gradient-to-r ${selectedRoleData.color} shadow-xl`}
+                className={`w-full py-4 rounded-xl font-bold text-white text-sm bg-gradient-to-r ${ACCENT.color} shadow-xl`}
                 whileHover={{ scale: 1.02 }}
                 whileTap={{ scale: 0.98 }}
-                style={{ boxShadow: `0 10px 30px ${selectedRoleData.glow}` }}
+                style={{ boxShadow: `0 10px 30px ${ACCENT.glow}` }}
               >
                 {loading ? (
                   <div className="flex items-center justify-center gap-3">
@@ -242,7 +205,7 @@ const Login = () => {
                 ) : (
                   <div className="flex items-center justify-center gap-2">
                     <Sparkles className="w-4 h-4" />
-                    Sign In as {selectedRoleData.label}
+                    Sign In
                   </div>
                 )}
               </motion.button>
@@ -256,7 +219,7 @@ const Login = () => {
 
             <motion.div whileHover={{ scale: 1.01 }} whileTap={{ scale: 0.99 }}>
               <Link
-                to={`/register?panel=${selectedRole}`}
+                to="/register"
                 className="block w-full py-3.5 rounded-xl font-semibold text-slate-300 text-sm glass-card-light text-center border border-white/10 hover:border-white/20 hover:text-white transition-all"
               >
                 Create New Account

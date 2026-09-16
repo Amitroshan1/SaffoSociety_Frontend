@@ -6,6 +6,7 @@ import '../../../styles/guard/visitor/visitors.css';
 import Sidebar from '../../../components/guard/Sidebar';
 import DashboardHeader from '../../../components/guard/DashboardHeader';
 import AddStaffModal from '../../../components/guard/staff/AddStaffModal.jsx';
+import GateDatePicker from '../../../components/guard/shared/GateDatePicker.jsx';
 import { listStaff } from '../../../services/staff.service.js';
 import {
   checkInAttendance,
@@ -288,35 +289,31 @@ export default function GuardStaffEntryPage() {
               </button>
 
               <div className="gs-date-range" aria-label="Date range filter">
-                <label className="gs-date-filter">
-                  <span>From</span>
-                  <input
-                    type="date"
-                    value={fromDate}
-                    max={today}
-                    onChange={(e) => {
-                      const next = e.target.value || today;
-                      setFromDate(next);
-                      if (next > toDate) setToDate(next);
-                      setStatusFilter('all');
-                    }}
-                  />
-                </label>
+                <GateDatePicker
+                  label="From"
+                  value={fromDate}
+                  max={today}
+                  allowClear={false}
+                  onChange={(next) => {
+                    const value = next || today;
+                    setFromDate(value);
+                    if (value > toDate) setToDate(value);
+                    setStatusFilter('all');
+                  }}
+                />
                 <span className="gs-date-sep">→</span>
-                <label className="gs-date-filter">
-                  <span>To</span>
-                  <input
-                    type="date"
-                    value={toDate}
-                    min={fromDate}
-                    max={today}
-                    onChange={(e) => {
-                      const next = e.target.value || today;
-                      setToDate(next < fromDate ? fromDate : next);
-                      setStatusFilter('all');
-                    }}
-                  />
-                </label>
+                <GateDatePicker
+                  label="To"
+                  value={toDate}
+                  min={fromDate}
+                  max={today}
+                  allowClear={false}
+                  onChange={(next) => {
+                    const value = next || today;
+                    setToDate(value < fromDate ? fromDate : value);
+                    setStatusFilter('all');
+                  }}
+                />
               </div>
             </div>
 
@@ -363,14 +360,14 @@ export default function GuardStaffEntryPage() {
                         <div className="vtbl-av">{(s.name || '?').charAt(0).toUpperCase()}</div>
                         <div className="vtbl-name">{s.name || '—'}</div>
                       </div>
-                      <div className="vtbl-text">{roleLabel(s)}</div>
-                      <div className="vtbl-text gs-flat-cell">
+                      <div className="vtbl-text" data-label="Role">{roleLabel(s)}</div>
+                      <div className="vtbl-text gs-flat-cell" data-label="Works at">
                         {staffFlat(s) === '—' ? '—' : `Flat ${staffFlat(s)}`}
                       </div>
-                      <div className="vtbl-phone">{s.phone || '—'}</div>
-                      <div className="vtbl-mono">{formatAadhaar(staffAadhaar(s))}</div>
-                      <div className="vtbl-time">{formatTime(att?.checkInTime)}</div>
-                      <div className="vtbl-time">{formatTime(att?.checkOutTime)}</div>
+                      <div className="vtbl-phone" data-label="Phone">{s.phone || '—'}</div>
+                      <div className="vtbl-mono" data-label="Aadhaar">{formatAadhaar(staffAadhaar(s))}</div>
+                      <div className="vtbl-time" data-label="Check in">{formatTime(att?.checkInTime)}</div>
+                      <div className="vtbl-time" data-label="Check out">{formatTime(att?.checkOutTime)}</div>
                       <div className="vtbl-actions">
                         {!isTodayOnly ? (
                           <span className="gs-status gs-status--out">

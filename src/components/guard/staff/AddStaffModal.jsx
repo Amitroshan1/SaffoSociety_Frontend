@@ -128,19 +128,17 @@ export default function AddStaffModal({ open, onClose, onDone, showToast }) {
 
   return (
     <div
-      className="gm-park-modal-backdrop"
+      className="gm-park-modal-backdrop gs-add-modal-backdrop"
       role="dialog"
       aria-modal="true"
       aria-label="Add Staff"
       onClick={close}
     >
-      <div
-        className="avf-card gs-add-modal"
-        onClick={(e) => e.stopPropagation()}
-      >
+      <div className="vp-root gs-add-modal-host" onClick={(e) => e.stopPropagation()}>
+      <div className="avf-card gs-add-modal">
         <div className="gs-add-modal-head">
           <h3 className="gs-add-modal-title">Add Staff</h3>
-          <button type="button" className="gm-park-modal-close" onClick={close} aria-label="Close">
+          <button type="button" className="gs-add-modal-close" onClick={close} aria-label="Close">
             ×
           </button>
         </div>
@@ -278,6 +276,7 @@ export default function AddStaffModal({ open, onClose, onDone, showToast }) {
               ? 'Save staff'
               : 'Log one-time entry'}
         </button>
+      </div>
       </div>
     </div>
   );

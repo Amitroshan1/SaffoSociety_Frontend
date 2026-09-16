@@ -105,8 +105,8 @@ export const AuthProvider = ({ children }) => {
   }, [applySession, clearSession]);
 
   const login = useCallback(
-    async (email, password, role) => {
-      const { data } = await authService.login({ email, password, role });
+    async (email, password) => {
+      const { data } = await authService.login({ email, password });
       const nextUser = data.data.user;
       const accessToken = data.data.accessToken;
       applySession(nextUser, accessToken);

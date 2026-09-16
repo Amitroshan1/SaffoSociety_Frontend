@@ -34,6 +34,20 @@ export const QUICK_ENTRY_MODES = {
     requireVehicle: false,
     showStaffRole: false,
     submitLabel: 'Log delivery',
+    filterBy: 'company',
+    filterAllLabel: 'All companies',
+    filterOptions: [
+      'Amazon',
+      'Flipkart',
+      'Blinkit',
+      'Zepto',
+      'Swiggy Instamart',
+      'Dunzo',
+      'Delhivery',
+      'Blue Dart',
+      'India Post',
+      'Other',
+    ],
     tabs: [
       { key: 'add', label: 'Log Delivery', icon: 'plus' },
       { key: 'pending', label: 'At Gate', icon: 'clock' },
@@ -431,6 +445,9 @@ export default function GuardQuickEntryPage({ mode = 'delivery' }) {
                   onDeny={handleDeny}
                   onCall={handleCall}
                   actionLabels={tableCopy}
+                  filterBy={config.filterBy || 'purpose'}
+                  filterOptions={config.filterOptions}
+                  filterAllLabel={config.filterAllLabel}
                 />
               ) : null}
 
@@ -441,6 +458,9 @@ export default function GuardQuickEntryPage({ mode = 'delivery' }) {
                   loading={loading}
                   onMarkExit={handleMarkExit}
                   actionLabels={tableCopy}
+                  filterBy={config.filterBy || 'purpose'}
+                  filterOptions={config.filterOptions}
+                  filterAllLabel={config.filterAllLabel}
                 />
               ) : null}
 
@@ -450,6 +470,9 @@ export default function GuardQuickEntryPage({ mode = 'delivery' }) {
                   data={completed}
                   loading={loading}
                   actionLabels={tableCopy}
+                  filterBy={config.filterBy || 'purpose'}
+                  filterOptions={config.filterOptions}
+                  filterAllLabel={config.filterAllLabel}
                 />
               ) : null}
 
@@ -460,6 +483,9 @@ export default function GuardQuickEntryPage({ mode = 'delivery' }) {
                   loading={loading}
                   onReadd={handleReadd}
                   actionLabels={tableCopy}
+                  filterBy={config.filterBy || 'purpose'}
+                  filterOptions={config.filterOptions}
+                  filterAllLabel={config.filterAllLabel}
                 />
               ) : null}
             </div>

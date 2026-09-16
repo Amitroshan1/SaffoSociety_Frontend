@@ -1,5 +1,12 @@
 import '../../styles/guard/guard-main.css';
 
+const MAX_VISIBLE_ROWS = 8;
+
+/** Grow with data: 0→1, 1→2 … up to 8; scroll if more. */
+function bodyRowSlots(count) {
+  return Math.min(MAX_VISIBLE_ROWS, Math.max(1, count + 1));
+}
+
 const ICONS = {
   visitor: (
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
@@ -39,6 +46,7 @@ const ICONS = {
 
 export default function RecentActivity({ data = [], loading = false }) {
   const activities = data;
+  const rowSlots = bodyRowSlots(loading ? 0 : activities.length);
 
   return (
     <div className="gm-panel">
@@ -46,16 +54,13 @@ export default function RecentActivity({ data = [], loading = false }) {
         <span className="gm-panel-title">Recent Activity</span>
       </div>
 
-      <div className="gm-table-body">
-        {loading && (
-          <div style={{ padding: '24px 16px', textAlign: 'center', color: 'var(--gm-text-tertiary)', fontSize: 13 }}>
-            Loading…
-          </div>
-        )}
+      <div
+        className="gm-table-body gm-activity-body"
+        style={{ '--gm-panel-visible-rows': rowSlots }}
+      >
+        {loading && <div className="gm-table-empty">Loading…</div>}
         {!loading && activities.length === 0 && (
-          <div style={{ padding: '24px 16px', textAlign: 'center', color: 'var(--gm-text-tertiary)', fontSize: 13 }}>
-            No activity today
-          </div>
+          <div className="gm-table-empty">No activity today</div>
         )}
         {!loading &&
           activities.map((a) => (

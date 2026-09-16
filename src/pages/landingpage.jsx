@@ -232,6 +232,7 @@ function FloatingOrb({ size, color, top, left, delay }) {
 export default function Landing() {
   const navigate = useNavigate();
   const [activePanel, setActivePanel] = useState(null);
+  const [mobileNavOpen, setMobileNavOpen] = useState(false);
 
   const featuresRef = useRef(null);
   const panelsRef = useRef(null);
@@ -305,11 +306,11 @@ export default function Landing() {
           ))}
         </div>
 
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-2 sm:gap-3">
           <ThemeToggle variant="nav" />
           <motion.button
             onClick={() => navigate("/login")}
-            className="px-4 py-2 text-sm font-medium text-slate-300 hover:text-white transition-colors"
+            className="hidden sm:inline-flex px-4 py-2 text-sm font-medium text-slate-300 hover:text-white transition-colors"
             whileHover={{ scale: 1.02 }}
             whileTap={{ scale: 0.98 }}
           >
@@ -317,15 +318,84 @@ export default function Landing() {
           </motion.button>
           <motion.button
             onClick={() => navigate("/register")}
-            className="px-5 py-2.5 text-sm font-semibold text-white rounded-xl bg-linear-to-r from-violet-600 to-indigo-600 shadow-lg"
+            className="hidden sm:inline-flex px-5 py-2.5 text-sm font-semibold text-white rounded-xl bg-linear-to-r from-violet-600 to-indigo-600 shadow-lg"
             style={{ boxShadow: "0 4px 15px rgba(139,92,246,0.35)" }}
             whileHover={{ scale: 1.05 }}
             whileTap={{ scale: 0.98 }}
           >
             Get Started
           </motion.button>
+          <button
+            type="button"
+            className="md:hidden inline-flex items-center justify-center w-10 h-10 rounded-xl border border-white/10 text-white"
+            aria-label="Open menu"
+            onClick={() => setMobileNavOpen((v) => !v)}
+          >
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2">
+              {mobileNavOpen ? (
+                <>
+                  <line x1="6" y1="6" x2="18" y2="18" />
+                  <line x1="6" y1="18" x2="18" y2="6" />
+                </>
+              ) : (
+                <>
+                  <line x1="4" y1="7" x2="20" y2="7" />
+                  <line x1="4" y1="12" x2="20" y2="12" />
+                  <line x1="4" y1="17" x2="20" y2="17" />
+                </>
+              )}
+            </svg>
+          </button>
         </div>
       </motion.nav>
+
+      {mobileNavOpen ? (
+        <div className="md:hidden fixed top-[72px] left-0 right-0 z-40 px-4">
+          <div className="rounded-2xl border border-white/10 bg-slate-950/95 backdrop-blur-xl p-4 shadow-2xl">
+            <div className="flex flex-col gap-1">
+              {[
+                { label: "Features", ref: featuresRef },
+                { label: "Panels", ref: panelsRef },
+                { label: "About", ref: aboutRef },
+              ].map(({ label, ref }) => (
+                <button
+                  key={label}
+                  type="button"
+                  className="text-left px-3 py-3 rounded-xl text-slate-200 hover:bg-white/5 text-sm font-medium"
+                  onClick={() => {
+                    setMobileNavOpen(false);
+                    scrollTo(ref);
+                  }}
+                >
+                  {label}
+                </button>
+              ))}
+            </div>
+            <div className="mt-3 grid grid-cols-2 gap-2">
+              <button
+                type="button"
+                className="px-3 py-2.5 rounded-xl text-sm font-medium text-slate-200 border border-white/10"
+                onClick={() => {
+                  setMobileNavOpen(false);
+                  navigate("/login");
+                }}
+              >
+                Sign In
+              </button>
+              <button
+                type="button"
+                className="px-3 py-2.5 rounded-xl text-sm font-semibold text-white bg-violet-600"
+                onClick={() => {
+                  setMobileNavOpen(false);
+                  navigate("/register");
+                }}
+              >
+                Get Started
+              </button>
+            </div>
+          </div>
+        </div>
+      ) : null}
 
       {/* ── Hero ── */}
       <section className="relative pt-36 pb-20 px-6 overflow-hidden">
@@ -341,7 +411,7 @@ export default function Landing() {
           </motion.div>
 
           <motion.h1
-            className="text-5xl md:text-7xl font-black text-white leading-none tracking-tight mb-6"
+            className="text-4xl sm:text-5xl md:text-7xl font-black text-white leading-none tracking-tight mb-6"
             initial={{ opacity: 0, y: 30 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.7, delay: 0.2 }}

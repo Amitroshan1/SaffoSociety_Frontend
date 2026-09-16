@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import '../../../styles/guard/visitor/visitors.css';
 import { searchGuardFlats } from '../../../services/guard.service';
+import GatePhotoCapture from '../shared/GatePhotoCapture';
 
 const CAB_SERVICES = ['Uber', 'Ola', 'Rapido', 'Local / Other'];
 const TRIP_PURPOSES = ['Pickup', 'Drop', 'Guest'];
@@ -17,6 +18,7 @@ function flatLabel(f) {
 
 /**
  * Minimal Add Cab form — vehicle + flat required; entry time is server-side.
+ * Optional driver face capture (same as visitor / delivery).
  */
 export default function CabEntryForm({ onSubmit, showToast }) {
   const [vehicle, setVehicle] = useState('');
@@ -24,6 +26,7 @@ export default function CabEntryForm({ onSubmit, showToast }) {
   const [service, setService] = useState(CAB_SERVICES[0]);
   const [flat, setFlat] = useState('');
   const [tripPurpose, setTripPurpose] = useState(TRIP_PURPOSES[0]);
+  const [photoSrc, setPhotoSrc] = useState(null);
   const [flatHits, setFlatHits] = useState([]);
   const [flatOpen, setFlatOpen] = useState(false);
   const [submitting, setSubmitting] = useState(false);
@@ -75,12 +78,14 @@ export default function CabEntryForm({ onSubmit, showToast }) {
         service,
         flat: flat.trim(),
         tripPurpose,
+        photoSrc: photoSrc || null,
       });
       setVehicle('');
       setDriverName('');
       setService(CAB_SERVICES[0]);
       setFlat('');
       setTripPurpose(TRIP_PURPOSES[0]);
+      setPhotoSrc(null);
       setFlatHits([]);
     } catch (err) {
       showToast?.(
@@ -104,6 +109,14 @@ export default function CabEntryForm({ onSubmit, showToast }) {
       </div>
 
       <div className="avf-form-grid">
+        <GatePhotoCapture
+          value={photoSrc}
+          onChange={setPhotoSrc}
+          showToast={showToast}
+          title="Driver photo"
+          subject="driver"
+        />
+
         <div className="avf-card">
           <div className="avf-card-title">Cab details</div>
           <div className="avf-grid-2">

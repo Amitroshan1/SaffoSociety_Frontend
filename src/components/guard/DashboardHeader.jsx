@@ -10,6 +10,7 @@ import {
   getGuardProfile,
   getUnreadNotificationCount,
 } from '../../services/guard.service';
+import { toggleGuardMobileNav } from '../../utils/guardMobileNav.js';
 import '../../styles/guard/guard-main.css';
 
 export default function DashboardHeader() {
@@ -88,6 +89,18 @@ export default function DashboardHeader() {
 
   return (
     <header className="gm-header">
+      <button
+        type="button"
+        className="gm-menu-btn"
+        onClick={toggleGuardMobileNav}
+        aria-label="Open menu"
+      >
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round">
+          <line x1="4" y1="7" x2="20" y2="7" />
+          <line x1="4" y1="12" x2="20" y2="12" />
+          <line x1="4" y1="17" x2="20" y2="17" />
+        </svg>
+      </button>
 
       <div className="gm-search-wrap">
         <svg className="gm-search-icon" viewBox="0 0 24 24" fill="none"
@@ -98,7 +111,7 @@ export default function DashboardHeader() {
         <input
           type="text"
           className="gm-search-input"
-          placeholder="Search by name, phone, or vehicle number..."
+          placeholder="Search by name, phone, or vehicle…"
           onKeyDown={(e) => {
             if (e.key === 'Enter' && e.currentTarget.value.trim()) {
               navigate(`/guard/visitors?q=${encodeURIComponent(e.currentTarget.value.trim())}`);

@@ -2,9 +2,9 @@
 
 import '../../styles/guard/guard-main.css';
 
-const MAX_VISIBLE_ROWS = 5;
+const MAX_VISIBLE_ROWS = 8;
 
-/** Grow with data: 0→1 row, 1→2 … up to 5 (no leftover empty space at 5). */
+/** Grow with data: 0→1 … up to 8; scroll if more. */
 function bodyRowSlots(count) {
   return Math.min(MAX_VISIBLE_ROWS, Math.max(1, count + 1));
 }
@@ -45,22 +45,11 @@ export default function ActiveVisitors({ data = [], onMarkExit, onViewAll, loadi
         {!loading &&
           visitors.map((v) => (
             <div key={v.id} className="gm-table-row gm-visitors-grid">
-              <span
-                style={{
-                  fontSize: 15,
-                  fontWeight: 600,
-                  color: 'var(--gm-text-primary)',
-                  overflow: 'hidden',
-                  textOverflow: 'ellipsis',
-                  whiteSpace: 'nowrap',
-                }}
-              >
-                {v.name}
-              </span>
-              <span className="gm-cell-center">{v.totalPersons}</span>
-              <span className="gm-cell-center">{v.flat}</span>
-              <span className="gm-cell-sm">{v.entryTime}</span>
-              <span className="gm-cell-sm">{v.duration}</span>
+              <span className="gm-visitor-name">{v.name}</span>
+              <span className="gm-cell-center" data-label="Persons">{v.totalPersons}</span>
+              <span className="gm-cell-center" data-label="Flat">{v.flat}</span>
+              <span className="gm-cell-sm" data-label="Entry">{v.entryTime}</span>
+              <span className="gm-cell-sm" data-label="Duration">{v.duration}</span>
               <div>
                 <button type="button" className="gm-exit-btn" onClick={() => onMarkExit?.(v.id)}>
                   Mark Exit

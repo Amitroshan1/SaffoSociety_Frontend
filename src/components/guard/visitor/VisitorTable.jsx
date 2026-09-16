@@ -29,13 +29,22 @@
 //   }
 // ─────────────────────────────────────────────────────────────────────────────
 
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 
 const AVATAR_COLORS = ["#5b52f0","#20c997","#f5a623","#f05353","#a855f7","#3b82f6"];
+const PURPOSE_OPTIONS = ["Guest", "Work / Service", "Medical", "Other"];
+
 function avColor(name) { return AVATAR_COLORS[name.charCodeAt(0) % AVATAR_COLORS.length]; }
 function initials(name) {
   const p = name.trim().split(" ");
   return p.length >= 2 ? (p[0][0] + p[p.length - 1][0]).toUpperCase() : p[0].substring(0, 2).toUpperCase();
+}
+
+function rowFilterValue(row, filterBy) {
+  if (filterBy === "company") {
+    return String(row.company || row.purpose || "").trim();
+  }
+  return String(row.purpose || "").trim();
 }
 
 export default function VisitorTable({
@@ -49,9 +58,19 @@ export default function VisitorTable({
   onReadd,
   onVerifyOtp,
   actionLabels = {},
+  /** purpose (visitors) | company (deliveries) */
+  filterBy = "purpose",
+  filterOptions,
+  filterAllLabel,
 }) {
   const [search,  setSearch]  = useState("");
-  const [purpose, setPurpose] = useState("");
+  const [filterVal, setFilterVal] = useState("");
+  const [filterOpen, setFilterOpen] = useState(false);
+  const filterRef = useRef(null);
+  const options = filterOptions || (filterBy === "company" ? [] : PURPOSE_OPTIONS);
+  const allLabel =
+    filterAllLabel ||
+    (filterBy === "company" ? "All companies" : "All purposes");
   const labels = {
     visitorCol: "Visitor",
     purposeCol: "Purpose",
@@ -64,20 +83,33 @@ export default function VisitorTable({
     ...actionLabels,
   };
 
-  // ── Client-side filter (search + purpose dropdown) ───────────────────────
-  // BACKEND NOTE: For large datasets (>500 rows) move this to a query param:
-  //   GET /api/visitors?status=pending&search=amit&purpose=Guest&page=1&limit=20
-  // The backend should do:  WHERE (name ILIKE '%amit%' OR phone LIKE '%amit%')
-  //   AND purpose = 'Guest'  ORDER BY created_at DESC  LIMIT 20 OFFSET 0
+  useEffect(() => {
+    if (!filterOpen) return undefined;
+    const onDoc = (e) => {
+      if (filterRef.current && !filterRef.current.contains(e.target)) {
+        setFilterOpen(false);
+      }
+    };
+    document.addEventListener("mousedown", onDoc);
+    return () => document.removeEventListener("mousedown", onDoc);
+  }, [filterOpen]);
+
+  // ── Client-side filter (search + purpose/company dropdown) ───────────────
   const filtered = data.filter((v) => {
     const matchSearch =
       !search ||
       v.name.toLowerCase().includes(search.toLowerCase()) ||
-      v.phone.includes(search) ||
-      v.flat.toLowerCase().includes(search.toLowerCase());
-    const matchPurpose = !purpose || v.purpose === purpose;
-    return matchSearch && matchPurpose;
+      String(v.phone || "").includes(search) ||
+      String(v.flat || "").toLowerCase().includes(search.toLowerCase()) ||
+      String(v.company || "").toLowerCase().includes(search.toLowerCase());
+    const matchFilter =
+      !filterVal ||
+      rowFilterValue(v, filterBy).toLowerCase() === filterVal.toLowerCase();
+    return matchSearch && matchFilter;
   });
+
+  const filterLabel = filterVal || allLabel;
+  const showFilter = options.length > 0;
 
   return (
     <div className="vtbl-root">
@@ -92,16 +124,53 @@ export default function VisitorTable({
             onChange={(e) => setSearch(e.target.value)}
           />
         </div>
-        <select
-          className="vtbl-filter-select"
-          value={purpose}
-          onChange={(e) => setPurpose(e.target.value)}
-        >
-          <option value="">All purposes</option>
-          {["Guest","Work / Service","Medical","Other"].map((p) => (
-            <option key={p}>{p}</option>
-          ))}
-        </select>
+        {showFilter ? (
+          <div className="vtbl-filter-wrap" ref={filterRef}>
+            <button
+              type="button"
+              className={`vtbl-filter-select${filterOpen ? " is-open" : ""}`}
+              aria-haspopup="listbox"
+              aria-expanded={filterOpen}
+              onClick={() => setFilterOpen((o) => !o)}
+            >
+              <span>{filterLabel}</span>
+            </button>
+            {filterOpen ? (
+              <ul className="vtbl-filter-menu" role="listbox">
+                <li>
+                  <button
+                    type="button"
+                    className={!filterVal ? "is-active" : undefined}
+                    role="option"
+                    aria-selected={!filterVal}
+                    onClick={() => {
+                      setFilterVal("");
+                      setFilterOpen(false);
+                    }}
+                  >
+                    {allLabel}
+                  </button>
+                </li>
+                {options.map((p) => (
+                  <li key={p}>
+                    <button
+                      type="button"
+                      className={filterVal === p ? "is-active" : undefined}
+                      role="option"
+                      aria-selected={filterVal === p}
+                      onClick={() => {
+                        setFilterVal(p);
+                        setFilterOpen(false);
+                      }}
+                    >
+                      {p}
+                    </button>
+                  </li>
+                ))}
+              </ul>
+            ) : null}
+          </div>
+        ) : null}
       </div>
 
       {/* ── Table ── */}
@@ -153,19 +222,21 @@ export default function VisitorTable({
               </div>
 
               {/* Flat — visitors.flat_id → flats.flat_number */}
-              <div className="vtbl-mono vtbl-hide">{v.flat}</div>
+              <div className="vtbl-mono vtbl-hide" data-label="Flat">{v.flat}</div>
 
               {/* Purpose / Company */}
-              <div className="vtbl-text vtbl-hide">{v.company || v.purpose}</div>
+              <div className="vtbl-text vtbl-hide" data-label={labels.purposeCol || 'Purpose'}>
+                {v.company || v.purpose}
+              </div>
 
               {/* Variant-specific cells */}
               {variant === "pending" && (
                 <>
                   {/* time = visitors.created_at formatted */}
-                  <div className="vtbl-time vtbl-hide">{v.time}</div>
+                  <div className="vtbl-time vtbl-hide" data-label="Requested">{v.time}</div>
                   {/* wait = computed from (now - created_at), can also be done in SQL:
                       EXTRACT(EPOCH FROM (NOW() - created_at))/60 AS wait_minutes */}
-                  <div>
+                  <div data-label="Waiting">
                     <span className="vtbl-badge vtbl-badge--pending">
                       <span className="vtbl-badge-dot" />
                       {v.wait}
@@ -175,8 +246,8 @@ export default function VisitorTable({
               )}
               {variant === "approved" && (
                 <>
-                  <div className="vtbl-time vtbl-hide">{v.time}</div>
-                  <div className="vtbl-hide">
+                  <div className="vtbl-time vtbl-hide" data-label="Entry time">{v.time}</div>
+                  <div className="vtbl-hide" data-label="Duration">
                     <span className="vtbl-badge vtbl-badge--approved">
                       <span className="vtbl-badge-dot" />
                       {v.duration}
@@ -186,8 +257,8 @@ export default function VisitorTable({
               )}
               {variant === "completed" && (
                 <>
-                  <div className="vtbl-time vtbl-hide">{v.time}</div>
-                  <div className="vtbl-hide">
+                  <div className="vtbl-time vtbl-hide" data-label="Exit time">{v.time}</div>
+                  <div className="vtbl-hide" data-label="Duration">
                     <span className="vtbl-badge vtbl-badge--approved">
                       <span className="vtbl-badge-dot" />
                       {v.duration}
@@ -198,9 +269,9 @@ export default function VisitorTable({
               {variant === "rejected" && (
                 <>
                   {/* time = visitors.rejected_at formatted */}
-                  <div className="vtbl-time vtbl-hide">{v.time}</div>
+                  <div className="vtbl-time vtbl-hide" data-label="Time">{v.time}</div>
                   {/* by = visitors.rejected_by ("Guard" | "Resident") */}
-                  <div className="vtbl-text vtbl-hide">{v.by}</div>
+                  <div className="vtbl-text vtbl-hide" data-label="By">{v.by}</div>
                 </>
               )}
 
@@ -214,6 +285,7 @@ export default function VisitorTable({
                       onClick={() => onCall?.(v.id)}
                     >
                       <PhoneIcon />
+                      <span>Call</span>
                     </button>
                     <button
                       className="vtbl-act vtbl-act--approve"
