@@ -178,7 +178,7 @@ export default function AddStaffModal({ open, onClose, onDone, showToast }) {
               Phone <span className="avf-req">*</span>
             </label>
             <div className="avf-phone-wrap">
-              <div className="avf-phone-cc">🇮🇳 +91</div>
+              <div className="avf-phone-cc">+91</div>
               <input
                 value={phone}
                 onChange={(e) => setPhone(e.target.value.replace(/\D/g, '').slice(0, 10))}

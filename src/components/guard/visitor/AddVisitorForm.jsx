@@ -220,7 +220,7 @@ export default function AddVisitorForm({ onSubmit, showToast }) {
   function applyRecentVisitor(r) {
     setName(r.name || "");
     setPhone(String(r.phone || "").replace(/\D/g, "").slice(-10));
-    setFlat(r.flat && r.flat !== "â€”" ? r.flat : "");
+    setFlat(r.flat && r.flat !== "—" ? r.flat : "");
     if (r.purpose) setPurpose(r.purpose);
     if (r.persons) setPersons(Number(r.persons) || 1);
     if (r.vehicle) setVehicle(r.vehicle);
@@ -508,7 +508,7 @@ export default function AddVisitorForm({ onSubmit, showToast }) {
               type="search"
               value={recentQ}
               onChange={(e) => setRecentQ(e.target.value)}
-              placeholder="Search by name or phoneâ€¦"
+              placeholder="Search by name or phone..."
               autoComplete="off"
             />
           </div>
@@ -516,7 +516,7 @@ export default function AddVisitorForm({ onSubmit, showToast }) {
             {recentQ.trim() ? (
               <>
                 {recentLoading ? (
-                  <div className="avf-recent-empty">Searchingâ€¦</div>
+                  <div className="avf-recent-empty">Searching...</div>
                 ) : null}
                 {!recentLoading && recentWalkIns.length === 0 ? (
                   <div className="avf-recent-empty">
@@ -534,7 +534,7 @@ export default function AddVisitorForm({ onSubmit, showToast }) {
                       <div className="avf-recent-item-main">
                         <span className="avf-recent-name">{r.name || "Visitor"}</span>
                         <span className="avf-recent-meta">
-                          {[r.phone, r.flat && r.flat !== "â€”" ? `Flat ${r.flat}` : null]
+                          {[r.phone, r.flat && r.flat !== "—" ? `Flat ${r.flat}` : null]
                             .filter(Boolean)
                             .join(" Â· ")}
                         </span>
@@ -600,7 +600,7 @@ export default function AddVisitorForm({ onSubmit, showToast }) {
                     <circle cx="12" cy="13" r="4" />
                   </svg>
                   <span className="avf-photo-hint-text">
-                    {camLoading ? "â€¦" : "Tap"}
+                    {camLoading ? "..." : "Tap"}
                   </span>
                 </>
               )}
@@ -621,7 +621,7 @@ export default function AddVisitorForm({ onSubmit, showToast }) {
                       onClick={openCameraPicker}
                       disabled={camLoading}
                     >
-                      <CamIcon /> {camLoading ? "Openingâ€¦" : "Take Photo"}
+                      <CamIcon /> {camLoading ? "Opening..." : "Take Photo"}
                     </button>
                     <button
                       type="button"
@@ -679,7 +679,7 @@ export default function AddVisitorForm({ onSubmit, showToast }) {
                 Phone <span className="avf-req">*</span>
               </label>
               <div className="avf-phone-wrap">
-                <div className="avf-phone-cc">ðŸ‡®ðŸ‡³ +91</div>
+                <div className="avf-phone-cc">+91</div>
                 <input
                   type="tel"
                   value={phone}
@@ -730,7 +730,7 @@ export default function AddVisitorForm({ onSubmit, showToast }) {
                   className="avf-cnt-btn"
                   onClick={() => setPersons((p) => Math.max(1, p - 1))}
                 >
-                  âˆ’
+                  -
                 </button>
                 <div className="avf-cnt-val">{persons}</div>
                 <button
@@ -829,7 +829,7 @@ export default function AddVisitorForm({ onSubmit, showToast }) {
             <textarea
               value={note}
               onChange={(e) => setNote(e.target.value)}
-              placeholder="Any special instructions or notesâ€¦"
+              placeholder="Any special instructions or notes..."
               rows={3}
             />
           </div>
@@ -842,7 +842,7 @@ export default function AddVisitorForm({ onSubmit, showToast }) {
           disabled={submitting}
         >
           <SendIcon />
-          {submitting ? "Addingâ€¦" : "Add & Notify Resident"}
+          {submitting ? "Adding..." : "Add & Notify Resident"}
         </button>
       </div>
 
@@ -875,7 +875,7 @@ export default function AddVisitorForm({ onSubmit, showToast }) {
                     disabled={enumerating || camLoading}
                   >
                     <span className="avf-cam-choice-emoji" aria-hidden>
-                      ðŸ“±
+                      Phone
                     </span>
                     <span className="avf-cam-choice-label">
                       Connected Phone Camera
@@ -891,7 +891,7 @@ export default function AddVisitorForm({ onSubmit, showToast }) {
                     disabled={enumerating || camLoading}
                   >
                     <span className="avf-cam-choice-emoji" aria-hidden>
-                      ðŸ’»
+                      Cam
                     </span>
                     <span className="avf-cam-choice-label">Browser Camera</span>
                     <span className="avf-cam-choice-hint">
@@ -900,7 +900,7 @@ export default function AddVisitorForm({ onSubmit, showToast }) {
                   </button>
                 </div>
                 {(enumerating || camLoading) && (
-                  <p className="avf-cam-modal-status">Checking camerasâ€¦</p>
+                  <p className="avf-cam-modal-status">Checking cameras...</p>
                 )}
                 <button
                   type="button"
@@ -929,7 +929,7 @@ export default function AddVisitorForm({ onSubmit, showToast }) {
                     onClick={retryPhoneCameraDetect}
                     disabled={enumerating || camLoading}
                   >
-                    {enumerating ? "Checkingâ€¦" : "Try Again"}
+                    {enumerating ? "Checking..." : "Try Again"}
                   </button>
                   <button
                     type="button"
@@ -951,7 +951,7 @@ export default function AddVisitorForm({ onSubmit, showToast }) {
                     : "Select browser camera"}
                 </h3>
                 <p className="avf-cam-modal-sub">
-                  Multiple cameras found â€” pick one to continue.
+                  Multiple cameras found - pick one to continue.
                 </p>
                 <div className="avf-cam-device-list">
                   {deviceOptions.map((d) => (
