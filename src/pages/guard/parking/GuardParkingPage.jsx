@@ -1,7 +1,9 @@
-import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { ChevronDown } from 'lucide-react';
 import { navigateGuard } from '../../../constants/guardRoutes.js';
 import '../../../styles/guard/guard-main.css';
+import '../../../styles/guard/visitor/visitors.css';
 import '../../../styles/common/crud.css';
 import Sidebar from '../../../components/guard/Sidebar';
 import DashboardHeader from '../../../components/guard/DashboardHeader';
@@ -204,6 +206,108 @@ function StatusPill({ status }) {
   return <span className={`gm-pcd-pill gm-pcd-pill--${s}`}>{label}</span>;
 }
 
+/** Unassigned resident slots are Free — never Outside. */
+function isResidentAllotted(slot) {
+  const a = slot?.allottee;
+  if (!a) return false;
+  return Boolean(a.name || a.vehicleNumber || a.flat);
+}
+
+function normalizeResidentSlot(slot) {
+  if (!slot || slot.category !== 'resident') return slot;
+  if (isResidentAllotted(slot)) return slot;
+  if (slot.occupancy?.status === 'available') return slot;
+  return {
+    ...slot,
+    allottee: null,
+    occupancy: {
+      ...slot.occupancy,
+      status: 'available',
+      entryAt: null,
+      exitAt: null,
+    },
+  };
+}
+
+const RESIDENT_STATUS_OPTS = [
+  { value: 'all', label: 'Status' },
+  { value: 'inside', label: 'Inside' },
+  { value: 'outside', label: 'Outside' },
+  { value: 'free', label: 'Free' },
+];
+
+const VISITOR_STATUS_OPTS = [
+  { value: 'all', label: 'Status' },
+  { value: 'free', label: 'Free' },
+  { value: 'filled', label: 'Filled' },
+];
+
+function StatusHeadFilter({ value, onChange, options }) {
+  const rootRef = useRef(null);
+  const [open, setOpen] = useState(false);
+  const selected = options.find((o) => o.value === value) || options[0];
+  const isFiltered = value !== 'all';
+
+  useEffect(() => {
+    if (!open) return undefined;
+    const onDoc = (e) => {
+      if (rootRef.current && !rootRef.current.contains(e.target)) setOpen(false);
+    };
+    const onKey = (e) => {
+      if (e.key === 'Escape') setOpen(false);
+    };
+    document.addEventListener('mousedown', onDoc);
+    document.addEventListener('keydown', onKey);
+    return () => {
+      document.removeEventListener('mousedown', onDoc);
+      document.removeEventListener('keydown', onKey);
+    };
+  }, [open]);
+
+  return (
+    <div className="gm-pcd-head-filter" ref={rootRef}>
+      <button
+        type="button"
+        className={`gm-pcd-head-filter-trigger${open ? ' is-open' : ''}${isFiltered ? ' is-filtered' : ''}`}
+        aria-label="Status"
+        aria-haspopup="listbox"
+        aria-expanded={open}
+        onClick={(e) => {
+          e.stopPropagation();
+          setOpen((o) => !o);
+        }}
+      >
+        <span>{selected?.label}</span>
+        <ChevronDown size={14} className="gm-pcd-head-filter-icon" aria-hidden />
+      </button>
+      {open ? (
+        <ul className="gm-pcd-head-filter-menu" role="listbox" aria-label="Status">
+          {options.map((o) => {
+            const active = o.value === value;
+            return (
+              <li key={o.value}>
+                <button
+                  type="button"
+                  role="option"
+                  aria-selected={active}
+                  className={active ? 'is-active' : undefined}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    onChange(o.value);
+                    setOpen(false);
+                  }}
+                >
+                  {o.label}
+                </button>
+              </li>
+            );
+          })}
+        </ul>
+      ) : null}
+    </div>
+  );
+}
+
 function mapApiToSlots(apiData) {
   const slots = apiData?.slots || [];
   const parked = apiData?.parkedVehicles || apiData?.vehicles || [];
@@ -253,7 +357,7 @@ function mapApiToSlots(apiData) {
           }
         : null,
       occupancy: {
-        status: parkedRow || status === 'occupied' ? 'inside' : 'outside',
+        status: parkedRow || status === 'occupied' ? 'inside' : vehicleNumber ? 'outside' : 'available',
         entryAt: parkedRow?.entryAt || null,
         exitAt: null,
       },
@@ -375,7 +479,7 @@ export default function GuardParkingPage() {
   const [success, setSuccess] = useState('');
   const [busy, setBusy] = useState(false);
 
-  const [tab, setTab] = useState('resident');
+  const [tab, setTab] = useState('live');
   const [search, setSearch] = useState('');
   const [statusFilter, setStatusFilter] = useState('all');
   const [compartment, setCompartment] = useState('all');
@@ -463,12 +567,12 @@ export default function GuardParkingPage() {
     () =>
       mapped.resident.map((s) => {
         const ov = overrides[s.id];
-        if (!ov) return s;
-        return {
+        if (!ov) return normalizeResidentSlot(s);
+        return normalizeResidentSlot({
           ...s,
           allottee: ov.allottee !== undefined ? ov.allottee : s.allottee,
           occupancy: { ...s.occupancy, ...ov.occupancy },
-        };
+        });
       }),
     [mapped.resident, overrides],
   );
@@ -495,35 +599,41 @@ export default function GuardParkingPage() {
   }, [residentSlots, visitorSlots]);
 
   const compartments = useMemo(() => {
-    if (tab === 'logs') return [];
+    if (tab === 'live') return [];
     const source = tab === 'resident' ? residentSlots : visitorSlots;
     const map = new Map();
     for (const s of source) {
       const key = s.compartment || 'B2';
       if (!map.has(key)) map.set(key, { key, total: 0, inside: 0, outside: 0, free: 0, filled: 0 });
       const row = map.get(key);
+      const st = s.occupancy.status;
       row.total += 1;
       if (s.category === 'resident') {
-        if (s.occupancy.status === 'inside') row.inside += 1;
+        if (st === 'inside') row.inside += 1;
+        else if (st === 'available') row.free += 1;
         else row.outside += 1;
-      } else if (s.occupancy.status === 'available') row.free += 1;
+      } else if (st === 'available') row.free += 1;
       else row.filled += 1;
     }
     return Array.from(map.values()).sort((a, b) => a.key.localeCompare(b.key));
   }, [tab, residentSlots, visitorSlots]);
 
   const filtered = useMemo(() => {
-    if (tab === 'logs') return [];
+    if (tab === 'live') return [];
     const source = tab === 'resident' ? residentSlots : visitorSlots;
     const term = search.trim().toLowerCase();
+    const activeStatus =
+      tab === 'visitor' && (statusFilter === 'inside' || statusFilter === 'outside')
+        ? 'all'
+        : statusFilter;
     return source
       .filter((s) => {
         if (compartment !== 'all' && s.compartment !== compartment) return false;
         const st = s.occupancy.status;
-        if (statusFilter === 'inside' && st !== 'inside') return false;
-        if (statusFilter === 'outside' && st !== 'outside') return false;
-        if (statusFilter === 'free' && st !== 'available') return false;
-        if (statusFilter === 'filled' && st !== 'occupied') return false;
+        if (activeStatus === 'inside' && st !== 'inside') return false;
+        if (activeStatus === 'outside' && st !== 'outside') return false;
+        if (activeStatus === 'free' && st !== 'available') return false;
+        if (activeStatus === 'filled' && st !== 'occupied') return false;
         if (!term) return true;
         const hay = [
           s.slotCode,
@@ -846,63 +956,49 @@ export default function GuardParkingPage() {
               <h2 className="gm-park-page-title">Parking</h2>
             </div>
             <div className="gm-park-toolbar-btns">
-              {tab !== 'logs' ? (
-                <>
-                  <button
-                    type="button"
-                    className="gm-park-action-btn gm-park-action-btn--entry"
-                    onClick={() => openEntry('resident')}
-                  >
-                    Resident Entry
-                  </button>
-                  <button
-                    type="button"
-                    className="gm-park-action-btn gm-park-action-btn--visitor"
-                    onClick={() => openEntry('visitor')}
-                  >
-                    Visitor Entry
-                  </button>
-                  <button
-                    type="button"
-                    className="gm-park-action-btn gm-park-action-btn--exit"
-                    onClick={openExit}
-                  >
-                    Vehicle Exit
-                  </button>
-                </>
-              ) : null}
+              <button
+                type="button"
+                className="gm-park-action-btn gm-park-action-btn--entry"
+                onClick={() => openEntry('resident')}
+              >
+                Resident Entry
+              </button>
+              <button
+                type="button"
+                className="gm-park-action-btn gm-park-action-btn--visitor"
+                onClick={() => openEntry('visitor')}
+              >
+                Visitor Entry
+              </button>
+              <button
+                type="button"
+                className="gm-park-action-btn gm-park-action-btn--exit"
+                onClick={openExit}
+              >
+                Vehicle Exit
+              </button>
             </div>
           </div>
 
           {error ? <div className="gm-park-alert gm-park-alert--error">{error}</div> : null}
           {success ? <div className="gm-park-alert gm-park-alert--ok">{success}</div> : null}
 
-          {tab !== 'logs' ? (
-          <div className="gm-park-summary">
-            <div className="glass-card gm-park-stat gm-park-stat--ok">
-              <strong>{loading ? '—' : summary.inside}</strong>
-              <span className="gm-park-stat-label">Residents Inside</span>
-            </div>
-            <div className="glass-card gm-park-stat">
-              <strong>{loading ? '—' : summary.outside}</strong>
-              <span className="gm-park-stat-label">Residents Outside</span>
-            </div>
-            <div className="glass-card gm-park-stat gm-park-stat--warn">
-              <strong>
-                {loading ? '—' : `${summary.filled}/${summary.visitorTotal}`}
-              </strong>
-              <span className="gm-park-stat-label">Visitor Filled</span>
-            </div>
-            <div className="glass-card gm-park-stat gm-park-stat--info">
-              <strong>{loading ? '—' : summary.free}</strong>
-              <span className="gm-park-stat-label">Visitor Free</span>
-            </div>
-          </div>
-          ) : null}
-
           <section className="glass-card gm-pcd-live">
             <div className="gm-pcd-live-head">
               <div className="gm-pcd-tabs">
+                <button
+                  type="button"
+                  className={tab === 'live' ? 'is-active' : ''}
+                  onClick={() => {
+                    setTab('live');
+                    setParkLogs(readLogs());
+                    setSearch('');
+                    setCompartment('all');
+                    setStatusFilter('all');
+                  }}
+                >
+                  Live Parking
+                </button>
                 <button
                   type="button"
                   className={tab === 'resident' ? 'is-active' : ''}
@@ -927,28 +1023,39 @@ export default function GuardParkingPage() {
                 >
                   Visitor Parking
                 </button>
-                <button
-                  type="button"
-                  className={tab === 'logs' ? 'is-active' : ''}
-                  onClick={() => {
-                    setTab('logs');
-                    setParkLogs(readLogs());
-                    setSearch('');
-                    setCompartment('all');
-                    setStatusFilter('all');
-                  }}
-                >
-                  Logs
-                </button>
               </div>
             </div>
 
-            {tab === 'logs' ? (
+            {tab === 'live' ? (
               <ParkingLogsPanel localLogs={parkLogs} />
             ) : (
-              <>
-            <div className="gm-park-controlbar gm-pcd-filters">
-              <div className="gm-park-search">
+              <div className="gm-plog">
+            <div className="gm-plog-summary">
+              <div className="gm-plog-stat gm-plog-stat--entries">
+                <strong>{loading ? '—' : summary.inside}</strong>
+                <span className="gm-plog-stat-label">Residents Inside</span>
+                <em>Now</em>
+              </div>
+              <div className="gm-plog-stat gm-plog-stat--exits">
+                <strong>{loading ? '—' : summary.outside}</strong>
+                <span className="gm-plog-stat-label">Residents Outside</span>
+                <em>Now</em>
+              </div>
+              <div className="gm-plog-stat gm-plog-stat--resident">
+                <strong>
+                  {loading ? '—' : `${summary.filled}/${summary.visitorTotal}`}
+                </strong>
+                <span className="gm-plog-stat-label">Visitor Filled</span>
+                <em>Filled / total</em>
+              </div>
+              <div className="gm-plog-stat gm-plog-stat--visitor">
+                <strong>{loading ? '—' : summary.free}</strong>
+                <span className="gm-plog-stat-label">Visitor Free</span>
+                <em>Available</em>
+              </div>
+            </div>
+            <div className="gm-park-controlbar gm-pcd-filters gm-plog-toolbar">
+              <div className="gm-park-search gm-plog-search">
                 <SearchInput
                   value={search}
                   onChange={setSearch}
@@ -960,122 +1067,105 @@ export default function GuardParkingPage() {
                   debounceMs={200}
                 />
               </div>
-              <label className="gm-park-filter gm-park-filter--inline">
-                <span>Status</span>
-                <select
-                  value={statusFilter}
-                  onChange={(e) => setStatusFilter(e.target.value)}
-                >
-                  <option value="all">All</option>
-                  {tab === 'resident' ? (
-                    <>
-                      <option value="inside">Inside</option>
-                      <option value="outside">Outside</option>
-                    </>
-                  ) : (
-                    <>
-                      <option value="free">Free</option>
-                      <option value="filled">Filled</option>
-                    </>
-                  )}
-                </select>
-              </label>
-            </div>
-
-            {compartments.length > 0 ? (
-              <div className="gm-pcd-floor-chips" role="tablist" aria-label="Floor">
-                <button
-                  type="button"
-                  className={compartment === 'all' ? 'is-active' : ''}
-                  onClick={() => setCompartment('all')}
-                >
-                  All
-                </button>
-                {compartments.map((c) => (
-                  <button
-                    key={c.key}
-                    type="button"
-                    className={compartment === c.key ? 'is-active' : ''}
-                    onClick={() => setCompartment(c.key)}
+              {compartments.length > 0 ? (
+                <label className="gm-pcd-floor-filter">
+                  <select
+                    value={compartment}
+                    onChange={(e) => setCompartment(e.target.value)}
+                    aria-label="Floor"
                   >
-                    {c.key}
-                  </button>
-                ))}
-              </div>
-            ) : null}
+                    <option value="all">All Block</option>
+                    {compartments.map((c) => (
+                      <option key={c.key} value={c.key}>
+                        {c.key}
+                      </option>
+                    ))}
+                  </select>
+                  <ChevronDown size={14} className="gm-pcd-floor-filter-icon" aria-hidden />
+                </label>
+              ) : null}
+            </div>
 
             {loading ? (
               <div className="gm-pcd-empty">Loading…</div>
-            ) : filtered.length === 0 ? (
-              <div className="gm-pcd-empty">
-                {tab === 'resident'
-                  ? 'No resident slots match.'
-                  : 'No visitor slots match.'}
-              </div>
             ) : (
               <div className="gm-pcd-board">
+                <div className="gm-pcd-rows-head">
+                  <span>Parking No.</span>
+                  <span>{tab === 'resident' ? 'Resident / Flat' : 'Visitor / Flat'}</span>
+                  <span>Vehicle</span>
+                  <span>Type</span>
+                  <StatusHeadFilter
+                    value={
+                      tab === 'visitor' &&
+                      (statusFilter === 'inside' || statusFilter === 'outside')
+                        ? 'all'
+                        : statusFilter
+                    }
+                    onChange={setStatusFilter}
+                    options={tab === 'resident' ? RESIDENT_STATUS_OPTS : VISITOR_STATUS_OPTS}
+                  />
+                </div>
                 <div className="gm-pcd-rows">
-                  <div className="gm-pcd-rows-head" aria-hidden>
-                    <span>Parking No</span>
-                    <span>Status</span>
-                    <span>{tab === 'resident' ? 'Allotted' : 'Visitor'}</span>
-                    <span>Vehicle</span>
-                    <span>Time</span>
-                  </div>
-                  {groups.map((g) => (
-                    <div key={g.key} className="gm-pcd-floor-block">
-                      <div className="gm-pcd-floor-head">
-                        <h4>{g.key}</h4>
-                        <span>{g.rows.length}</span>
-                      </div>
-                      {g.rows.map((s) => {
-                        const isVisitor = s.category === 'visitor';
-                        const st = s.occupancy.status;
-                        const name = isVisitor
-                          ? st === 'available'
-                            ? '—'
-                            : s.occupancy.visitorName || 'Visitor'
-                          : s.allottee?.name || 'Unassigned';
-                        const vehicle = isVisitor
-                          ? s.occupancy.vehicleNumber || '—'
-                          : s.allottee?.vehicleNumber || '—';
-                        const detail = isVisitor
-                          ? st === 'available'
-                            ? 'Free'
-                            : `Flat ${s.occupancy.visitingFlat || '—'}`
-                          : s.allottee?.flat
-                            ? `Flat ${s.allottee.flat}`
-                            : formatLabel(s.allottee?.vehicleType) || '—';
-                        const time =
-                          st === 'inside' || st === 'occupied'
-                            ? formatParkTime(s.occupancy.entryAt)
-                            : s.occupancy.exitAt
-                              ? formatParkTime(s.occupancy.exitAt)
-                              : '—';
-                        return (
-                          <button
-                            type="button"
-                            key={s.id}
-                            className={`gm-pcd-row gm-pcd-row--${st}`}
-                            onClick={() => setSelected(s)}
-                          >
-                            <strong className="gm-pcd-row-slot">{s.slotCode}</strong>
-                            <StatusPill status={st} />
-                            <div className="gm-pcd-row-main">
-                              <span className="gm-pcd-row-person">{name}</span>
-                              <span className="gm-pcd-row-vehicle">{detail}</span>
-                            </div>
-                            <div className="gm-pcd-row-meta">{vehicle}</div>
-                            <div className="gm-pcd-row-time">{time}</div>
-                          </button>
-                        );
-                      })}
+                  {filtered.length === 0 ? (
+                    <div className="gm-pcd-empty">
+                      {tab === 'resident'
+                        ? 'No resident slots match.'
+                        : 'No visitor slots match.'}
                     </div>
-                  ))}
+                  ) : (
+                    groups.map((g) => (
+                      <div key={g.key} className="gm-pcd-floor-block">
+                        <div className="gm-pcd-floor-head">
+                          <h4>{g.key}</h4>
+                          <span>{g.rows.length}</span>
+                        </div>
+                        {g.rows.map((s) => {
+                          const isVisitor = s.category === 'visitor';
+                          const st = s.occupancy.status;
+                          const name = isVisitor
+                            ? st === 'available'
+                              ? '—'
+                              : s.occupancy.visitorName || 'Visitor'
+                            : s.allottee?.name || 'Unassigned';
+                          const flat = isVisitor
+                            ? st === 'available'
+                              ? '—'
+                              : s.occupancy.visitingFlat || '—'
+                            : s.allottee?.flat || '—';
+                          const vehicle = isVisitor
+                            ? s.occupancy.vehicleNumber || '—'
+                            : s.allottee?.vehicleNumber || '—';
+                          const vehicleType = isVisitor
+                            ? formatLabel(s.occupancy.vehicleType) || '—'
+                            : formatLabel(s.allottee?.vehicleType) || '—';
+                          return (
+                            <button
+                              type="button"
+                              key={s.id}
+                              className={`gm-pcd-row gm-pcd-row--${st}`}
+                              onClick={() => setSelected(s)}
+                            >
+                              <strong className="gm-pcd-row-slot">{s.slotCode}</strong>
+                              <div className="gm-pcd-row-main">
+                                <span className="gm-pcd-row-person">{name}</span>
+                                <span className="gm-pcd-row-vehicle">
+                                  {flat !== '—' ? `Flat ${flat}` : '—'}
+                                </span>
+                              </div>
+                              <div className="gm-pcd-row-meta">{vehicle}</div>
+                              <div className="gm-pcd-row-type">{vehicleType}</div>
+                              <StatusPill status={st} />
+                            </button>
+                          );
+                        })}
+                      </div>
+                    ))
+                  )}
                 </div>
               </div>
             )}
-              </>
+              </div>
             )}
           </section>
 

@@ -15,6 +15,7 @@ const MONTHS = [
   'November',
   'December',
 ];
+const MONTHS_SHORT = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
 
 function toIsoKey(d) {
   const y = d.getFullYear();
@@ -56,6 +57,10 @@ function buildMonthDays(viewYear, viewMonth) {
   return days;
 }
 
+function decadeStart(year) {
+  return Math.floor(year / 12) * 12;
+}
+
 function CalendarIcon() {
   return (
     <svg
@@ -91,6 +96,7 @@ export default function GateDatePicker({
 }) {
   const rootRef = useRef(null);
   const [open, setOpen] = useState(false);
+  const [panel, setPanel] = useState('day'); // day | month | year
   const selected = parseIsoKey(value);
   const [viewYear, setViewYear] = useState(() => (selected || new Date()).getFullYear());
   const [viewMonth, setViewMonth] = useState(() => (selected || new Date()).getMonth());
@@ -103,7 +109,10 @@ export default function GateDatePicker({
       }
     };
     const onKey = (e) => {
-      if (e.key === 'Escape') setOpen(false);
+      if (e.key !== 'Escape') return;
+      if (panel === 'year') setPanel('month');
+      else if (panel === 'month') setPanel('day');
+      else setOpen(false);
     };
     document.addEventListener('mousedown', onDoc);
     document.addEventListener('keydown', onKey);
@@ -111,16 +120,25 @@ export default function GateDatePicker({
       document.removeEventListener('mousedown', onDoc);
       document.removeEventListener('keydown', onKey);
     };
-  }, [open]);
+  }, [open, panel]);
 
   useEffect(() => {
-    if (!open) return;
+    if (!open) {
+      setPanel('day');
+      return;
+    }
     const base = selected || new Date();
     setViewYear(base.getFullYear());
     setViewMonth(base.getMonth());
+    setPanel('day');
   }, [open, value]);
 
   const days = useMemo(() => buildMonthDays(viewYear, viewMonth), [viewYear, viewMonth]);
+  const yearBlockStart = decadeStart(viewYear);
+  const years = useMemo(
+    () => Array.from({ length: 12 }, (_, i) => yearBlockStart + i),
+    [yearBlockStart],
+  );
 
   const isDisabled = (iso) => {
     if (min && iso < min) return true;
@@ -128,7 +146,15 @@ export default function GateDatePicker({
     return false;
   };
 
-  const shiftMonth = (delta) => {
+  const shiftView = (delta) => {
+    if (panel === 'year') {
+      setViewYear((y) => y + delta * 12);
+      return;
+    }
+    if (panel === 'month') {
+      setViewYear((y) => y + delta);
+      return;
+    }
     const d = new Date(viewYear, viewMonth + delta, 1);
     setViewYear(d.getFullYear());
     setViewMonth(d.getMonth());
@@ -156,7 +182,30 @@ export default function GateDatePicker({
     setOpen(false);
   };
 
+  const advancePanel = () => {
+    if (panel === 'day') setPanel('month');
+    else if (panel === 'month') setPanel('year');
+  };
+
+  const titleLabel =
+    panel === 'year'
+      ? `${yearBlockStart} – ${yearBlockStart + 11}`
+      : panel === 'month'
+        ? String(viewYear)
+        : `${MONTHS[viewMonth]} ${viewYear}`;
+
+  const titleAria =
+    panel === 'year'
+      ? 'Year range'
+      : panel === 'month'
+        ? 'Select year'
+        : 'Select month and year';
+
+  const navPrevLabel = panel === 'year' ? 'Previous years' : panel === 'month' ? 'Previous year' : 'Previous month';
+  const navNextLabel = panel === 'year' ? 'Next years' : panel === 'month' ? 'Next year' : 'Next month';
+
   const today = todayIso();
+  const now = new Date();
 
   return (
     <div className={`gdp-root${open ? ' gdp-root--open' : ''}${className ? ` ${className}` : ''}`} ref={rootRef}>
@@ -175,49 +224,122 @@ export default function GateDatePicker({
       {open ? (
         <div className="gdp-popover" role="dialog" aria-label={label ? `${label} calendar` : 'Calendar'}>
           <div className="gdp-head">
-            <button type="button" className="gdp-nav" aria-label="Previous month" onClick={() => shiftMonth(-1)}>
+            <button type="button" className="gdp-nav" aria-label={navPrevLabel} onClick={() => shiftView(-1)}>
               ‹
             </button>
-            <span className="gdp-title">
-              {MONTHS[viewMonth]} {viewYear}
-            </span>
-            <button type="button" className="gdp-nav" aria-label="Next month" onClick={() => shiftMonth(1)}>
+            <button
+              type="button"
+              className={`gdp-title${panel !== 'year' ? ' gdp-title--btn' : ''}`}
+              aria-label={titleAria}
+              disabled={panel === 'year'}
+              onClick={advancePanel}
+            >
+              <span>{titleLabel}</span>
+              {panel !== 'year' ? <span className="gdp-title-chevron" aria-hidden>▾</span> : null}
+            </button>
+            <button type="button" className="gdp-nav" aria-label={navNextLabel} onClick={() => shiftView(1)}>
               ›
             </button>
           </div>
 
-          <div className="gdp-weekdays">
-            {WEEKDAYS.map((w) => (
-              <span key={w}>{w}</span>
-            ))}
-          </div>
+          {panel === 'day' ? (
+            <>
+              <div className="gdp-weekdays">
+                {WEEKDAYS.map((w) => (
+                  <span key={w}>{w}</span>
+                ))}
+              </div>
 
-          <div className="gdp-grid">
-            {days.map((cell) => {
-              const disabled = isDisabled(cell.iso);
-              const isSelected = value && cell.iso === value;
-              const isToday = cell.iso === today;
-              return (
-                <button
-                  key={`${cell.iso}-${cell.outside ? 'o' : 'i'}`}
-                  type="button"
-                  className={[
-                    'gdp-day',
-                    cell.outside ? 'gdp-day--outside' : '',
-                    isSelected ? 'gdp-day--selected' : '',
-                    isToday && !isSelected ? 'gdp-day--today' : '',
-                    disabled ? 'gdp-day--disabled' : '',
-                  ]
-                    .filter(Boolean)
-                    .join(' ')}
-                  disabled={disabled}
-                  onClick={() => pick(cell.iso)}
-                >
-                  {Number(cell.iso.slice(8, 10))}
-                </button>
-              );
-            })}
-          </div>
+              <div className="gdp-grid">
+                {days.map((cell) => {
+                  const disabled = isDisabled(cell.iso);
+                  const isSelected = value && cell.iso === value;
+                  const isToday = cell.iso === today;
+                  return (
+                    <button
+                      key={`${cell.iso}-${cell.outside ? 'o' : 'i'}`}
+                      type="button"
+                      className={[
+                        'gdp-day',
+                        cell.outside ? 'gdp-day--outside' : '',
+                        isSelected ? 'gdp-day--selected' : '',
+                        isToday && !isSelected ? 'gdp-day--today' : '',
+                        disabled ? 'gdp-day--disabled' : '',
+                      ]
+                        .filter(Boolean)
+                        .join(' ')}
+                      disabled={disabled}
+                      onClick={() => pick(cell.iso)}
+                    >
+                      {Number(cell.iso.slice(8, 10))}
+                    </button>
+                  );
+                })}
+              </div>
+            </>
+          ) : null}
+
+          {panel === 'month' ? (
+            <div className="gdp-picker-grid" role="listbox" aria-label="Select month">
+              {MONTHS_SHORT.map((name, idx) => {
+                const isSelected = viewMonth === idx && selected?.getFullYear() === viewYear;
+                const isCurrent = now.getFullYear() === viewYear && now.getMonth() === idx;
+                return (
+                  <button
+                    key={name}
+                    type="button"
+                    role="option"
+                    aria-selected={viewMonth === idx}
+                    className={[
+                      'gdp-picker-cell',
+                      viewMonth === idx ? 'gdp-picker-cell--active' : '',
+                      isSelected ? 'gdp-picker-cell--selected' : '',
+                      isCurrent && !isSelected ? 'gdp-picker-cell--today' : '',
+                    ]
+                      .filter(Boolean)
+                      .join(' ')}
+                    onClick={() => {
+                      setViewMonth(idx);
+                      setPanel('day');
+                    }}
+                  >
+                    {name}
+                  </button>
+                );
+              })}
+            </div>
+          ) : null}
+
+          {panel === 'year' ? (
+            <div className="gdp-picker-grid" role="listbox" aria-label="Select year">
+              {years.map((y) => {
+                const isSelected = selected?.getFullYear() === y;
+                const isCurrent = now.getFullYear() === y;
+                return (
+                  <button
+                    key={y}
+                    type="button"
+                    role="option"
+                    aria-selected={viewYear === y}
+                    className={[
+                      'gdp-picker-cell',
+                      viewYear === y ? 'gdp-picker-cell--active' : '',
+                      isSelected ? 'gdp-picker-cell--selected' : '',
+                      isCurrent && !isSelected ? 'gdp-picker-cell--today' : '',
+                    ]
+                      .filter(Boolean)
+                      .join(' ')}
+                    onClick={() => {
+                      setViewYear(y);
+                      setPanel('month');
+                    }}
+                  >
+                    {y}
+                  </button>
+                );
+              })}
+            </div>
+          ) : null}
 
           <div className="gdp-foot">
             {allowClear ? (

@@ -1,9 +1,8 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { SearchInput } from '../../common/index.js';
+import GateDatePicker from '../shared/GateDatePicker.jsx';
 import {
   dateRangeForPreset,
-  formatLogClock,
-  formatLogDate,
   formatLogWhen,
   resolveParkingLogs,
   summarizeLogs,
@@ -33,17 +32,72 @@ const DATE_OPTS = [
 ];
 
 function FilterSelect({ value, onChange, options, ariaLabel }) {
+  const rootRef = useRef(null);
+  const [open, setOpen] = useState(false);
+  const selected = options.find((o) => o.value === value) || options[0];
+  const isFiltered = value !== options[0]?.value;
+
+  useEffect(() => {
+    if (!open) return undefined;
+    const onDoc = (e) => {
+      if (rootRef.current && !rootRef.current.contains(e.target)) setOpen(false);
+    };
+    const onKey = (e) => {
+      if (e.key === 'Escape') setOpen(false);
+    };
+    document.addEventListener('mousedown', onDoc);
+    document.addEventListener('keydown', onKey);
+    return () => {
+      document.removeEventListener('mousedown', onDoc);
+      document.removeEventListener('keydown', onKey);
+    };
+  }, [open]);
+
   return (
-    <label className="gm-plog-filter">
-      <span className="gm-plog-sr-only">{ariaLabel}</span>
-      <select value={value} onChange={(e) => onChange(e.target.value)} aria-label={ariaLabel}>
-        {options.map((o) => (
-          <option key={o.value} value={o.value}>
-            {o.label}
-          </option>
-        ))}
-      </select>
-    </label>
+    <div className="gm-plog-filter" ref={rootRef}>
+      <button
+        type="button"
+        className={`gm-plog-filter-trigger${open ? ' is-open' : ''}${isFiltered ? ' is-filtered' : ''}`}
+        aria-label={ariaLabel}
+        aria-haspopup="listbox"
+        aria-expanded={open}
+        onClick={() => setOpen((o) => !o)}
+      >
+        <span>{selected?.label}</span>
+        <svg className="gm-plog-filter-chevron" width="12" height="12" viewBox="0 0 24 24" fill="none" aria-hidden>
+          <polyline
+            points="6 9 12 15 18 9"
+            stroke="currentColor"
+            strokeWidth="2.5"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+          />
+        </svg>
+      </button>
+      {open ? (
+        <ul className="gm-plog-filter-menu" role="listbox" aria-label={ariaLabel}>
+          {options.map((o) => {
+            const active = o.value === value;
+            return (
+              <li key={o.value}>
+                <button
+                  type="button"
+                  role="option"
+                  aria-selected={active}
+                  className={active ? 'is-active' : undefined}
+                  onClick={() => {
+                    onChange(o.value);
+                    setOpen(false);
+                  }}
+                >
+                  {o.label}
+                </button>
+              </li>
+            );
+          })}
+        </ul>
+      ) : null}
+    </div>
   );
 }
 
@@ -68,10 +122,6 @@ function CategoryChip({ category }) {
 function LogsSkeleton() {
   return (
     <div className="gm-plog" aria-busy="true">
-      <div className="gm-plog-head">
-        <div className="gm-plog-skel gm-plog-skel--title" />
-        <div className="gm-plog-skel gm-plog-skel--sub" />
-      </div>
       <div className="gm-plog-summary">
         {[0, 1, 2, 3].map((i) => (
           <div key={i} className="gm-plog-stat gm-plog-skel-card" />
@@ -106,94 +156,6 @@ function EmptyLogs({ filtered }) {
   );
 }
 
-function LogDetailDrawer({ log, onClose }) {
-  if (!log) return null;
-  const isExit = log.eventType === 'exit';
-
-  return (
-    <div className="gm-park-drawer-backdrop" role="dialog" aria-modal="true" onClick={onClose}>
-      <aside className="gm-park-drawer gm-plog-drawer" onClick={(e) => e.stopPropagation()}>
-        <div className="gm-park-drawer-head">
-          <div>
-            <p className="gm-park-drawer-kicker">Parking Activity</p>
-            <h3 className="gm-park-drawer-title">
-              <EventBadge eventType={log.eventType} />
-            </h3>
-          </div>
-          <button type="button" className="gm-park-modal-close" onClick={onClose} aria-label="Close">
-            ×
-          </button>
-        </div>
-        <div className="gm-park-drawer-body">
-          <dl className="gm-park-detail-grid">
-            <div>
-              <dt>Vehicle</dt>
-              <dd>{log.vehicleNumber || '—'}</dd>
-            </div>
-            <div>
-              <dt>Vehicle Type</dt>
-              <dd>{log.vehicleType || '—'}</dd>
-            </div>
-            <div>
-              <dt>{log.category === 'visitor' ? 'Visitor' : 'Resident'}</dt>
-              <dd>{log.personName || '—'}</dd>
-            </div>
-            <div>
-              <dt>Flat</dt>
-              <dd>
-                {log.flatNumber
-                  ? log.category === 'visitor'
-                    ? `Visiting ${log.flatNumber}`
-                    : log.flatNumber
-                  : '—'}
-              </dd>
-            </div>
-            <div>
-              <dt>Parking</dt>
-              <dd>{log.parkingNumber || '—'}</dd>
-            </div>
-            <div>
-              <dt>Date</dt>
-              <dd>{formatLogDate(log.timestamp)}</dd>
-            </div>
-            {isExit ? (
-              <>
-                <div>
-                  <dt>Entry</dt>
-                  <dd>{formatLogClock(log.entryTime)}</dd>
-                </div>
-                <div>
-                  <dt>Exit</dt>
-                  <dd>{formatLogClock(log.timestamp)}</dd>
-                </div>
-                {log.category === 'visitor' ? (
-                  <div>
-                    <dt>Duration</dt>
-                    <dd>{log.duration || '—'}</dd>
-                  </div>
-                ) : null}
-              </>
-            ) : (
-              <div>
-                <dt>Time</dt>
-                <dd>{formatLogClock(log.timestamp)}</dd>
-              </div>
-            )}
-            <div>
-              <dt>Recorded By</dt>
-              <dd>{log.recordedBy || 'Guard'}</dd>
-            </div>
-            <div>
-              <dt>Status</dt>
-              <dd>Completed</dd>
-            </div>
-          </dl>
-        </div>
-      </aside>
-    </div>
-  );
-}
-
 /**
  * Read-only Parking Activity / Logs dashboard.
  * @param {{ localLogs?: object[] }} props
@@ -207,7 +169,6 @@ export default function ParkingLogsPanel({ localLogs = [] }) {
   const [customFrom, setCustomFrom] = useState('');
   const [customTo, setCustomTo] = useState('');
   const [page, setPage] = useState(1);
-  const [selected, setSelected] = useState(null);
 
   useEffect(() => {
     setLoading(true);
@@ -264,10 +225,6 @@ export default function ParkingLogsPanel({ localLogs = [] }) {
 
   return (
     <div className="gm-plog">
-      <div className="gm-plog-head">
-        <h3 className="gm-plog-title">Parking Logs</h3>
-      </div>
-
       <div className="gm-plog-summary">
         <div className="gm-plog-stat gm-plog-stat--entries">
           <strong>{summary.entries}</strong>
@@ -291,7 +248,7 @@ export default function ParkingLogsPanel({ localLogs = [] }) {
         </div>
       </div>
 
-      <div className="gm-plog-toolbar">
+      <div className={`gm-plog-toolbar${datePreset === 'custom' ? ' gm-plog-toolbar--custom' : ''}`}>
         <div className="gm-plog-search">
           <SearchInput
             value={search}
@@ -319,23 +276,30 @@ export default function ParkingLogsPanel({ localLogs = [] }) {
             onChange={setDatePreset}
             options={DATE_OPTS}
           />
-        </div>
-        {datePreset === 'custom' ? (
-          <div className="gm-plog-custom-dates">
-            <label>
-              <span>From</span>
-              <input
-                type="date"
+          {datePreset === 'custom' ? (
+            <div className="gm-plog-custom-dates" aria-label="Custom date range">
+              <GateDatePicker
                 value={customFrom}
-                onChange={(e) => setCustomFrom(e.target.value)}
+                max={customTo || undefined}
+                onChange={(next) => {
+                  setCustomFrom(next);
+                  if (customTo && next && next > customTo) setCustomTo(next);
+                }}
               />
-            </label>
-            <label>
-              <span>To</span>
-              <input type="date" value={customTo} onChange={(e) => setCustomTo(e.target.value)} />
-            </label>
-          </div>
-        ) : null}
+              <span className="gm-plog-custom-dates-arrow" aria-hidden>
+                →
+              </span>
+              <GateDatePicker
+                value={customTo}
+                min={customFrom || undefined}
+                onChange={(next) => {
+                  if (customFrom && next && next < customFrom) setCustomTo(customFrom);
+                  else setCustomTo(next);
+                }}
+              />
+            </div>
+          ) : null}
+        </div>
       </div>
 
       <div className="gm-plog-table-card">
@@ -363,7 +327,7 @@ export default function ParkingLogsPanel({ localLogs = [] }) {
                 </thead>
                 <tbody>
                   {pageRows.map((log) => (
-                    <tr key={log.id} onClick={() => setSelected(log)}>
+                    <tr key={log.id}>
                       <td>
                         <time dateTime={log.timestamp}>{formatLogWhen(log.timestamp)}</time>
                       </td>
@@ -443,8 +407,6 @@ export default function ParkingLogsPanel({ localLogs = [] }) {
           </>
         )}
       </div>
-
-      <LogDetailDrawer log={selected} onClose={() => setSelected(null)} />
     </div>
   );
 }

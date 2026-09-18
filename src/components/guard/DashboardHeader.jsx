@@ -1,5 +1,5 @@
 // client/src/components/guard/DashboardHeader.jsx
-// Header with live clock, search, notification bell,
+// Header with live clock, notification bell,
 // theme toggle (dark ↔ light), and profile dropdown.
 
 import { useState, useEffect, useRef, useCallback } from 'react';
@@ -89,43 +89,22 @@ export default function DashboardHeader() {
 
   return (
     <header className="gm-header">
-      <button
-        type="button"
-        className="gm-menu-btn"
-        onClick={toggleGuardMobileNav}
-        aria-label="Open menu"
-      >
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round">
-          <line x1="4" y1="7" x2="20" y2="7" />
-          <line x1="4" y1="12" x2="20" y2="12" />
-          <line x1="4" y1="17" x2="20" y2="17" />
-        </svg>
-      </button>
-
-      <div className="gm-search-wrap">
-        <svg className="gm-search-icon" viewBox="0 0 24 24" fill="none"
-          stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-          <circle cx="11" cy="11" r="8"/>
-          <line x1="21" y1="21" x2="16.65" y2="16.65"/>
-        </svg>
-        <input
-          type="text"
-          className="gm-search-input"
-          placeholder="Search by name, phone, or vehicle…"
-          onKeyDown={(e) => {
-            if (e.key === 'Enter' && e.currentTarget.value.trim()) {
-              navigate(`/guard/visitors?q=${encodeURIComponent(e.currentTarget.value.trim())}`);
-            }
-          }}
-        />
+      <div className="gm-header-left">
+        <button
+          type="button"
+          className="gm-menu-btn"
+          onClick={toggleGuardMobileNav}
+          aria-label="Open menu"
+        >
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round">
+            <line x1="4" y1="7" x2="20" y2="7" />
+            <line x1="4" y1="12" x2="20" y2="12" />
+            <line x1="4" y1="17" x2="20" y2="17" />
+          </svg>
+        </button>
       </div>
 
       <div className="gm-clock">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"
-          strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-          <circle cx="12" cy="12" r="10"/>
-          <polyline points="12 6 12 12 16 14"/>
-        </svg>
         <div>
           <div className="gm-clock-time">
             {time.toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit', second: '2-digit' })}
