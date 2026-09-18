@@ -5,11 +5,15 @@ import '../../../styles/guard/guard-main.css';
 import '../../../styles/common/crud.css';
 import Sidebar from '../../../components/guard/Sidebar';
 import DashboardHeader from '../../../components/guard/DashboardHeader';
-import { FormField, FormSelect, SearchInput, StatusBadge } from '../../../components/common/index.js';
-import SearchableParkingCode from '../../../components/guard/parking/SearchableParkingCode.jsx';
 import {
-  SLOT_STATUS_COLORS,
-  VISITOR_STATUS_COLORS,
+  FormField,
+  FormSelect,
+  SearchInput,
+  ConfirmDialog,
+} from '../../../components/common/index.js';
+import SearchableParkingCode from '../../../components/guard/parking/SearchableParkingCode.jsx';
+import ParkingLogsPanel from '../../../components/guard/parking/ParkingLogsPanel.jsx';
+import {
   createGuardVisitorParking,
   formatLabel,
   listTodayGuardParking,
@@ -17,226 +21,389 @@ import {
   recordParkingExit,
 } from '../../../services/parking.service.js';
 
-const PARK_TABS = [
-  { key: 'resident', label: 'Resident Parking' },
-  { key: 'visitor', label: 'Visitor Parking' },
+/**
+ * Park+-ready slot shape (frontend model):
+ * {
+ *   id, slotCode, compartment, category: 'resident'|'visitor',
+ *   allottee: { name, flat, vehicleNumber, vehicleType } | null,
+ *   occupancy: { status, entryAt, exitAt, visitorName?, visitingFlat? }
+ * }
+ */
+
+const OVERRIDE_KEY = 'gm-park-simple-overrides';
+const LOGS_KEY = 'gm-park-simple-logs';
+
+const DEMO_RESIDENT = [
+  {
+    id: 'demo-r-b1-01',
+    slotCode: 'B1-01',
+    compartment: 'B1',
+    category: 'resident',
+    allottee: {
+      name: 'Rahul Sharma',
+      flat: 'B-804',
+      vehicleNumber: 'MH12AB1234',
+      vehicleType: 'car',
+      role: 'Owner',
+    },
+    occupancy: { status: 'outside', entryAt: null, exitAt: null },
+  },
+  {
+    id: 'demo-r-b1-02',
+    slotCode: 'B1-02',
+    compartment: 'B1',
+    category: 'resident',
+    allottee: {
+      name: 'Amit Kumar',
+      flat: 'A-302',
+      vehicleNumber: 'MH12XY9876',
+      vehicleType: 'bike',
+      role: 'Tenant',
+    },
+    occupancy: { status: 'outside', entryAt: null, exitAt: null },
+  },
+  {
+    id: 'demo-r-b2-01',
+    slotCode: 'B2-01',
+    compartment: 'B2',
+    category: 'resident',
+    allottee: {
+      name: 'Priya Patel',
+      flat: 'C-110',
+      vehicleNumber: 'MH14CD4411',
+      vehicleType: 'car',
+      role: 'Owner',
+    },
+    occupancy: { status: 'outside', entryAt: null, exitAt: null },
+  },
 ];
 
-const STATUS_FILTERS = [
-  { value: 'all', label: 'All' },
-  { value: 'inside', label: 'Inside' },
-  { value: 'outside', label: 'Outside' },
-  { value: 'available', label: 'Free slots' },
+const DEMO_VISITOR = [
+  { id: 'demo-v-01', slotCode: 'V-01', compartment: 'Visitor', category: 'visitor', allottee: null, occupancy: { status: 'available', entryAt: null, exitAt: null } },
+  { id: 'demo-v-02', slotCode: 'V-02', compartment: 'Visitor', category: 'visitor', allottee: null, occupancy: { status: 'available', entryAt: null, exitAt: null } },
+  { id: 'demo-v-03', slotCode: 'V-03', compartment: 'Visitor', category: 'visitor', allottee: null, occupancy: { status: 'available', entryAt: null, exitAt: null } },
+  { id: 'demo-v-04', slotCode: 'V-04', compartment: 'Visitor', category: 'visitor', allottee: null, occupancy: { status: 'available', entryAt: null, exitAt: null } },
 ];
 
-const TYPE_FILTERS = [
-  { value: 'all', label: 'All types' },
+const VISITOR_TYPES = [
   { value: 'car', label: 'Car' },
   { value: 'bike', label: 'Bike' },
   { value: 'other', label: 'Other' },
 ];
 
-const VISITOR_VEHICLE_TYPES = [
-  { value: 'car', label: 'Car' },
-  { value: 'bike', label: 'Bike' },
-  { value: 'other', label: 'Other' },
-];
-
-const STATUS_COLORS = {
-  ...SLOT_STATUS_COLORS,
-  ...VISITOR_STATUS_COLORS,
-  occupied: '#f59e0b',
-  inside: '#22c55e',
-  active: '#22c55e',
-  available: '#22c55e',
-  outside: '#64748b',
-  exited: '#64748b',
-};
-
-const PANEL = {
-  entry: {
-    key: 'entry',
-    title: 'Record entry',
-    cardClass: 'gm-park-card--entry',
-    btnLabel: 'Record entry',
-  },
-  exit: {
-    key: 'exit',
-    title: 'Record exit',
-    cardClass: 'gm-park-card--exit',
-    btnLabel: 'Confirm exit',
-  },
-  visitor: {
-    key: 'visitor',
-    title: 'Register Visitor Vehicle',
-    cardClass: 'gm-park-card--visitor',
-    btnLabel: 'Register Entry',
-  },
-};
+function nowIso() {
+  return new Date().toISOString();
+}
 
 function formatParkTime(iso) {
   if (!iso) return '—';
   try {
     const d = new Date(iso);
     if (Number.isNaN(d.getTime())) return '—';
-    let hours = d.getHours();
-    const minutes = String(d.getMinutes()).padStart(2, '0');
-    const ampm = hours >= 12 ? 'PM' : 'AM';
-    hours = hours % 12;
-    if (hours === 0) hours = 12;
-    return `${hours}.${minutes} ${ampm}`;
+    let h = d.getHours();
+    const m = String(d.getMinutes()).padStart(2, '0');
+    const ampm = h >= 12 ? 'PM' : 'AM';
+    h = h % 12 || 12;
+    return `${h}:${m} ${ampm}`;
   } catch {
     return '—';
   }
 }
 
-function formatDuration(entryAt, exitAt) {
-  if (!entryAt || !exitAt) return null;
-  const start = new Date(entryAt).getTime();
-  const end = new Date(exitAt).getTime();
-  if (!Number.isFinite(start) || !Number.isFinite(end) || end < start) return null;
-  const totalMins = Math.round((end - start) / 60000);
-  const hours = Math.floor(totalMins / 60);
-  const mins = totalMins % 60;
-  if (hours <= 0) return `${mins}m`;
-  if (mins === 0) return `${hours}h`;
-  return `${hours}h ${mins}m`;
-}
-
 function normalizeType(type) {
   const t = String(type || '').toLowerCase();
   if (t === 'car') return 'car';
-  if (t === 'bike' || t === 'scooter' || t === 'bicycle') return 'bike';
-  if (!t) return '';
-  return 'other';
+  if (['bike', 'scooter', 'bicycle'].includes(t)) return 'bike';
+  return t ? 'other' : '';
 }
 
-function isVisitorSlot(slot) {
+function normVehicle(value) {
+  return String(value || '')
+    .replace(/[\s-]/g, '')
+    .toLowerCase();
+}
+
+function isVisitorApiSlot(slot) {
   const cat = String(slot?.slotCategory || slot?.category || '').toLowerCase();
-  if (cat === 'visitor') return true;
-  return String(slot?.status || '').toLowerCase() === 'visitor';
+  return cat === 'visitor' || String(slot?.status || '').toLowerCase() === 'visitor';
 }
 
-function isResidentSlot(slot) {
-  return !isVisitorSlot(slot);
-}
+function compartmentOf(code) {
+  const s = String(code || '').trim();
+  if (!s) return 'B2';
+  if (/^v[-_]?\d+/i.test(s) || /^visitor/i.test(s)) return 'Visitor';
 
-function isInsideStatus(status) {
-  const s = String(status || '').toLowerCase();
-  return ['occupied', 'visitor', 'active', 'requested', 'inside'].includes(s);
-}
-
-function isOutsideStatus(status) {
-  const s = String(status || '').toLowerCase();
-  return ['outside', 'exited', 'allocated', 'reserved'].includes(s);
-}
-
-function isAvailableStatus(status) {
-  return String(status || '').toLowerCase() === 'available';
-}
-
-function displayStatus(row) {
-  if (row?.presence) return row.presence;
-  const raw = row.slotStatus || row.status || '';
-  const s = String(raw).toLowerCase();
-  if (row.kind === 'visitor') {
-    if (row.isFreeSlot || s === 'available') return 'available';
-    if (s === 'active' || s === 'requested' || s === 'visitor') return 'inside';
-    if (s === 'exited') return 'exited';
-  }
-  if (s === 'occupied') return 'inside';
-  if (s === 'allocated' || s === 'reserved') return 'outside';
-  if (s === 'available') return 'available';
-  if (s === 'exited') return 'exited';
-  return raw || '—';
-}
-
-function parkingNo(row) {
-  return row.slotCode || row.parkingCode || '—';
-}
-
-function presenceKey(row) {
-  return [
-    row.kind || '',
-    String(row.vehicleNumber || '').toLowerCase(),
-    String(row.slotCode || row.parkingCode || '').toLowerCase(),
-  ].join('|');
-}
-
-function rememberExit(prev, row, exitAt) {
-  const next = { ...prev };
-  const iso = exitAt || new Date().toISOString();
-  const keys = [
-    presenceKey(row),
-    `resident|${String(row.vehicleNumber || '').toLowerCase()}|`,
-    `visitor|${String(row.vehicleNumber || '').toLowerCase()}|`,
-    `|${String(row.slotCode || row.parkingCode || '').toLowerCase()}`,
-  ];
-  for (const key of keys) {
-    if (key && key !== '||' && key !== 'resident||' && key !== 'visitor||') {
-      next[key] = iso;
+  // Normal floors/blocks: B1-01, B2/03, LG-12, P1_04
+  const floorMatch = s.match(/^([A-Za-z]{1,3}\d{0,2}|LG|UG|P\d+|B\d+|G\d+|F\d+)(?=[-_/]|$)/i);
+  if (floorMatch) {
+    const raw = floorMatch[1].toUpperCase();
+    const block = raw.match(/^([A-Z]+)(\d+)?$/);
+    if (block) {
+      const letter = block[1];
+      const num = block[2];
+      // Keep classic B1 / B2 / B3 style when possible
+      if (letter === 'B' && num) return `B${num}`;
+      return `${letter}${num || ''}`.toUpperCase();
     }
+    return raw;
   }
+
+  // Non-standard codes → B2 / B3 (never "Other")
+  let hash = 0;
+  for (let i = 0; i < s.length; i += 1) hash += s.charCodeAt(i);
+  return hash % 2 === 0 ? 'B2' : 'B3';
+}
+
+function readOverrides() {
   try {
-    sessionStorage.setItem('gm-park-last-exit', JSON.stringify(next));
+    return JSON.parse(sessionStorage.getItem(OVERRIDE_KEY) || '{}');
   } catch {
-    /* ignore */
+    return {};
+  }
+}
+
+function readLogs() {
+  try {
+    const rows = JSON.parse(sessionStorage.getItem(LOGS_KEY) || '[]');
+    return Array.isArray(rows) ? rows : [];
+  } catch {
+    return [];
+  }
+}
+
+function pushParkLog(entry) {
+  const next = [
+    {
+      id: `${Date.now()}-${Math.random().toString(36).slice(2, 7)}`,
+      timestamp: entry.timestamp || nowIso(),
+      recordedBy: entry.recordedBy || 'Guard',
+      ...entry,
+    },
+    ...readLogs(),
+  ].slice(0, 120);
+  try {
+    sessionStorage.setItem(LOGS_KEY, JSON.stringify(next));
+  } catch {
+    /* ignore quota */
   }
   return next;
 }
 
-function lookupExitAt(map, row) {
-  if (row?.exitAt) return row.exitAt;
-  if (!map) return null;
-  return (
-    map[presenceKey(row)] ||
-    map[`resident|${String(row.vehicleNumber || '').toLowerCase()}|`] ||
-    map[`visitor|${String(row.vehicleNumber || '').toLowerCase()}|`] ||
-    map[`|${String(row.slotCode || row.parkingCode || '').toLowerCase()}`] ||
-    null
-  );
+function StatusPill({ status }) {
+  const s = String(status || '').toLowerCase();
+  const label =
+    s === 'inside'
+      ? 'Inside'
+      : s === 'outside'
+        ? 'Outside'
+        : s === 'occupied'
+          ? 'Filled'
+          : s === 'available'
+            ? 'Free'
+            : status || '—';
+  return <span className={`gm-pcd-pill gm-pcd-pill--${s}`}>{label}</span>;
+}
+
+function mapApiToSlots(apiData) {
+  const slots = apiData?.slots || [];
+  const parked = apiData?.parkedVehicles || apiData?.vehicles || [];
+  const codes = apiData?.parkingCodes || [];
+  const visitorLogs = apiData?.activeVisitorParking || [];
+
+  const insideByCode = new Map();
+  const insideByVehicle = new Map();
+  for (const v of parked) {
+    if (v.kind === 'visitor') continue;
+    if (v.slotCode) insideByCode.set(String(v.slotCode).toLowerCase(), v);
+    if (v.parkingCode) insideByCode.set(String(v.parkingCode).toLowerCase(), v);
+    if (v.vehicleNumber) insideByVehicle.set(String(v.vehicleNumber).toLowerCase(), v);
+  }
+
+  const resident = [];
+  const seen = new Set();
+
+  for (const s of slots) {
+    if (isVisitorApiSlot(s)) continue;
+    const status = String(s.status || '').toLowerCase();
+    if (!['allocated', 'reserved', 'occupied'].includes(status) && !s.vehicleNumber) continue;
+    const slotCode = s.slotCode || s.code;
+    if (!slotCode) continue;
+    const key = String(slotCode).toLowerCase();
+    seen.add(key);
+    const parkedRow =
+      insideByCode.get(key) ||
+      (s.vehicleNumber && insideByVehicle.get(String(s.vehicleNumber).toLowerCase())) ||
+      null;
+    const codeMeta = codes.find(
+      (c) => c.kind === 'resident' && String(c.code || '').toLowerCase() === key,
+    );
+    const vehicleNumber =
+      parkedRow?.vehicleNumber || s.vehicleNumber || codeMeta?.vehicleNumber || null;
+    resident.push({
+      id: s.id || `r-${key}`,
+      slotCode,
+      compartment: compartmentOf(slotCode),
+      category: 'resident',
+      allottee: vehicleNumber
+        ? {
+            name: parkedRow?.residentName || null,
+            flat: parkedRow?.flat || parkedRow?.flatNumber || null,
+            vehicleNumber,
+            vehicleType: normalizeType(parkedRow?.vehicleType || codeMeta?.vehicleType),
+          }
+        : null,
+      occupancy: {
+        status: parkedRow || status === 'occupied' ? 'inside' : 'outside',
+        entryAt: parkedRow?.entryAt || null,
+        exitAt: null,
+      },
+      slotId: s.id || null,
+    });
+  }
+
+  for (const c of codes) {
+    if (c.kind !== 'resident') continue;
+    const key = String(c.code || '').toLowerCase();
+    if (!key || seen.has(key)) continue;
+    seen.add(key);
+    const parkedRow =
+      insideByCode.get(key) ||
+      (c.vehicleNumber && insideByVehicle.get(String(c.vehicleNumber).toLowerCase())) ||
+      null;
+    resident.push({
+      id: parkedRow?.id || `r-${key}`,
+      slotCode: c.code,
+      compartment: compartmentOf(c.code),
+      category: 'resident',
+      allottee: {
+        name: parkedRow?.residentName || null,
+        flat: null,
+        vehicleNumber: parkedRow?.vehicleNumber || c.vehicleNumber || null,
+        vehicleType: normalizeType(parkedRow?.vehicleType || c.vehicleType),
+      },
+      occupancy: {
+        status: parkedRow ? 'inside' : 'outside',
+        entryAt: parkedRow?.entryAt || null,
+        exitAt: null,
+      },
+      slotId: parkedRow?.slotId || null,
+    });
+  }
+
+  const visitor = [];
+  const vSeen = new Set();
+  const visitorApiSlots = slots.filter(isVisitorApiSlot);
+
+  for (const s of visitorApiSlots) {
+    const slotCode = s.slotCode || s.code;
+    const key = String(slotCode).toLowerCase();
+    vSeen.add(key);
+    const log = visitorLogs.find(
+      (l) =>
+        (s.id && l.slotId && String(l.slotId) === String(s.id)) ||
+        (slotCode && l.parkingCode && l.parkingCode === slotCode),
+    );
+    const parkedV = parked.find(
+      (v) =>
+        v.kind === 'visitor' &&
+        ((s.id && v.slotId && String(v.slotId) === String(s.id)) ||
+          (slotCode && (v.slotCode === slotCode || v.parkingCode === slotCode))),
+    );
+    const occ = parkedV || log || null;
+    const meta = occ?.metadata || {};
+    visitor.push({
+      id: s.id || `v-${key}`,
+      slotCode,
+      compartment: 'Visitor',
+      category: 'visitor',
+      allottee: null,
+      occupancy: occ
+        ? {
+            status: 'occupied',
+            entryAt: occ.entryAt || null,
+            exitAt: occ.exitAt || null,
+            visitorName: occ.visitorName || meta.visitorName || meta.name || null,
+            visitingFlat: occ.visitingResident || meta.visitingResident || meta.flat || null,
+            vehicleNumber: occ.vehicleNumber || null,
+            vehicleType: normalizeType(occ.vehicleType),
+            visitorLogId: occ.id || null,
+          }
+        : { status: 'available', entryAt: null, exitAt: null },
+      slotId: s.id || null,
+    });
+  }
+
+  for (const log of visitorLogs) {
+    const slotCode = log.parkingCode || log.slotCode;
+    if (!slotCode) continue;
+    const key = String(slotCode).toLowerCase();
+    if (vSeen.has(key)) continue;
+    vSeen.add(key);
+    const meta = log.metadata || {};
+    visitor.push({
+      id: log.id || `v-${key}`,
+      slotCode,
+      compartment: 'Visitor',
+      category: 'visitor',
+      allottee: null,
+      occupancy: {
+        status: 'occupied',
+        entryAt: log.entryAt || null,
+        exitAt: log.exitAt || null,
+        visitorName: meta.visitorName || meta.name || null,
+        visitingFlat: meta.visitingResident || meta.flat || null,
+        vehicleNumber: log.vehicleNumber || null,
+        vehicleType: normalizeType(log.vehicleType),
+        visitorLogId: log.id,
+      },
+      slotId: log.slotId || null,
+    });
+  }
+
+  return {
+    resident: resident.length ? resident : DEMO_RESIDENT,
+    visitor: visitor.length ? visitor : DEMO_VISITOR,
+    usedDemo: !resident.length || !visitor.length,
+  };
 }
 
 export default function GuardParkingPage() {
   const navigate = useNavigate();
-  const [search, setSearch] = useState('');
-  const [data, setData] = useState(null);
+  const [apiData, setApiData] = useState(null);
+  const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
-  const [loading, setLoading] = useState(true);
   const [busy, setBusy] = useState(false);
-  const [parkTab, setParkTab] = useState('resident');
+
+  const [tab, setTab] = useState('resident');
+  const [search, setSearch] = useState('');
   const [statusFilter, setStatusFilter] = useState('all');
-  const [typeFilter, setTypeFilter] = useState('all');
-  const [summaryFocus, setSummaryFocus] = useState('residentsInside');
-  const [activePanel, setActivePanel] = useState(null);
+  const [compartment, setCompartment] = useState('all');
+  const [overrides, setOverrides] = useState(readOverrides);
+  const [parkLogs, setParkLogs] = useState(readLogs);
+
+  const [panel, setPanel] = useState(null);
   const [selected, setSelected] = useState(null);
-  const [lastExitByKey, setLastExitByKey] = useState(() => {
-    try {
-      return JSON.parse(sessionStorage.getItem('gm-park-last-exit') || '{}');
-    } catch {
-      return {};
-    }
-  });
-  const [entryForm, setEntryForm] = useState({ slotId: '', vehicleNumber: '' });
-  const [exitForm, setExitForm] = useState({ slotId: '', vehicleNumber: '' });
+  const [confirmExit, setConfirmExit] = useState(null);
+
+  const [residentForm, setResidentForm] = useState({ slotKey: '', vehicleNumber: '' });
   const [visitorForm, setVisitorForm] = useState({
-    vehicleNumber: '',
-    vehicleType: 'car',
     visitorName: '',
-    visitingResident: '',
-    slotId: '',
-    purpose: '',
+    vehicleNumber: '',
+    visitingFlat: '',
+    vehicleType: 'car',
+    slotKey: '',
   });
+  const [exitForm, setExitForm] = useState({ matchKey: '', vehicleNumber: '' });
 
   const load = useCallback(async () => {
     setLoading(true);
     setError('');
     try {
       const res = await listTodayGuardParking();
-      setData(res.data?.data || null);
+      setApiData(res.data?.data || null);
     } catch (err) {
-      setError(err.response?.data?.message || "Failed to load today's parking");
+      setError(err.response?.data?.message || "Failed to load parking");
     } finally {
       setLoading(false);
     }
@@ -251,578 +418,394 @@ export default function GuardParkingPage() {
   }, [load]);
 
   useEffect(() => {
-    if (!activePanel && !selected) return undefined;
-    function onKey(e) {
-      if (e.key !== 'Escape') return;
-      if (selected) setSelected(null);
-      else setActivePanel(null);
+    try {
+      sessionStorage.setItem(OVERRIDE_KEY, JSON.stringify(overrides));
+    } catch {
+      /* ignore */
     }
+  }, [overrides]);
+
+  useEffect(() => {
+    if (!panel && !selected && !confirmExit) return undefined;
+    const onKey = (e) => {
+      if (e.key !== 'Escape') return;
+      if (confirmExit) setConfirmExit(null);
+      else if (selected) setSelected(null);
+      else closePanel();
+    };
     window.addEventListener('keydown', onKey);
     return () => window.removeEventListener('keydown', onKey);
-  }, [activePanel, selected]);
-
-  function handleSidebarNav(label) {
-    navigateGuard(navigate, label);
-  }
+  }, [panel, selected, confirmExit]);
 
   function closePanel() {
-    setActivePanel(null);
+    setPanel(null);
+    setResidentForm({ slotKey: '', vehicleNumber: '' });
+    setVisitorForm({
+      visitorName: '',
+      vehicleNumber: '',
+      visitingFlat: '',
+      vehicleType: 'car',
+      slotKey: '',
+    });
+    setExitForm({ matchKey: '', vehicleNumber: '' });
   }
 
-  const visitorLogById = useMemo(() => {
-    const map = {};
-    for (const log of data?.activeVisitorParking || []) {
-      map[String(log.id)] = log;
-    }
-    return map;
-  }, [data]);
-
-  const parkedVehicles = useMemo(() => {
-    const rows =
-      data?.parkedVehicles ||
-      data?.vehicles ||
-      [
-        ...(data?.activeVisitorParking || []).map((log) => ({
-          id: log.id,
-          kind: 'visitor',
-          vehicleNumber: log.vehicleNumber,
-          vehicleType: log.vehicleType,
-          residentName: null,
-          parkingCode: log.parkingCode,
-          slotCode: null,
-          slotStatus: null,
-          status: log.status,
-          entryAt: log.entryAt,
-          exitAt: log.exitAt,
-        })),
-        ...(data?.occupiedSlots || []).map((s) => ({
-          id: s.id,
-          kind: 'resident',
-          vehicleNumber: null,
-          vehicleType: null,
-          residentName: null,
-          parkingCode: null,
-          slotCode: s.slotCode,
-          slotStatus: s.status,
-          status: s.status,
-          entryAt: null,
-        })),
-      ];
-
-    return rows.map((row) => {
-      if (row.kind !== 'visitor') return row;
-      const log = visitorLogById[String(row.id)];
-      const meta = log?.metadata || {};
-      return {
-        ...row,
-        entryAt: row.entryAt || log?.entryAt || null,
-        exitAt: row.exitAt || log?.exitAt || null,
-        purpose: log?.purpose || null,
-        visitorName: meta.visitorName || meta.name || null,
-        visitingResident: meta.visitingResident || meta.flat || meta.residentLabel || null,
-        parkingCode: row.parkingCode || log?.parkingCode || null,
-        slotId: log?.slotId || row.slotId || null,
-      };
-    });
-  }, [data, visitorLogById]);
-
-  const slotOptions = useMemo(() => {
-    const fromApi = data?.slots || [];
-    if (fromApi.length) return fromApi;
-    return (data?.occupiedSlots || []).map((s) => ({
-      id: s.id,
-      code: s.slotCode,
-      slotCode: s.slotCode,
-      status: s.status,
-      slotCategory: s.slotCategory,
-      label: `${s.slotCode} · ${s.status}`,
+  function patchSlot(id, patch) {
+    setOverrides((prev) => ({
+      ...prev,
+      [id]: { ...(prev[id] || {}), ...patch },
     }));
-  }, [data]);
+  }
 
-  // Resident slots are fixed — track which assigned cars are currently inside vs outside.
-  const residentBoard = useMemo(() => {
-    const insideBySlot = new Map();
-    const insideByVehicle = new Map();
-    for (const v of parkedVehicles) {
-      if (v.kind !== 'resident') continue;
-      if (v.slotCode) insideBySlot.set(String(v.slotCode).toLowerCase(), v);
-      if (v.parkingCode) insideBySlot.set(String(v.parkingCode).toLowerCase(), v);
-      if (v.vehicleNumber) insideByVehicle.set(String(v.vehicleNumber).toLowerCase(), v);
-    }
+  const mapped = useMemo(() => mapApiToSlots(apiData), [apiData]);
 
-    const rows = [];
-    const seenSlots = new Set();
-    const seenVehicles = new Set();
-
-    for (const s of slotOptions) {
-      if (!isResidentSlot(s)) continue;
-      if (!['allocated', 'reserved', 'occupied'].includes(String(s.status || '').toLowerCase())) {
-        continue;
-      }
-      const codeKey = String(s.slotCode || s.code || '').toLowerCase();
-      const parked =
-        (codeKey && insideBySlot.get(codeKey)) ||
-        (s.vehicleNumber && insideByVehicle.get(String(s.vehicleNumber).toLowerCase())) ||
-        null;
-      const presence = parked || String(s.status).toLowerCase() === 'occupied' ? 'inside' : 'outside';
-      if (codeKey) seenSlots.add(codeKey);
-      if (parked?.vehicleNumber) seenVehicles.add(String(parked.vehicleNumber).toLowerCase());
-      else if (s.vehicleNumber) seenVehicles.add(String(s.vehicleNumber).toLowerCase());
-
-      rows.push({
-        id: parked?.id || s.id,
-        kind: 'resident',
-        slotId: s.id,
-        slotCode: s.slotCode || s.code,
-        parkingCode: parked?.parkingCode || s.slotCode || s.code,
-        vehicleNumber: parked?.vehicleNumber || s.vehicleNumber || null,
-        vehicleType: parked?.vehicleType || null,
-        residentName: parked?.residentName || null,
-        entryAt: parked?.entryAt || null,
-        exitAt: parked?.exitAt || null,
-        slotStatus: s.status,
-        status: presence,
-        presence,
-      });
-    }
-
-    for (const c of data?.parkingCodes || []) {
-      if (c.kind !== 'resident') continue;
-      const codeKey = String(c.code || '').toLowerCase();
-      const vehicleKey = String(c.vehicleNumber || '').toLowerCase();
-      if (codeKey && seenSlots.has(codeKey)) continue;
-      if (vehicleKey && seenVehicles.has(vehicleKey)) continue;
-
-      const parked =
-        (codeKey && insideBySlot.get(codeKey)) ||
-        (vehicleKey && insideByVehicle.get(vehicleKey)) ||
-        null;
-      const presence = parked ? 'inside' : 'outside';
-      if (codeKey) seenSlots.add(codeKey);
-      if (vehicleKey) seenVehicles.add(vehicleKey);
-
-      rows.push({
-        id: parked?.id || `code-${c.code}`,
-        kind: 'resident',
-        slotId: parked?.slotId || parked?.id || null,
-        slotCode: c.code,
-        parkingCode: c.code,
-        vehicleNumber: parked?.vehicleNumber || c.vehicleNumber || null,
-        vehicleType: parked?.vehicleType || c.vehicleType || null,
-        residentName: parked?.residentName || null,
-        entryAt: parked?.entryAt || null,
-        exitAt: parked?.exitAt || null,
-        slotStatus: presence,
-        status: presence,
-        presence,
-      });
-    }
-
-    // Any resident currently parked but missing from assigned lists.
-    for (const v of parkedVehicles) {
-      if (v.kind !== 'resident') continue;
-      const vehicleKey = String(v.vehicleNumber || '').toLowerCase();
-      const codeKey = String(v.slotCode || v.parkingCode || '').toLowerCase();
-      if (vehicleKey && seenVehicles.has(vehicleKey)) continue;
-      if (codeKey && seenSlots.has(codeKey)) continue;
-      rows.push({
-        ...v,
-        presence: 'inside',
-        status: 'inside',
-      });
-    }
-
-    return rows.map((row) => {
-      if (row.presence !== 'outside') return row;
-      return { ...row, exitAt: lookupExitAt(lastExitByKey, row) || row.exitAt || null };
-    });
-  }, [slotOptions, parkedVehicles, data, lastExitByKey]);
-
-  // Visitor slots are open pool — every free/occupied slot must be trackable.
-  const visitorBoard = useMemo(() => {
-    const visitorSlots = slotOptions.filter(isVisitorSlot);
-    const insideVisitors = parkedVehicles.filter((v) => v.kind === 'visitor');
-    const usedSlotIds = new Set();
-    const usedSlotCodes = new Set();
-
-    const rows = [];
-
-    const matchVisitor = (slot) =>
-      insideVisitors.find((v) => {
-        if (slot.id && v.slotId && String(v.slotId) === String(slot.id)) return true;
-        if (slot.slotCode && v.slotCode && v.slotCode === slot.slotCode) return true;
-        if (slot.code && v.slotCode && v.slotCode === slot.code) return true;
-        if (slot.slotCode && v.parkingCode && v.parkingCode === slot.slotCode) return true;
-        return false;
-      });
-
-    if (visitorSlots.length) {
-      for (const s of visitorSlots) {
-        const parked = matchVisitor(s);
-        if (parked) {
-          if (parked.slotId) usedSlotIds.add(String(parked.slotId));
-          if (parked.slotCode) usedSlotCodes.add(String(parked.slotCode).toLowerCase());
-          if (parked.id) usedSlotIds.add(String(parked.id));
-          rows.push({
-            ...parked,
-            slotId: parked.slotId || s.id,
-            slotCode: parked.slotCode || s.slotCode || s.code,
-            slotCategory: s.slotCategory || 'visitor',
-            presence: 'inside',
-            status: 'inside',
-            isFreeSlot: false,
-          });
-        } else {
-          rows.push({
-            id: `free-${s.id}`,
-            kind: 'visitor',
-            slotId: s.id,
-            slotCode: s.slotCode || s.code,
-            parkingCode: s.slotCode || s.code,
-            slotCategory: s.slotCategory || 'visitor',
-            vehicleNumber: null,
-            vehicleType: null,
-            visitorName: null,
-            visitingResident: null,
-            entryAt: null,
-            exitAt: null,
-            slotStatus: 'available',
-            status: 'available',
-            presence: 'available',
-            isFreeSlot: true,
-          });
-        }
-      }
-    }
-
-    // Visitors parked without a categorized visitor slot still appear.
-    for (const v of insideVisitors) {
-      if (v.slotId && usedSlotIds.has(String(v.slotId))) continue;
-      if (v.slotCode && usedSlotCodes.has(String(v.slotCode).toLowerCase())) continue;
-      if (usedSlotIds.has(String(v.id))) continue;
-      rows.push({
-        ...v,
-        presence: 'inside',
-        status: 'inside',
-        isFreeSlot: false,
-      });
-    }
-
-    // If API has no visitor-category slots, still expose free available slots as visitor-capable.
-    if (!visitorSlots.length) {
-      for (const s of slotOptions) {
-        if (String(s.status || '').toLowerCase() !== 'available') continue;
-        if (isVisitorSlot(s)) continue;
-        rows.push({
-          id: `free-${s.id}`,
-          kind: 'visitor',
-          slotId: s.id,
-          slotCode: s.slotCode || s.code,
-          parkingCode: s.slotCode || s.code,
-          vehicleNumber: null,
-          status: 'available',
-          presence: 'available',
-          isFreeSlot: true,
-        });
-      }
-    }
-
-    return rows;
-  }, [slotOptions, parkedVehicles]);
-
-  const summary = useMemo(() => {
-    const residentsInside = residentBoard.filter((r) => r.presence === 'inside').length;
-    const residentsOutside = residentBoard.filter((r) => r.presence === 'outside').length;
-    const visitorFree = visitorBoard.filter((r) => r.presence === 'available').length;
-    const visitorsInside = visitorBoard.filter((r) => r.presence === 'inside').length;
-    return {
-      residentsInside,
-      residentsOutside,
-      visitorFree,
-      visitorsInside,
-    };
-  }, [residentBoard, visitorBoard]);
-
-  const filteredVehicles = useMemo(() => {
-    const term = search.trim().toLowerCase();
-    const source = parkTab === 'visitor' ? visitorBoard : residentBoard;
-
-    return source.filter((v) => {
-      const status = displayStatus(v);
-
-      if (statusFilter === 'inside' && !isInsideStatus(status)) return false;
-      if (statusFilter === 'outside' && !isOutsideStatus(status)) return false;
-      if (statusFilter === 'available' && !isAvailableStatus(status)) return false;
-
-      if (typeFilter !== 'all') {
-        if (v.isFreeSlot) return false;
-        if (normalizeType(v.vehicleType) !== typeFilter) return false;
-      }
-
-      if (!term) return true;
-      const hay = [
-        v.vehicleNumber,
-        v.parkingCode,
-        v.slotCode,
-        v.residentName,
-        v.visitorName,
-        v.visitingResident,
-        v.purpose,
-        v.presence,
-      ]
-        .filter(Boolean)
-        .join(' ')
-        .toLowerCase();
-      return hay.includes(term);
-    });
-  }, [residentBoard, visitorBoard, parkTab, search, statusFilter, typeFilter]);
-
-  const entrySlotOptions = useMemo(() => {
-    // Fixed assigned resident slots — show who is inside vs outside.
-    const byPresence = (presence) =>
-      residentBoard
-        .filter((r) => r.presence === presence && (r.slotId || r.slotCode))
-        .map((r) => ({
-          id: r.slotId || r.id,
-          code: r.slotCode || r.parkingCode,
-          slotCode: r.slotCode || r.parkingCode,
-          status: r.presence,
-          vehicleNumber: r.vehicleNumber,
-          label: `${r.slotCode || r.parkingCode || '—'} · ${r.vehicleNumber || '—'} (${r.presence})`,
-        }));
-
-    const outside = byPresence('outside');
-    const inside = byPresence('inside');
-    if (outside.length || inside.length) return [...outside, ...inside];
-
-    return slotOptions
-      .filter((s) => isResidentSlot(s) && ['allocated', 'reserved', 'occupied'].includes(s.status))
-      .map((s) => ({
-        ...s,
-        label: s.vehicleNumber
-          ? `${s.slotCode || s.code} · ${s.vehicleNumber} (assigned)`
-          : `${s.slotCode || s.code} · ${s.status}`,
-      }));
-  }, [residentBoard, slotOptions]);
-
-  const exitSlotOptions = useMemo(() => {
-    const insideResidents = residentBoard
-      .filter((r) => r.presence === 'inside')
-      .map((r) => ({
-        id: r.slotId || r.id,
-        code: r.slotCode || r.parkingCode,
-        slotCode: r.slotCode || r.parkingCode,
-        status: 'inside',
-        vehicleNumber: r.vehicleNumber,
-        kind: 'resident',
-        label: `${r.slotCode || r.parkingCode || '—'} · ${r.vehicleNumber || '—'} (resident)`,
-      }));
-    const insideVisitors = visitorBoard
-      .filter((r) => r.presence === 'inside')
-      .map((r) => ({
-        id: r.slotId || r.id,
-        code: r.slotCode || r.parkingCode,
-        slotCode: r.slotCode || r.parkingCode,
-        status: 'inside',
-        vehicleNumber: r.vehicleNumber,
-        kind: 'visitor',
-        label: `${r.slotCode || r.parkingCode || '—'} · ${r.vehicleNumber || '—'} (visitor)`,
-      }));
-    if (insideResidents.length || insideVisitors.length) {
-      return [...insideResidents, ...insideVisitors];
-    }
-    return parkedVehicles
-      .filter((v) => v.slotCode || v.slotId)
-      .map((v) => ({
-        id: v.slotId || v.id,
-        code: v.slotCode || v.parkingCode,
-        slotCode: v.slotCode || v.parkingCode,
-        status: v.slotStatus || v.status,
-        vehicleNumber: v.vehicleNumber,
-        kind: v.kind,
-        label: `${v.slotCode || v.parkingCode || '—'} · ${v.vehicleNumber || '—'}`,
-      }));
-  }, [residentBoard, visitorBoard, parkedVehicles]);
-
-  const visitorSlotOptions = useMemo(
+  const residentSlots = useMemo(
     () =>
-      visitorBoard
-        .filter((r) => r.presence === 'available')
-        .map((r) => ({
-          id: r.slotId || r.id,
-          code: r.slotCode,
-          slotCode: r.slotCode,
-          status: 'available',
-          slotCategory: r.slotCategory || 'visitor',
-          label: `${r.slotCode || '—'} · free`,
-        })),
-    [visitorBoard],
+      mapped.resident.map((s) => {
+        const ov = overrides[s.id];
+        if (!ov) return s;
+        return {
+          ...s,
+          allottee: ov.allottee !== undefined ? ov.allottee : s.allottee,
+          occupancy: { ...s.occupancy, ...ov.occupancy },
+        };
+      }),
+    [mapped.resident, overrides],
   );
 
-  const exitPreview = useMemo(() => {
-    const term = exitForm.vehicleNumber.trim().toLowerCase();
-    const selectedOpt = exitSlotOptions.find((o) => String(o.id) === String(exitForm.slotId));
-    const bySlot = parkedVehicles.find((v) => {
-      if (exitForm.slotId && String(v.slotId || '') === String(exitForm.slotId)) return true;
-      if (selectedOpt?.slotCode && v.slotCode === selectedOpt.slotCode) return true;
-      if (selectedOpt?.code && (v.slotCode === selectedOpt.code || v.parkingCode === selectedOpt.code)) {
-        return true;
-      }
-      if (exitForm.slotId && v.kind === 'resident' && String(v.id) === String(exitForm.slotId)) {
-        return true;
-      }
-      return false;
-    });
-    if (bySlot) return bySlot;
-    if (!term) return null;
-    return (
-      parkedVehicles.find((v) => String(v.vehicleNumber || '').toLowerCase() === term) || null
+  const visitorSlots = useMemo(
+    () =>
+      mapped.visitor.map((s) => {
+        const ov = overrides[s.id];
+        if (!ov) return s;
+        return {
+          ...s,
+          occupancy: { ...s.occupancy, ...ov.occupancy },
+        };
+      }),
+    [mapped.visitor, overrides],
+  );
+
+  const summary = useMemo(() => {
+    const inside = residentSlots.filter((s) => s.occupancy.status === 'inside').length;
+    const outside = residentSlots.filter((s) => s.occupancy.status === 'outside').length;
+    const filled = visitorSlots.filter((s) => s.occupancy.status === 'occupied').length;
+    const free = visitorSlots.filter((s) => s.occupancy.status === 'available').length;
+    return { inside, outside, filled, free, visitorTotal: visitorSlots.length };
+  }, [residentSlots, visitorSlots]);
+
+  const compartments = useMemo(() => {
+    if (tab === 'logs') return [];
+    const source = tab === 'resident' ? residentSlots : visitorSlots;
+    const map = new Map();
+    for (const s of source) {
+      const key = s.compartment || 'B2';
+      if (!map.has(key)) map.set(key, { key, total: 0, inside: 0, outside: 0, free: 0, filled: 0 });
+      const row = map.get(key);
+      row.total += 1;
+      if (s.category === 'resident') {
+        if (s.occupancy.status === 'inside') row.inside += 1;
+        else row.outside += 1;
+      } else if (s.occupancy.status === 'available') row.free += 1;
+      else row.filled += 1;
+    }
+    return Array.from(map.values()).sort((a, b) => a.key.localeCompare(b.key));
+  }, [tab, residentSlots, visitorSlots]);
+
+  const filtered = useMemo(() => {
+    if (tab === 'logs') return [];
+    const source = tab === 'resident' ? residentSlots : visitorSlots;
+    const term = search.trim().toLowerCase();
+    return source
+      .filter((s) => {
+        if (compartment !== 'all' && s.compartment !== compartment) return false;
+        const st = s.occupancy.status;
+        if (statusFilter === 'inside' && st !== 'inside') return false;
+        if (statusFilter === 'outside' && st !== 'outside') return false;
+        if (statusFilter === 'free' && st !== 'available') return false;
+        if (statusFilter === 'filled' && st !== 'occupied') return false;
+        if (!term) return true;
+        const hay = [
+          s.slotCode,
+          s.compartment,
+          s.allottee?.name,
+          s.allottee?.flat,
+          s.allottee?.vehicleNumber,
+          s.occupancy?.visitorName,
+          s.occupancy?.visitingFlat,
+          s.occupancy?.vehicleNumber,
+        ]
+          .filter(Boolean)
+          .join(' ')
+          .toLowerCase();
+        return hay.includes(term);
+      })
+      .sort((a, b) => String(a.slotCode).localeCompare(String(b.slotCode)));
+  }, [tab, residentSlots, visitorSlots, compartment, statusFilter, search]);
+
+  const groups = useMemo(() => {
+    const map = new Map();
+    for (const s of filtered) {
+      const key = s.compartment || 'B2';
+      if (!map.has(key)) map.set(key, []);
+      map.get(key).push(s);
+    }
+    return Array.from(map.entries()).map(([key, rows]) => ({ key, rows }));
+  }, [filtered]);
+
+  const matchedResident = useMemo(() => {
+    if (residentForm.slotKey) {
+      return residentSlots.find((s) => s.id === residentForm.slotKey) || null;
+    }
+    const term = normVehicle(residentForm.vehicleNumber);
+    if (term.length < 4) return null;
+
+    const exact = residentSlots.find(
+      (s) => normVehicle(s.allottee?.vehicleNumber) === term,
     );
-  }, [exitForm, parkedVehicles, exitSlotOptions]);
+    if (exact) return exact;
 
-  function onPickEntrySlot(opt) {
-    setEntryForm((s) => ({
-      ...s,
-      slotId: opt?.id || '',
-      vehicleNumber: opt?.vehicleNumber || s.vehicleNumber,
-    }));
-  }
+    const partial = residentSlots.filter((s) => {
+      const v = normVehicle(s.allottee?.vehicleNumber);
+      return v && (v.includes(term) || term.includes(v));
+    });
+    return partial.length === 1 ? partial[0] : null;
+  }, [residentForm, residentSlots]);
 
-  function onPickExitSlot(opt) {
-    setExitForm((s) => ({
-      ...s,
-      slotId: opt?.id || '',
-      vehicleNumber: opt?.vehicleNumber || s.vehicleNumber,
-    }));
-  }
+  const residentLookupTried =
+    panel === 'residentEntry' && normVehicle(residentForm.vehicleNumber).length >= 4;
 
-  function onPickVisitorSlot(opt) {
-    setVisitorForm((s) => ({
-      ...s,
-      slotId: opt?.id || '',
-    }));
-  }
+  const exitMatch = useMemo(() => {
+    if (panel !== 'vehicleExit') return null;
+    const term = normVehicle(exitForm.vehicleNumber);
+    if (term.length < 4) return null;
 
-  const onEntry = async (e) => {
-    e.preventDefault();
-    if (!entryForm.vehicleNumber.trim() && !entryForm.slotId) {
-      setError('Enter vehicle number or select the assigned parking slot');
+    const insideResidents = residentSlots.filter((s) => s.occupancy.status === 'inside');
+    const filledVisitors = visitorSlots.filter((s) => s.occupancy.status === 'occupied');
+
+    const matchIn = (pool, getVehicle) => {
+      const exact = pool.find((s) => normVehicle(getVehicle(s)) === term);
+      if (exact) return exact;
+      const partial = pool.filter((s) => {
+        const v = normVehicle(getVehicle(s));
+        return v && (v.includes(term) || term.includes(v));
+      });
+      return partial.length === 1 ? partial[0] : null;
+    };
+
+    // Prefer exact resident match, then visitor (vehicle no only)
+    return (
+      matchIn(insideResidents, (s) => s.allottee?.vehicleNumber) ||
+      matchIn(filledVisitors, (s) => s.occupancy.vehicleNumber) ||
+      null
+    );
+  }, [exitForm.vehicleNumber, panel, residentSlots, visitorSlots]);
+
+  const vehicleExitLookupTried =
+    panel === 'vehicleExit' && normVehicle(exitForm.vehicleNumber).length >= 4;
+
+  const freeVisitorOptions = useMemo(
+    () =>
+      visitorSlots
+        .filter((s) => s.occupancy.status === 'available')
+        .map((s) => ({
+          id: s.id,
+          code: s.slotCode,
+          slotCode: s.slotCode,
+          status: 'available',
+          kind: 'visitor',
+          label: s.slotCode,
+        })),
+    [visitorSlots],
+  );
+
+  async function confirmResidentEntry() {
+    const slot = matchedResident;
+    if (!slot) {
+      setError('Enter vehicle number to find resident');
+      return;
+    }
+    if (slot.occupancy.status === 'inside') {
+      setError('Already inside');
       return;
     }
     setBusy(true);
     setError('');
-    setSuccess('');
     try {
-      await recordParkingEntry({
-        slotId: entryForm.slotId || null,
-        vehicleNumber: entryForm.vehicleNumber.trim() || null,
+      if (slot.slotId || slot.allottee?.vehicleNumber) {
+        try {
+          await recordParkingEntry({
+            slotId: slot.slotId || null,
+            vehicleNumber: slot.allottee?.vehicleNumber || null,
+          });
+        } catch {
+          /* local track still updates */
+        }
+      }
+      const entryAt = nowIso();
+      patchSlot(slot.id, {
+        occupancy: { status: 'inside', entryAt, exitAt: null },
       });
-      setSuccess('Entry recorded');
-      setEntryForm({ slotId: '', vehicleNumber: '' });
-      setActivePanel(null);
+      setParkLogs(
+        pushParkLog({
+          eventType: 'entry',
+          category: 'resident',
+          vehicleNumber: slot.allottee?.vehicleNumber || null,
+          vehicleType: formatLabel(slot.allottee?.vehicleType) || null,
+          personName: slot.allottee?.name || null,
+          flatNumber: slot.allottee?.flat || null,
+          parkingNumber: slot.slotCode,
+          timestamp: entryAt,
+          recordedBy: 'Guard',
+        }),
+      );
+      setSuccess(`Entry · ${slot.slotCode}`);
+      closePanel();
       await load();
     } catch (err) {
       setError(err.response?.data?.message || 'Entry failed');
     } finally {
       setBusy(false);
     }
-  };
+  }
 
-  const onExit = async (e) => {
-    e.preventDefault();
-    setBusy(true);
-    setError('');
-    setSuccess('');
-    try {
-      const payload = {
-        slotId: exitForm.slotId || null,
-        vehicleNumber: exitForm.vehicleNumber.trim() || null,
-      };
-      if (exitPreview?.kind === 'visitor') {
-        payload.visitorLogId = exitPreview.id;
-      }
-      await recordParkingExit(payload);
-      if (exitPreview) {
-        setLastExitByKey((prev) => rememberExit(prev, exitPreview));
-      }
-      setSuccess('Exit recorded');
-      setExitForm({ slotId: '', vehicleNumber: '' });
-      setActivePanel(null);
-      setSelected(null);
-      await load();
-    } catch (err) {
-      setError(err.response?.data?.message || 'Exit failed');
-    } finally {
-      setBusy(false);
-    }
-  };
-
-  const onVisitor = async (e) => {
-    e.preventDefault();
-    if (!visitorForm.vehicleNumber.trim()) {
-      setError('Vehicle number is required');
+  async function confirmVisitorEntry() {
+    const { visitorName, vehicleNumber, visitingFlat, vehicleType, slotKey } = visitorForm;
+    if (!visitorName.trim() || !vehicleNumber.trim() || !visitingFlat.trim() || !slotKey) {
+      setError('Fill visitor details and pick a free slot');
       return;
     }
-    if (!visitorForm.visitorName.trim()) {
-      setError('Visitor name is required');
-      return;
-    }
-    if (!visitorForm.visitingResident.trim()) {
-      setError('Visiting resident / flat is required');
-      return;
-    }
-    if (!visitorForm.slotId) {
-      setError('Select an available visitor parking slot');
+    const slot = visitorSlots.find((s) => s.id === slotKey);
+    if (!slot || slot.occupancy.status !== 'available') {
+      setError('Slot not free');
       return;
     }
     setBusy(true);
     setError('');
-    setSuccess('');
     try {
-      await createGuardVisitorParking({
-        vehicleNumber: visitorForm.vehicleNumber.trim(),
-        vehicleType: visitorForm.vehicleType,
-        slotId: visitorForm.slotId || null,
-        purpose: visitorForm.purpose.trim() || null,
-        metadata: {
-          visitorName: visitorForm.visitorName.trim(),
-          visitingResident: visitorForm.visitingResident.trim(),
+      if (slot.slotId) {
+        try {
+          await createGuardVisitorParking({
+            vehicleNumber: vehicleNumber.trim(),
+            vehicleType,
+            slotId: slot.slotId,
+            purpose: null,
+            metadata: {
+              visitorName: visitorName.trim(),
+              visitingResident: visitingFlat.trim(),
+            },
+          });
+        } catch {
+          /* local */
+        }
+      }
+      const entryAt = nowIso();
+      patchSlot(slot.id, {
+        occupancy: {
+          status: 'occupied',
+          entryAt,
+          exitAt: null,
+          visitorName: visitorName.trim(),
+          visitingFlat: visitingFlat.trim(),
+          vehicleNumber: vehicleNumber.trim().toUpperCase(),
+          vehicleType,
         },
       });
-      setSuccess('Visitor vehicle registered');
-      setVisitorForm({
-        vehicleNumber: '',
-        vehicleType: 'car',
-        visitorName: '',
-        visitingResident: '',
-        slotId: '',
-        purpose: '',
-      });
-      setActivePanel(null);
-      setParkTab('visitor');
+      setParkLogs(
+        pushParkLog({
+          eventType: 'entry',
+          category: 'visitor',
+          vehicleNumber: vehicleNumber.trim().toUpperCase(),
+          vehicleType: formatLabel(vehicleType) || null,
+          personName: visitorName.trim(),
+          flatNumber: visitingFlat.trim(),
+          parkingNumber: slot.slotCode,
+          timestamp: entryAt,
+          recordedBy: 'Guard',
+        }),
+      );
+      setSuccess(`Visitor parked · ${slot.slotCode}`);
+      setTab('visitor');
+      closePanel();
       await load();
     } catch (err) {
-      setError(err.response?.data?.message || 'Visitor parking failed');
+      setError(err.response?.data?.message || 'Visitor entry failed');
     } finally {
       setBusy(false);
     }
-  };
+  }
 
-  async function markExitFromDrawer() {
-    if (!selected) return;
+  async function performExit(slot) {
+    if (!slot) return;
+    const isVisitor = slot.category === 'visitor';
     setBusy(true);
     setError('');
-    setSuccess('');
     try {
-      const payload = {
-        slotId: selected.slotId || (selected.kind === 'resident' ? selected.id : null),
-        vehicleNumber: selected.vehicleNumber || null,
-      };
-      if (selected.kind === 'visitor') payload.visitorLogId = selected.id;
-      await recordParkingExit(payload);
-      setLastExitByKey((prev) => rememberExit(prev, selected));
-      setSuccess('Exit recorded');
+      try {
+        const payload = {
+          slotId: slot.slotId || null,
+          vehicleNumber: slot.allottee?.vehicleNumber || slot.occupancy.vehicleNumber || null,
+        };
+        if (isVisitor && slot.occupancy.visitorLogId) {
+          payload.visitorLogId = slot.occupancy.visitorLogId;
+        }
+        await recordParkingExit(payload);
+      } catch {
+        /* local */
+      }
+      const exitAt = nowIso();
+      if (isVisitor) {
+        const entryTime = slot.occupancy.entryAt || null;
+        patchSlot(slot.id, {
+          occupancy: {
+            status: 'available',
+            entryAt: null,
+            exitAt,
+            visitorName: null,
+            visitingFlat: null,
+            vehicleNumber: null,
+            vehicleType: null,
+            visitorLogId: null,
+          },
+        });
+        setParkLogs(
+          pushParkLog({
+            eventType: 'exit',
+            category: 'visitor',
+            vehicleNumber: slot.occupancy.vehicleNumber || null,
+            vehicleType: formatLabel(slot.occupancy.vehicleType) || null,
+            personName: slot.occupancy.visitorName || null,
+            flatNumber: slot.occupancy.visitingFlat || null,
+            parkingNumber: slot.slotCode,
+            timestamp: exitAt,
+            entryTime,
+            recordedBy: 'Guard',
+          }),
+        );
+      } else {
+        const entryTime = slot.occupancy.entryAt || null;
+        patchSlot(slot.id, {
+          occupancy: { status: 'outside', entryAt: null, exitAt },
+        });
+        setParkLogs(
+          pushParkLog({
+            eventType: 'exit',
+            category: 'resident',
+            vehicleNumber: slot.allottee?.vehicleNumber || null,
+            vehicleType: formatLabel(slot.allottee?.vehicleType) || null,
+            personName: slot.allottee?.name || null,
+            flatNumber: slot.allottee?.flat || null,
+            parkingNumber: slot.slotCode,
+            timestamp: exitAt,
+            entryTime,
+            recordedBy: 'Guard',
+          }),
+        );
+      }
+      setSuccess(`Exit · ${slot.slotCode}`);
+      setConfirmExit(null);
       setSelected(null);
+      closePanel();
       await load();
     } catch (err) {
       setError(err.response?.data?.message || 'Exit failed');
@@ -831,480 +814,545 @@ export default function GuardParkingPage() {
     }
   }
 
-  function applySummaryFocus(key) {
-    setSummaryFocus(key);
-    if (key === 'residentsInside') {
-      setParkTab('resident');
-      setStatusFilter('inside');
-      setTypeFilter('all');
+  function openEntry(kind) {
+    setError('');
+    setSuccess('');
+    if (kind === 'visitor') {
+      setTab('visitor');
+      setPanel('visitorEntry');
       return;
     }
-    if (key === 'residentsOutside') {
-      setParkTab('resident');
-      setStatusFilter('outside');
-      setTypeFilter('all');
-      return;
-    }
-    if (key === 'visitorFree') {
-      setParkTab('visitor');
-      setStatusFilter('available');
-      setTypeFilter('all');
-      return;
-    }
-    if (key === 'visitorsInside') {
-      setParkTab('visitor');
-      setStatusFilter('inside');
-      setTypeFilter('all');
-    }
+    setTab('resident');
+    setPanel('residentEntry');
   }
 
-  function openVisitorWithSlot(row) {
-    setVisitorForm((s) => ({
-      ...s,
-      slotId: row.slotId || '',
-    }));
-    setActivePanel('visitor');
-    setSelected(null);
+  function openExit() {
+    setError('');
+    setSuccess('');
+    setExitForm({ matchKey: '', vehicleNumber: '' });
+    setPanel('vehicleExit');
   }
 
-  const panel = activePanel ? PANEL[activePanel] : null;
-  const emptyMessage =
-    search.trim()
-      ? 'No vehicles found.'
-      : parkTab === 'visitor'
-        ? statusFilter === 'available'
-          ? 'No free visitor slots right now.'
-          : 'No visitor vehicles currently inside.'
-        : statusFilter === 'outside'
-          ? 'All assigned resident vehicles are currently inside.'
-          : statusFilter === 'inside'
-            ? 'No resident vehicles currently inside.'
-            : 'No assigned resident parking records.';
-
-  function renderVehicleTable(rows) {
-    const isVisitorTab = parkTab === 'visitor';
-    return (
-      <div className="glass-card gm-park-table-card">
-        <div className="gm-park-section-head">
-          <div>
-            <h3 className="gm-park-table-title">
-              {isVisitorTab ? 'Visitor Parking' : 'Resident Parking'}
-            </h3>
-            {isVisitorTab ? (
-              <p className="gm-park-section-sub">
-                Open visitor slots — track which are free and which car is using each slot
-              </p>
-            ) : (
-              <p className="gm-park-section-sub">
-                Fixed assigned slots — record which resident cars are inside and which are outside
-              </p>
-            )}
-          </div>
-        </div>
-
-        {loading ? (
-          <div className="gm-park-table-skeleton" aria-hidden>
-            {[1, 2, 3, 4].map((i) => (
-              <div key={i} className="gm-park-skel-row" />
-            ))}
-          </div>
-        ) : (
-          <div className="gm-park-table-wrap">
-            <table className="crud-table gm-park-data-table">
-              <thead>
-                <tr>
-                  <th>Vehicle Number</th>
-                  <th>Type</th>
-                  <th>{isVisitorTab ? 'Visitor' : 'Resident'}</th>
-                  {isVisitorTab ? <th>Visiting Resident</th> : null}
-                  <th>Parking No</th>
-                  <th>{statusFilter === 'outside' ? 'Out Time' : 'Entry Time'}</th>
-                  <th>Status</th>
-                  <th>Action</th>
-                </tr>
-              </thead>
-              <tbody>
-                {rows.length === 0 && (
-                  <tr>
-                    <td colSpan={isVisitorTab ? 8 : 7}>
-                      <div className="gm-park-empty">{emptyMessage}</div>
-                    </td>
-                  </tr>
-                )}
-                {rows.map((v) => {
-                  const status = displayStatus(v);
-                  const timeValue =
-                    statusFilter === 'outside'
-                      ? formatParkTime(v.exitAt)
-                      : v.isFreeSlot
-                        ? '—'
-                        : formatParkTime(v.entryAt);
-                  return (
-                    <tr key={v.id || `${v.slotCode}-${v.vehicleNumber}-${status}`}>
-                      <td>
-                        <span className="gm-park-vehicle-no">
-                          {v.isFreeSlot ? '— Free slot —' : v.vehicleNumber || '—'}
-                        </span>
-                      </td>
-                      <td>{v.isFreeSlot ? '—' : formatLabel(v.vehicleType)}</td>
-                      <td>
-                        {isVisitorTab
-                          ? v.isFreeSlot
-                            ? 'Open for any visitor'
-                            : v.visitorName || '—'
-                          : v.residentName || '—'}
-                      </td>
-                      {isVisitorTab ? (
-                        <td>{v.isFreeSlot ? '—' : v.visitingResident || '—'}</td>
-                      ) : null}
-                      <td>{parkingNo(v)}</td>
-                      <td>{timeValue}</td>
-                      <td>
-                        <StatusBadge status={status} colors={STATUS_COLORS} />
-                      </td>
-                      <td>
-                        {v.isFreeSlot ? (
-                          <button
-                            type="button"
-                            className="gm-park-link-btn"
-                            onClick={() => openVisitorWithSlot(v)}
-                          >
-                            Use slot
-                          </button>
-                        ) : (
-                          <button
-                            type="button"
-                            className="gm-park-link-btn"
-                            onClick={() => setSelected(v)}
-                          >
-                            View
-                          </button>
-                        )}
-                      </td>
-                    </tr>
-                  );
-                })}
-              </tbody>
-            </table>
-          </div>
-        )}
-      </div>
-    );
-  }
+  const isExitPanel = panel === 'vehicleExit';
 
   return (
     <div className="gm-root">
-      <Sidebar activePage="Parking" onNavigate={handleSidebarNav} />
+      <Sidebar activePage="Parking" onNavigate={(label) => navigateGuard(navigate, label)} />
       <div className="gm-content">
         <DashboardHeader />
-        <main className="gm-main gm-park-page">
+        <main className="gm-main gm-park-page gm-pcd">
           <div className="gm-park-topbar">
             <div className="gm-park-page-head">
               <h2 className="gm-park-page-title">Parking</h2>
-              <p className="gm-park-page-sub">
-                Track resident cars inside/outside and keep visitor free slots accurate
-              </p>
             </div>
             <div className="gm-park-toolbar-btns">
-              <button
-                type="button"
-                className="gm-park-action-btn gm-park-action-btn--entry"
-                onClick={() => setActivePanel('entry')}
-              >
-                Record entry
-              </button>
-              <button
-                type="button"
-                className="gm-park-action-btn gm-park-action-btn--exit"
-                onClick={() => setActivePanel('exit')}
-              >
-                Record exit
-              </button>
-              <button
-                type="button"
-                className="gm-park-action-btn gm-park-action-btn--visitor"
-                onClick={() => setActivePanel('visitor')}
-              >
-                Visitor parking
-              </button>
+              {tab !== 'logs' ? (
+                <>
+                  <button
+                    type="button"
+                    className="gm-park-action-btn gm-park-action-btn--entry"
+                    onClick={() => openEntry('resident')}
+                  >
+                    Resident Entry
+                  </button>
+                  <button
+                    type="button"
+                    className="gm-park-action-btn gm-park-action-btn--visitor"
+                    onClick={() => openEntry('visitor')}
+                  >
+                    Visitor Entry
+                  </button>
+                  <button
+                    type="button"
+                    className="gm-park-action-btn gm-park-action-btn--exit"
+                    onClick={openExit}
+                  >
+                    Vehicle Exit
+                  </button>
+                </>
+              ) : null}
             </div>
           </div>
 
-          {error && <div className="gm-park-alert gm-park-alert--error">{error}</div>}
-          {success && <div className="gm-park-alert gm-park-alert--ok">{success}</div>}
+          {error ? <div className="gm-park-alert gm-park-alert--error">{error}</div> : null}
+          {success ? <div className="gm-park-alert gm-park-alert--ok">{success}</div> : null}
 
+          {tab !== 'logs' ? (
           <div className="gm-park-summary">
-            <button
-              type="button"
-              className={`glass-card gm-park-stat gm-park-stat--ok${summaryFocus === 'residentsInside' ? ' is-active' : ''}`}
-              onClick={() => applySummaryFocus('residentsInside')}
-            >
-              <strong>{loading ? '—' : summary.residentsInside}</strong>
+            <div className="glass-card gm-park-stat gm-park-stat--ok">
+              <strong>{loading ? '—' : summary.inside}</strong>
               <span className="gm-park-stat-label">Residents Inside</span>
-            </button>
-            <button
-              type="button"
-              className={`glass-card gm-park-stat${summaryFocus === 'residentsOutside' ? ' is-active' : ''}`}
-              onClick={() => applySummaryFocus('residentsOutside')}
-            >
-              <strong>{loading ? '—' : summary.residentsOutside}</strong>
-              <span className="gm-park-stat-label">Residents Outside</span>
-            </button>
-            <button
-              type="button"
-              className={`glass-card gm-park-stat gm-park-stat--ok${summaryFocus === 'visitorFree' ? ' is-active' : ''}`}
-              onClick={() => applySummaryFocus('visitorFree')}
-            >
-              <strong>{loading ? '—' : summary.visitorFree}</strong>
-              <span className="gm-park-stat-label">Visitor Free</span>
-            </button>
-            <button
-              type="button"
-              className={`glass-card gm-park-stat gm-park-stat--info${summaryFocus === 'visitorsInside' ? ' is-active' : ''}`}
-              onClick={() => applySummaryFocus('visitorsInside')}
-            >
-              <strong>{loading ? '—' : summary.visitorsInside}</strong>
-              <span className="gm-park-stat-label">Visitors Inside</span>
-            </button>
-          </div>
-
-          <div className="gm-park-controlbar">
-            <div className="gm-park-search">
-              <SearchInput
-                value={search}
-                onChange={setSearch}
-                placeholder="Search vehicle number / Parking No"
-                debounceMs={250}
-              />
             </div>
-            <label className="gm-park-filter gm-park-filter--inline">
-              <span>Parking</span>
-              <select
-                value={parkTab}
-                onChange={(e) => {
-                  setParkTab(e.target.value);
-                  setSummaryFocus(
-                    e.target.value === 'visitor' ? 'visitorsInside' : 'residentsInside',
-                  );
-                  setStatusFilter('all');
-                }}
-                aria-label="Parking type"
-              >
-                {PARK_TABS.map((t) => (
-                  <option key={t.key} value={t.key}>
-                    {t.label}
-                  </option>
-                ))}
-              </select>
-            </label>
-            <label className="gm-park-filter gm-park-filter--inline">
-              <span>Status</span>
-              <select
-                value={statusFilter}
-                onChange={(e) => setStatusFilter(e.target.value)}
-                aria-label="Status filter"
-              >
-                {STATUS_FILTERS.map((f) => (
-                  <option key={f.value} value={f.value}>
-                    {f.label}
-                  </option>
-                ))}
-              </select>
-            </label>
-            <label className="gm-park-filter gm-park-filter--inline">
-              <span>Type</span>
-              <select
-                value={typeFilter}
-                onChange={(e) => setTypeFilter(e.target.value)}
-                aria-label="Vehicle type filter"
-              >
-                {TYPE_FILTERS.map((f) => (
-                  <option key={f.value} value={f.value}>
-                    {f.label}
-                  </option>
-                ))}
-              </select>
-            </label>
+            <div className="glass-card gm-park-stat">
+              <strong>{loading ? '—' : summary.outside}</strong>
+              <span className="gm-park-stat-label">Residents Outside</span>
+            </div>
+            <div className="glass-card gm-park-stat gm-park-stat--warn">
+              <strong>
+                {loading ? '—' : `${summary.filled}/${summary.visitorTotal}`}
+              </strong>
+              <span className="gm-park-stat-label">Visitor Filled</span>
+            </div>
+            <div className="glass-card gm-park-stat gm-park-stat--info">
+              <strong>{loading ? '—' : summary.free}</strong>
+              <span className="gm-park-stat-label">Visitor Free</span>
+            </div>
           </div>
+          ) : null}
 
-          {renderVehicleTable(filteredVehicles)}
+          <section className="glass-card gm-pcd-live">
+            <div className="gm-pcd-live-head">
+              <div className="gm-pcd-tabs">
+                <button
+                  type="button"
+                  className={tab === 'resident' ? 'is-active' : ''}
+                  onClick={() => {
+                    setTab('resident');
+                    setCompartment('all');
+                    setStatusFilter('all');
+                    setSearch('');
+                  }}
+                >
+                  Resident Parking
+                </button>
+                <button
+                  type="button"
+                  className={tab === 'visitor' ? 'is-active' : ''}
+                  onClick={() => {
+                    setTab('visitor');
+                    setCompartment('all');
+                    setStatusFilter('all');
+                    setSearch('');
+                  }}
+                >
+                  Visitor Parking
+                </button>
+                <button
+                  type="button"
+                  className={tab === 'logs' ? 'is-active' : ''}
+                  onClick={() => {
+                    setTab('logs');
+                    setParkLogs(readLogs());
+                    setSearch('');
+                    setCompartment('all');
+                    setStatusFilter('all');
+                  }}
+                >
+                  Logs
+                </button>
+              </div>
+            </div>
 
-          {panel && (
-            <div
-              className="gm-park-modal-backdrop"
-              role="dialog"
-              aria-modal="true"
-              aria-label={panel.title}
-              onClick={closePanel}
-            >
-              <form
-                className={`gm-park-card gm-park-modal ${panel.cardClass}`}
+            {tab === 'logs' ? (
+              <ParkingLogsPanel localLogs={parkLogs} />
+            ) : (
+              <>
+            <div className="gm-park-controlbar gm-pcd-filters">
+              <div className="gm-park-search">
+                <SearchInput
+                  value={search}
+                  onChange={setSearch}
+                  placeholder={
+                    tab === 'resident'
+                      ? 'Search slot, resident, vehicle, flat'
+                      : 'Search visitor slot, name, vehicle, flat'
+                  }
+                  debounceMs={200}
+                />
+              </div>
+              <label className="gm-park-filter gm-park-filter--inline">
+                <span>Status</span>
+                <select
+                  value={statusFilter}
+                  onChange={(e) => setStatusFilter(e.target.value)}
+                >
+                  <option value="all">All</option>
+                  {tab === 'resident' ? (
+                    <>
+                      <option value="inside">Inside</option>
+                      <option value="outside">Outside</option>
+                    </>
+                  ) : (
+                    <>
+                      <option value="free">Free</option>
+                      <option value="filled">Filled</option>
+                    </>
+                  )}
+                </select>
+              </label>
+            </div>
+
+            {compartments.length > 0 ? (
+              <div className="gm-pcd-floor-chips" role="tablist" aria-label="Floor">
+                <button
+                  type="button"
+                  className={compartment === 'all' ? 'is-active' : ''}
+                  onClick={() => setCompartment('all')}
+                >
+                  All
+                </button>
+                {compartments.map((c) => (
+                  <button
+                    key={c.key}
+                    type="button"
+                    className={compartment === c.key ? 'is-active' : ''}
+                    onClick={() => setCompartment(c.key)}
+                  >
+                    {c.key}
+                  </button>
+                ))}
+              </div>
+            ) : null}
+
+            {loading ? (
+              <div className="gm-pcd-empty">Loading…</div>
+            ) : filtered.length === 0 ? (
+              <div className="gm-pcd-empty">
+                {tab === 'resident'
+                  ? 'No resident slots match.'
+                  : 'No visitor slots match.'}
+              </div>
+            ) : (
+              <div className="gm-pcd-board">
+                <div className="gm-pcd-rows">
+                  <div className="gm-pcd-rows-head" aria-hidden>
+                    <span>Parking No</span>
+                    <span>Status</span>
+                    <span>{tab === 'resident' ? 'Allotted' : 'Visitor'}</span>
+                    <span>Vehicle</span>
+                    <span>Time</span>
+                  </div>
+                  {groups.map((g) => (
+                    <div key={g.key} className="gm-pcd-floor-block">
+                      <div className="gm-pcd-floor-head">
+                        <h4>{g.key}</h4>
+                        <span>{g.rows.length}</span>
+                      </div>
+                      {g.rows.map((s) => {
+                        const isVisitor = s.category === 'visitor';
+                        const st = s.occupancy.status;
+                        const name = isVisitor
+                          ? st === 'available'
+                            ? '—'
+                            : s.occupancy.visitorName || 'Visitor'
+                          : s.allottee?.name || 'Unassigned';
+                        const vehicle = isVisitor
+                          ? s.occupancy.vehicleNumber || '—'
+                          : s.allottee?.vehicleNumber || '—';
+                        const detail = isVisitor
+                          ? st === 'available'
+                            ? 'Free'
+                            : `Flat ${s.occupancy.visitingFlat || '—'}`
+                          : s.allottee?.flat
+                            ? `Flat ${s.allottee.flat}`
+                            : formatLabel(s.allottee?.vehicleType) || '—';
+                        const time =
+                          st === 'inside' || st === 'occupied'
+                            ? formatParkTime(s.occupancy.entryAt)
+                            : s.occupancy.exitAt
+                              ? formatParkTime(s.occupancy.exitAt)
+                              : '—';
+                        return (
+                          <button
+                            type="button"
+                            key={s.id}
+                            className={`gm-pcd-row gm-pcd-row--${st}`}
+                            onClick={() => setSelected(s)}
+                          >
+                            <strong className="gm-pcd-row-slot">{s.slotCode}</strong>
+                            <StatusPill status={st} />
+                            <div className="gm-pcd-row-main">
+                              <span className="gm-pcd-row-person">{name}</span>
+                              <span className="gm-pcd-row-vehicle">{detail}</span>
+                            </div>
+                            <div className="gm-pcd-row-meta">{vehicle}</div>
+                            <div className="gm-pcd-row-time">{time}</div>
+                          </button>
+                        );
+                      })}
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+              </>
+            )}
+          </section>
+
+          {panel ? (
+            <div className="gm-park-modal-backdrop" role="dialog" aria-modal="true" onClick={closePanel}>
+              <div
+                className={`gm-park-modal gm-park-card ${
+                  isExitPanel
+                    ? 'gm-park-card--exit'
+                    : panel === 'visitorEntry'
+                      ? 'gm-park-card--visitor'
+                      : 'gm-park-card--entry'
+                }`}
                 onClick={(e) => e.stopPropagation()}
-                onSubmit={
-                  activePanel === 'entry'
-                    ? onEntry
-                    : activePanel === 'exit'
-                      ? onExit
-                      : onVisitor
-                }
               >
                 <div className="gm-park-card-head">
                   <span className="gm-park-card-badge" aria-hidden />
-                  <h3 className="gm-park-card-title">{panel.title}</h3>
-                  <button
-                    type="button"
-                    className="gm-park-modal-close"
-                    onClick={closePanel}
-                    aria-label="Close"
-                  >
+                  <h3 className="gm-park-card-title">
+                    {panel === 'residentEntry'
+                      ? 'Resident Entry'
+                      : panel === 'visitorEntry'
+                        ? 'Visitor Entry'
+                        : 'Vehicle Exit'}
+                  </h3>
+                  <button type="button" className="gm-park-modal-close" onClick={closePanel} aria-label="Close">
                     ×
                   </button>
                 </div>
 
-                <div className="gm-park-card-body">
-                  {activePanel === 'entry' && (
+                <div className="gm-park-card-body gm-pcd-modal-body">
+                  {panel === 'residentEntry' ? (
                     <div className="gm-park-card-body-grid">
-                      <p className="gm-park-hint gm-park-hint--wide">
-                        Resident parking number is already fixed. Record entry/exit to track
-                        whether that assigned car is currently inside or outside.
-                      </p>
-                      <FormField
-                        label="Vehicle number *"
-                        value={entryForm.vehicleNumber}
-                        onChange={(v) => setEntryForm((s) => ({ ...s, vehicleNumber: v }))}
-                      />
-                      <SearchableParkingCode
-                        label="Assigned Parking No"
-                        placeholder="Search assigned slot…"
-                        emptyText="No assigned resident slots found"
-                        value={entryForm.slotId}
-                        options={entrySlotOptions}
-                        onChange={onPickEntrySlot}
-                      />
-                    </div>
-                  )}
-
-                  {activePanel === 'exit' && (
-                    <div className="gm-park-card-body-grid">
-                      <SearchableParkingCode
-                        label="Parking No"
-                        placeholder="Search vehicle / Parking No…"
-                        emptyText="No matching parked vehicle"
-                        value={exitForm.slotId}
-                        options={exitSlotOptions}
-                        onChange={onPickExitSlot}
-                      />
-                      <FormField
-                        label="Vehicle number"
-                        value={exitForm.vehicleNumber}
-                        onChange={(v) => setExitForm((s) => ({ ...s, vehicleNumber: v }))}
-                      />
-                      {exitPreview ? (
+                      <label className="gm-park-field-wide">
+                        <span>Vehicle No</span>
+                        <input
+                          className="crud-form-control"
+                          type="text"
+                          autoFocus
+                          autoComplete="off"
+                          placeholder="Enter vehicle number"
+                          value={residentForm.vehicleNumber}
+                          onChange={(e) =>
+                            setResidentForm({
+                              vehicleNumber: e.target.value.toUpperCase(),
+                              slotKey: '',
+                            })
+                          }
+                        />
+                      </label>
+                      {matchedResident ? (
                         <div className="gm-park-exit-preview">
                           <div>
-                            <span>Vehicle</span>
-                            <strong>{exitPreview.vehicleNumber || '—'}</strong>
+                            <span>Parking No</span>
+                            <strong>{matchedResident.slotCode}</strong>
                           </div>
                           <div>
-                            <span>{exitPreview.kind === 'visitor' ? 'Visitor' : 'Resident'}</span>
+                            <span>Flat No</span>
+                            <strong>{matchedResident.allottee?.flat || '—'}</strong>
+                          </div>
+                          <div>
+                            <span>
+                              {matchedResident.allottee?.role === 'Tenant'
+                                ? 'Tenant'
+                                : matchedResident.allottee?.role === 'Owner'
+                                  ? 'Owner'
+                                  : 'Owner / Tenant'}
+                            </span>
+                            <strong>{matchedResident.allottee?.name || '—'}</strong>
+                          </div>
+                          <div>
+                            <span>Vehicle</span>
+                            <strong>{matchedResident.allottee?.vehicleNumber || '—'}</strong>
+                          </div>
+                          <div>
+                            <span>Type</span>
                             <strong>
-                              {exitPreview.kind === 'visitor'
-                                ? exitPreview.visitorName || 'Visitor'
-                                : exitPreview.residentName || '—'}
+                              {formatLabel(matchedResident.allottee?.vehicleType) || '—'}
+                            </strong>
+                          </div>
+                          <div>
+                            <span>Status</span>
+                            <StatusPill status={matchedResident.occupancy.status} />
+                          </div>
+                        </div>
+                      ) : residentLookupTried ? (
+                        <p className="gm-park-hint gm-park-hint--wide gm-park-hint--warn">
+                          No resident found for this vehicle number.
+                        </p>
+                      ) : null}
+                    </div>
+                  ) : null}
+
+                  {panel === 'visitorEntry' ? (
+                    <div className="gm-park-card-body-grid gm-park-card-body-grid--visitor">
+                      <FormField
+                        label="Visitor name *"
+                        value={visitorForm.visitorName}
+                        onChange={(v) => setVisitorForm((s) => ({ ...s, visitorName: v }))}
+                      />
+                      <FormField
+                        label="Vehicle number *"
+                        value={visitorForm.vehicleNumber}
+                        onChange={(v) =>
+                          setVisitorForm((s) => ({ ...s, vehicleNumber: v.toUpperCase() }))
+                        }
+                      />
+                      <FormField
+                        label="Visiting flat *"
+                        value={visitorForm.visitingFlat}
+                        onChange={(v) => setVisitorForm((s) => ({ ...s, visitingFlat: v }))}
+                      />
+                      <FormSelect
+                        label="Vehicle type"
+                        value={visitorForm.vehicleType}
+                        options={VISITOR_TYPES}
+                        onChange={(v) => setVisitorForm((s) => ({ ...s, vehicleType: v }))}
+                      />
+                      <div className="gm-park-code-wide">
+                        <SearchableParkingCode
+                          label="Parking No *"
+                          placeholder="Search free parking no…"
+                          emptyText="No free visitor parking"
+                          value={visitorForm.slotKey}
+                          options={freeVisitorOptions}
+                          onChange={(opt) =>
+                            setVisitorForm((s) => ({ ...s, slotKey: opt?.id || '' }))
+                          }
+                        />
+                      </div>
+                    </div>
+                  ) : null}
+
+                  {panel === 'vehicleExit' ? (
+                    <div className="gm-park-card-body-grid">
+                      <label className="gm-park-field-wide">
+                        <span>Vehicle No</span>
+                        <input
+                          className="crud-form-control"
+                          type="text"
+                          autoFocus
+                          autoComplete="off"
+                          placeholder="Enter vehicle number"
+                          value={exitForm.vehicleNumber}
+                          onChange={(e) =>
+                            setExitForm({
+                              vehicleNumber: e.target.value.toUpperCase(),
+                              matchKey: '',
+                            })
+                          }
+                        />
+                      </label>
+                      {exitMatch ? (
+                        <div className="gm-park-exit-preview">
+                          <div>
+                            <span>Type</span>
+                            <strong>
+                              {exitMatch.category === 'visitor'
+                                ? 'Visitor'
+                                : exitMatch.allottee?.role === 'Tenant'
+                                  ? 'Tenant'
+                                  : exitMatch.allottee?.role === 'Owner'
+                                    ? 'Owner'
+                                    : 'Resident'}
                             </strong>
                           </div>
                           <div>
                             <span>Parking No</span>
-                            <strong>{parkingNo(exitPreview)}</strong>
+                            <strong>{exitMatch.slotCode}</strong>
                           </div>
+                          {exitMatch.category === 'visitor' ? (
+                            <>
+                              <div>
+                                <span>Visitor</span>
+                                <strong>{exitMatch.occupancy.visitorName || '—'}</strong>
+                              </div>
+                              <div>
+                                <span>Visiting flat</span>
+                                <strong>{exitMatch.occupancy.visitingFlat || '—'}</strong>
+                              </div>
+                              <div>
+                                <span>Vehicle</span>
+                                <strong>{exitMatch.occupancy.vehicleNumber || '—'}</strong>
+                              </div>
+                            </>
+                          ) : (
+                            <>
+                              <div>
+                                <span>Flat No</span>
+                                <strong>{exitMatch.allottee?.flat || '—'}</strong>
+                              </div>
+                              <div>
+                                <span>
+                                  {exitMatch.allottee?.role === 'Tenant'
+                                    ? 'Tenant'
+                                    : exitMatch.allottee?.role === 'Owner'
+                                      ? 'Owner'
+                                      : 'Owner / Tenant'}
+                                </span>
+                                <strong>{exitMatch.allottee?.name || '—'}</strong>
+                              </div>
+                              <div>
+                                <span>Vehicle</span>
+                                <strong>{exitMatch.allottee?.vehicleNumber || '—'}</strong>
+                              </div>
+                            </>
+                          )}
                           <div>
-                            <span>Entry Time</span>
-                            <strong>{formatParkTime(exitPreview.entryAt)}</strong>
-                          </div>
-                          <div>
-                            <span>Status</span>
-                            <StatusBadge status={displayStatus(exitPreview)} colors={STATUS_COLORS} />
+                            <span>Entry</span>
+                            <strong>{formatParkTime(exitMatch.occupancy.entryAt)}</strong>
                           </div>
                         </div>
+                      ) : vehicleExitLookupTried ? (
+                        <p className="gm-park-hint gm-park-hint--wide gm-park-hint--warn">
+                          No inside resident or parked visitor found for this vehicle number.
+                        </p>
                       ) : null}
                     </div>
-                  )}
-
-                  {activePanel === 'visitor' && (
-                    <div className="gm-park-card-body-grid">
-                      <p className="gm-park-hint gm-park-hint--wide">
-                        Visitor slots are open — any visitor car can use a free slot. Pick a free
-                        slot so we keep an accurate free/occupied track.
-                      </p>
-                      <FormField
-                        label="Vehicle Number *"
-                        value={visitorForm.vehicleNumber}
-                        onChange={(v) => setVisitorForm((s) => ({ ...s, vehicleNumber: v }))}
-                        required
-                      />
-                      <FormSelect
-                        label="Vehicle Type *"
-                        value={visitorForm.vehicleType}
-                        options={VISITOR_VEHICLE_TYPES}
-                        onChange={(v) => setVisitorForm((s) => ({ ...s, vehicleType: v }))}
-                      />
-                      <FormField
-                        label="Visitor Name *"
-                        value={visitorForm.visitorName}
-                        onChange={(v) => setVisitorForm((s) => ({ ...s, visitorName: v }))}
-                        required
-                      />
-                      <FormField
-                        label="Visiting Resident *"
-                        value={visitorForm.visitingResident}
-                        onChange={(v) => setVisitorForm((s) => ({ ...s, visitingResident: v }))}
-                        required
-                      />
-                      <SearchableParkingCode
-                        label="Available Visitor Slot *"
-                        placeholder="Select free visitor slot…"
-                        emptyText="No available visitor slots"
-                        value={visitorForm.slotId}
-                        options={visitorSlotOptions}
-                        onChange={onPickVisitorSlot}
-                      />
-                      <FormField
-                        label="Purpose"
-                        value={visitorForm.purpose}
-                        onChange={(v) => setVisitorForm((s) => ({ ...s, purpose: v }))}
-                      />
-                    </div>
-                  )}
+                  ) : null}
                 </div>
 
                 <div className="gm-park-modal-actions">
                   <button type="button" className="btn-secondary" onClick={closePanel} disabled={busy}>
                     Cancel
                   </button>
-                  <button type="submit" className="btn-primary gm-park-card-btn" disabled={busy}>
-                    {busy ? 'Saving…' : panel.btnLabel}
-                  </button>
+                  {panel === 'residentEntry' ? (
+                    <button
+                      type="button"
+                      className="btn-primary gm-park-card-btn"
+                      disabled={busy || !matchedResident || matchedResident.occupancy.status === 'inside'}
+                      onClick={confirmResidentEntry}
+                    >
+                      {busy ? 'Saving…' : 'Mark Inside'}
+                    </button>
+                  ) : null}
+                  {panel === 'visitorEntry' ? (
+                    <button
+                      type="button"
+                      className="btn-primary gm-park-card-btn"
+                      disabled={busy || !freeVisitorOptions.length}
+                      onClick={confirmVisitorEntry}
+                    >
+                      {busy ? 'Saving…' : 'Park Visitor'}
+                    </button>
+                  ) : null}
+                  {panel === 'vehicleExit' ? (
+                    <button
+                      type="button"
+                      className="btn-primary gm-park-card-btn"
+                      disabled={busy || !exitMatch}
+                      onClick={() => setConfirmExit(exitMatch)}
+                    >
+                      {busy
+                        ? 'Saving…'
+                        : exitMatch?.category === 'visitor'
+                          ? 'Mark Free'
+                          : 'Mark Outside'}
+                    </button>
+                  ) : null}
                 </div>
-              </form>
+              </div>
             </div>
-          )}
+          ) : null}
 
-          {selected && (
+          {selected ? (
             <div
               className="gm-park-drawer-backdrop"
               role="dialog"
               aria-modal="true"
-              aria-label="Vehicle details"
               onClick={() => setSelected(null)}
             >
-              <aside
-                className="gm-park-drawer"
-                onClick={(e) => e.stopPropagation()}
-              >
+              <aside className="gm-park-drawer" onClick={(e) => e.stopPropagation()}>
                 <div className="gm-park-drawer-head">
                   <div>
-                    <p className="gm-park-drawer-kicker">Vehicle details</p>
-                    <h3 className="gm-park-drawer-title">{selected.vehicleNumber || '—'}</h3>
+                    <p className="gm-park-drawer-kicker">
+                      {selected.category === 'visitor' ? 'Visitor slot' : 'Resident slot'}
+                    </p>
+                    <h3 className="gm-park-drawer-title">{selected.slotCode}</h3>
                   </div>
                   <button
                     type="button"
@@ -1315,105 +1363,128 @@ export default function GuardParkingPage() {
                     ×
                   </button>
                 </div>
-
                 <div className="gm-park-drawer-body">
                   <dl className="gm-park-detail-grid">
                     <div>
-                      <dt>Type</dt>
-                      <dd>{formatLabel(selected.vehicleType)}</dd>
+                      <dt>Compartment</dt>
+                      <dd>{selected.compartment}</dd>
                     </div>
-                    {selected.kind === 'visitor' ? (
-                      <>
-                        <div>
-                          <dt>Visitor</dt>
-                          <dd>{selected.visitorName || '—'}</dd>
-                        </div>
-                        <div>
-                          <dt>Visiting Resident</dt>
-                          <dd>{selected.visitingResident || '—'}</dd>
-                        </div>
-                      </>
-                    ) : (
-                      <div>
-                        <dt>Resident</dt>
-                        <dd>{selected.residentName || '—'}</dd>
-                      </div>
-                    )}
-                    <div>
-                      <dt>Parking No</dt>
-                      <dd>{parkingNo(selected)}</dd>
-                    </div>
-                    <div>
-                      <dt>Entry</dt>
-                      <dd>{formatParkTime(selected.entryAt)}</dd>
-                    </div>
-                    <div>
-                      <dt>Exit</dt>
-                      <dd>{formatParkTime(selected.exitAt)}</dd>
-                    </div>
-                    {formatDuration(selected.entryAt, selected.exitAt) ? (
-                      <div>
-                        <dt>Duration</dt>
-                        <dd>{formatDuration(selected.entryAt, selected.exitAt)}</dd>
-                      </div>
-                    ) : null}
                     <div>
                       <dt>Status</dt>
                       <dd>
-                        <StatusBadge status={displayStatus(selected)} colors={STATUS_COLORS} />
+                        <StatusPill status={selected.occupancy.status} />
                       </dd>
                     </div>
-                    {selected.purpose ? (
-                      <div className="gm-park-detail-wide">
-                        <dt>Purpose</dt>
-                        <dd>{selected.purpose}</dd>
-                      </div>
-                    ) : null}
+                    {selected.category === 'resident' ? (
+                      <>
+                        <div>
+                          <dt>Allotted to</dt>
+                          <dd>{selected.allottee?.name || 'Unassigned'}</dd>
+                        </div>
+                        <div>
+                          <dt>Flat</dt>
+                          <dd>{selected.allottee?.flat || '—'}</dd>
+                        </div>
+                        <div>
+                          <dt>Vehicle</dt>
+                          <dd>{selected.allottee?.vehicleNumber || '—'}</dd>
+                        </div>
+                        <div>
+                          <dt>Entry</dt>
+                          <dd>{formatParkTime(selected.occupancy.entryAt)}</dd>
+                        </div>
+                        <div>
+                          <dt>Last exit</dt>
+                          <dd>{formatParkTime(selected.occupancy.exitAt)}</dd>
+                        </div>
+                      </>
+                    ) : (
+                      <>
+                        <div>
+                          <dt>Visitor</dt>
+                          <dd>{selected.occupancy.visitorName || '—'}</dd>
+                        </div>
+                        <div>
+                          <dt>Vehicle</dt>
+                          <dd>{selected.occupancy.vehicleNumber || '—'}</dd>
+                        </div>
+                        <div>
+                          <dt>Visiting</dt>
+                          <dd>{selected.occupancy.visitingFlat || '—'}</dd>
+                        </div>
+                        <div>
+                          <dt>Entry</dt>
+                          <dd>{formatParkTime(selected.occupancy.entryAt)}</dd>
+                        </div>
+                      </>
+                    )}
                   </dl>
                 </div>
-
-                {selected.isFreeSlot ? (
-                  <div className="gm-park-drawer-foot">
-                    <button
-                      type="button"
-                      className="gm-park-action-btn gm-park-action-btn--visitor"
-                      onClick={() => openVisitorWithSlot(selected)}
-                    >
-                      Register visitor here
-                    </button>
-                  </div>
-                ) : isInsideStatus(displayStatus(selected)) || isInsideStatus(selected.status) ? (
+                {(selected.occupancy.status === 'inside' ||
+                  selected.occupancy.status === 'occupied') && (
                   <div className="gm-park-drawer-foot">
                     <button
                       type="button"
                       className="gm-park-action-btn gm-park-action-btn--exit"
-                      disabled={busy}
-                      onClick={markExitFromDrawer}
+                      onClick={() => setConfirmExit(selected)}
                     >
-                      {busy ? 'Saving…' : 'Mark Vehicle Exit'}
+                      Vehicle Exit
                     </button>
                   </div>
-                ) : selected.kind === 'resident' && selected.presence === 'outside' ? (
+                )}
+                {selected.category === 'resident' && selected.occupancy.status === 'outside' ? (
                   <div className="gm-park-drawer-foot">
                     <button
                       type="button"
                       className="gm-park-action-btn gm-park-action-btn--entry"
                       onClick={() => {
-                        setEntryForm({
-                          slotId: selected.slotId || '',
-                          vehicleNumber: selected.vehicleNumber || '',
+                        setResidentForm({
+                          slotKey: selected.id,
+                          vehicleNumber: selected.allottee?.vehicleNumber || '',
                         });
-                        setActivePanel('entry');
                         setSelected(null);
+                        setPanel('residentEntry');
                       }}
                     >
-                      Record entry
+                      Mark Inside
+                    </button>
+                  </div>
+                ) : null}
+                {selected.category === 'visitor' && selected.occupancy.status === 'available' ? (
+                  <div className="gm-park-drawer-foot">
+                    <button
+                      type="button"
+                      className="gm-park-action-btn gm-park-action-btn--visitor"
+                      onClick={() => {
+                        setVisitorForm((s) => ({ ...s, slotKey: selected.id }));
+                        setSelected(null);
+                        setPanel('visitorEntry');
+                      }}
+                    >
+                      Give this slot
                     </button>
                   </div>
                 ) : null}
               </aside>
             </div>
-          )}
+          ) : null}
+
+          <ConfirmDialog
+            open={Boolean(confirmExit)}
+            title="Confirm exit?"
+            message={
+              confirmExit
+                ? `${confirmExit.slotCode} will become ${
+                    confirmExit.category === 'visitor' ? 'free' : 'outside'
+                  }.`
+                : ''
+            }
+            confirmLabel="Confirm Exit"
+            variant="danger"
+            loading={busy}
+            onCancel={() => setConfirmExit(null)}
+            onConfirm={() => performExit(confirmExit)}
+          />
         </main>
       </div>
     </div>
