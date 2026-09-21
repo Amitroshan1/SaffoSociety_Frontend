@@ -8,14 +8,14 @@ import {
   FileText,
   Pin,
 } from 'lucide-react';
-import EmptyState from '../../components/common/EmptyState';
-import SkeletonLoader from '../../components/common/SkeletonLoader';
+import EmptyState from '@/components/common/EmptyState';
+import SkeletonLoader from '@/components/common/SkeletonLoader';
 import {
   CategoryChip,
   PriorityBadge,
   formatNoticeDate,
-} from '../../components/resident/noticeUi';
-import { acknowledgeResidentNotice, getResidentNotice } from '../../services/notice.service';
+} from '@/components/resident/noticeUi';
+import { acknowledgeResidentNotice, getResidentNotice } from '@/services/notice.service';
 
 export default function ResidentNoticeDetailPage() {
   const { id } = useParams();

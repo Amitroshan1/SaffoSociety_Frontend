@@ -1,11 +1,11 @@
 import { useCallback, useEffect, useState } from 'react';
 import { ArrowLeft, Bell, Plus, Save, Send, Trash2 } from 'lucide-react';
 import { useNavigate, useParams } from 'react-router-dom';
-import { AppShell } from '../../../layout/admin/AppShell.jsx';
-import { PageHeader } from '../../../layout/admin/PageHeader.jsx';
-import { FormField, FormLayout, FormSelect } from '../../../components/common/index.js';
-import { ADMIN_ROUTES } from '../../../constants/adminRoutes.js';
-import { listBuildings } from '../../../services/building.service.js';
+import { AppShell } from '@/layout/admin/AppShell.jsx';
+import { PageHeader } from '@/layout/admin/PageHeader.jsx';
+import { FormField, FormLayout, FormSelect } from '@/components/common/index.js';
+import { ADMIN_ROUTES } from '@/constants/adminRoutes.js';
+import { listBuildings } from '@/services/building.service.js';
 import {
   NOTICE_CATEGORIES,
   NOTICE_PRIORITIES,
@@ -17,9 +17,9 @@ import {
   publishNotice,
   setNoticeTargets,
   updateNotice,
-} from '../../../services/notice.service.js';
-import '../../../styles/admin/AdminDashboard.css';
-import '../../../styles/common/crud.css';
+} from '@/services/notice.service.js';
+import '@/styles/admin/AdminDashboard.css';
+import '@/styles/common/crud.css';
 
 const initialForm = {
   title: '',

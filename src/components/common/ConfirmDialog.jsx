@@ -1,5 +1,5 @@
 import { useEffect } from 'react';
-import '../../styles/common/crud.css';
+import '@/styles/common/crud.css';
 
 export default function ConfirmDialog({
   open,

@@ -5,7 +5,7 @@ import {
   stopSosAlertSound,
   subscribeSosSound,
   syncSosAlertSound,
-} from '../utils/sosAlertSound';
+} from '@/utils/sosAlertSound';
 
 /**
  * Keep SOS alarm looping while `activeAlerts` is non-empty.

@@ -1,10 +1,10 @@
 import { useCallback, useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { FormField } from '../../components/common/index.js';
+import { FormField } from '@/components/common/index.js';
 import {
   getResidentNotificationPreferences,
   updateResidentNotificationPreferences,
-} from '../../services/notification.service.js';
+} from '@/services/notification.service.js';
 
 const initialState = {
   emailEnabled: false,

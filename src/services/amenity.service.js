@@ -1,1 +1,1 @@
-﻿export * from './facility.service.js';
+﻿export * from '@/services/facility.service.js';

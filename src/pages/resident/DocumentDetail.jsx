@@ -1,14 +1,14 @@
 import { useCallback, useEffect, useState } from 'react';
 import { Link, useNavigate, useParams } from 'react-router-dom';
-import EmptyState from '../../components/common/EmptyState';
-import SkeletonLoader from '../../components/common/SkeletonLoader';
+import EmptyState from '@/components/common/EmptyState';
+import SkeletonLoader from '@/components/common/SkeletonLoader';
 import {
   downloadResidentDocument,
   favoriteResidentDocument,
   formatFileSize,
   getResidentDocument,
   openDownloadedFile,
-} from '../../services/document.service';
+} from '@/services/document.service';
 
 export default function ResidentDocumentDetailPage() {
   const { id } = useParams();

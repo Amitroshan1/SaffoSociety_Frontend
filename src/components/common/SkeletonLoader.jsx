@@ -1,4 +1,4 @@
-import '../../styles/common/crud.css';
+import '@/styles/common/crud.css';
 
 export default function SkeletonLoader({ rows = 5 }) {
   return (

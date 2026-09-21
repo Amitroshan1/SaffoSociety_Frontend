@@ -1,13 +1,13 @@
 import { useEffect, useState } from 'react';
 import { ArrowLeft, Receipt } from 'lucide-react';
 import { useNavigate, useParams } from 'react-router-dom';
-import { AppShell } from '../../../layout/admin/AppShell.jsx';
-import { PageHeader } from '../../../layout/admin/PageHeader.jsx';
-import Spinner from '../../../common/Spinner.jsx';
-import { ADMIN_ROUTES, FINANCE_ROUTES } from '../../../constants/adminRoutes.js';
-import { formatMoney, getReceipt } from '../../../services/billing.service.js';
-import '../../../styles/admin/AdminDashboard.css';
-import '../../../styles/common/crud.css';
+import { AppShell } from '@/layout/admin/AppShell.jsx';
+import { PageHeader } from '@/layout/admin/PageHeader.jsx';
+import Spinner from '@/common/Spinner.jsx';
+import { ADMIN_ROUTES, FINANCE_ROUTES } from '@/constants/adminRoutes.js';
+import { formatMoney, getReceipt } from '@/services/billing.service.js';
+import '@/styles/admin/AdminDashboard.css';
+import '@/styles/common/crud.css';
 
 export default function ReceiptDetailPage({ basePath = '/admin' } = {}) {
   const navigate = useNavigate();

@@ -1,24 +1,24 @@
 import { useEffect, useState } from 'react';
 import { ArrowLeft, CalendarRange, Save } from 'lucide-react';
 import { useNavigate, useParams } from 'react-router-dom';
-import { AppShell } from '../../../layout/admin/AppShell.jsx';
-import { PageHeader } from '../../../layout/admin/PageHeader.jsx';
+import { AppShell } from '@/layout/admin/AppShell.jsx';
+import { PageHeader } from '@/layout/admin/PageHeader.jsx';
 import {
   DataTable,
   FormField,
   FormLayout,
-} from '../../../components/common/index.js';
-import Spinner from '../../../common/Spinner.jsx';
-import { ADMIN_ROUTES } from '../../../constants/adminRoutes.js';
+} from '@/components/common/index.js';
+import Spinner from '@/common/Spinner.jsx';
+import { ADMIN_ROUTES } from '@/constants/adminRoutes.js';
 import {
   closeAccountingPeriod,
   closeFinancialYear,
   createFinancialYear,
   getFinancialYear,
   listAccountingPeriods,
-} from '../../../services/billing.service.js';
-import '../../../styles/admin/AdminDashboard.css';
-import '../../../styles/common/crud.css';
+} from '@/services/billing.service.js';
+import '@/styles/admin/AdminDashboard.css';
+import '@/styles/common/crud.css';
 
 const PERIOD_COLUMNS = [
   { key: 'periodKey', label: 'Period' },

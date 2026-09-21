@@ -1,13 +1,13 @@
 import { useState } from 'react';
 import { BarChart3 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
-import { AppShell } from '../../../layout/admin/AppShell.jsx';
-import { PageHeader } from '../../../layout/admin/PageHeader.jsx';
-import { DataTable, FormField, FormSelect } from '../../../components/common/index.js';
-import { ADMIN_ROUTES } from '../../../constants/adminRoutes.js';
-import { DOCUMENT_REPORT_KEYS, getDocumentReport } from '../../../services/document.service.js';
-import '../../../styles/admin/AdminDashboard.css';
-import '../../../styles/common/crud.css';
+import { AppShell } from '@/layout/admin/AppShell.jsx';
+import { PageHeader } from '@/layout/admin/PageHeader.jsx';
+import { DataTable, FormField, FormSelect } from '@/components/common/index.js';
+import { ADMIN_ROUTES } from '@/constants/adminRoutes.js';
+import { DOCUMENT_REPORT_KEYS, getDocumentReport } from '@/services/document.service.js';
+import '@/styles/admin/AdminDashboard.css';
+import '@/styles/common/crud.css';
 
 function columnsFromRows(rows) {
   if (!rows.length) return [];

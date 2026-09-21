@@ -1,6 +1,6 @@
 import { useState } from 'react';
-import '../../../styles/guard/visitor/visitors.css';
-import { logVisitor } from '../../../services/guard.service.js';
+import '@/styles/guard/visitor/visitors.css';
+import { logVisitor } from '@/services/guard.service.js';
 
 const UI_ROLES = [
   { label: 'Maid', visitorType: 'maid', staffRole: 'housekeeping' },

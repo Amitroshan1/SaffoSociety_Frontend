@@ -1,25 +1,25 @@
 import { useEffect, useState } from 'react';
 import { ArrowLeft, Building2, Save } from 'lucide-react';
 import { useNavigate, useParams } from 'react-router-dom';
-import { AppShell } from '../../../layout/admin/AppShell.jsx';
-import { PageHeader } from '../../../layout/admin/PageHeader.jsx';
+import { AppShell } from '@/layout/admin/AppShell.jsx';
+import { PageHeader } from '@/layout/admin/PageHeader.jsx';
 import {
   ConfirmDialog,
   FormField,
   FormLayout,
   FormSelect,
-} from '../../../components/common/index.js';
-import Spinner from '../../../common/Spinner.jsx';
-import { ADMIN_ROUTES } from '../../../constants/adminRoutes.js';
+} from '@/components/common/index.js';
+import Spinner from '@/common/Spinner.jsx';
+import { ADMIN_ROUTES } from '@/constants/adminRoutes.js';
 import {
   activateBuilding,
   createBuilding,
   deactivateBuilding,
   getBuilding,
   updateBuilding,
-} from '../../../services/building.service.js';
-import '../../../styles/admin/AdminDashboard.css';
-import '../../../styles/common/crud.css';
+} from '@/services/building.service.js';
+import '@/styles/admin/AdminDashboard.css';
+import '@/styles/common/crud.css';
 
 const BUILDING_TYPE_OPTIONS = ['', 'tower', 'block', 'villa', 'commercial', 'mixed'];
 const OPERATION_STATUS_OPTIONS = ['operational', 'under_maintenance', 'blocked'];

@@ -1,6 +1,6 @@
 // client/src/components/guard/QuickActions.jsx
 
-import '../../styles/guard/guard-main.css';
+import '@/styles/guard/guard-main.css';
 
 const ACTIONS = [
   {

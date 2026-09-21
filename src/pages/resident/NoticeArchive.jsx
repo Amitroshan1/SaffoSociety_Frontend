@@ -1,13 +1,13 @@
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import DataTable from '../../components/common/DataTable';
-import ListToolbar from '../../components/common/ListToolbar';
-import Pagination from '../../components/common/Pagination';
-import NoticeTabs from '../../components/resident/NoticeTabs';
-import { buildNoticeColumns } from '../../components/resident/noticeUi';
-import { useListQuery } from '../../hooks/useListQuery';
-import { normalizePagination } from '../../utils/listQuery';
-import { getResidentArchivedNotices } from '../../services/notice.service';
+import DataTable from '@/components/common/DataTable';
+import ListToolbar from '@/components/common/ListToolbar';
+import Pagination from '@/components/common/Pagination';
+import NoticeTabs from '@/components/resident/NoticeTabs';
+import { buildNoticeColumns } from '@/components/resident/noticeUi';
+import { useListQuery } from '@/hooks/useListQuery';
+import { normalizePagination } from '@/utils/listQuery';
+import { getResidentArchivedNotices } from '@/services/notice.service';
 
 const columns = buildNoticeColumns({ dateKey: 'expiresAt', dateLabel: 'Expired / archived' });
 

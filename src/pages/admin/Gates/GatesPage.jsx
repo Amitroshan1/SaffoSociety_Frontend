@@ -1,15 +1,15 @@
 import { useCallback, useEffect, useState } from 'react';
 import { DoorOpen } from 'lucide-react';
 import { useLocation, useNavigate } from 'react-router-dom';
-import { AppShell } from '../../../layout/admin/AppShell.jsx';
-import { PageHeader } from '../../../layout/admin/PageHeader.jsx';
-import { DataTable, ListToolbar, Pagination } from '../../../components/common/index.js';
-import { useListQuery } from '../../../hooks/useListQuery.js';
-import { normalizePagination } from '../../../utils/listQuery.js';
-import { ADMIN_ROUTES } from '../../../constants/adminRoutes.js';
-import { listGates } from '../../../services/gate.service.js';
-import '../../../styles/admin/AdminDashboard.css';
-import '../../../styles/common/crud.css';
+import { AppShell } from '@/layout/admin/AppShell.jsx';
+import { PageHeader } from '@/layout/admin/PageHeader.jsx';
+import { DataTable, ListToolbar, Pagination } from '@/components/common/index.js';
+import { useListQuery } from '@/hooks/useListQuery.js';
+import { normalizePagination } from '@/utils/listQuery.js';
+import { ADMIN_ROUTES } from '@/constants/adminRoutes.js';
+import { listGates } from '@/services/gate.service.js';
+import '@/styles/admin/AdminDashboard.css';
+import '@/styles/common/crud.css';
 
 const COLUMNS = [
   { key: 'code', label: 'Code', sortable: true },

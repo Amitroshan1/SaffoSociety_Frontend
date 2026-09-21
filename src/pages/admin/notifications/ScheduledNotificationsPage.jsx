@@ -1,25 +1,25 @@
 import { useCallback, useEffect, useState } from 'react';
 import { ArrowLeft, CalendarClock } from 'lucide-react';
 import { useLocation, useNavigate } from 'react-router-dom';
-import { AppShell } from '../../../layout/admin/AppShell.jsx';
-import { PageHeader } from '../../../layout/admin/PageHeader.jsx';
+import { AppShell } from '@/layout/admin/AppShell.jsx';
+import { PageHeader } from '@/layout/admin/PageHeader.jsx';
 import {
   ConfirmDialog,
   DataTable,
   ListToolbar,
   Pagination,
-} from '../../../components/common/index.js';
-import { ADMIN_ROUTES } from '../../../constants/adminRoutes.js';
-import { useListQuery } from '../../../hooks/useListQuery.js';
-import { normalizePagination } from '../../../utils/listQuery.js';
+} from '@/components/common/index.js';
+import { ADMIN_ROUTES } from '@/constants/adminRoutes.js';
+import { useListQuery } from '@/hooks/useListQuery.js';
+import { normalizePagination } from '@/utils/listQuery.js';
 import {
   SCHEDULE_STATUSES,
   cancelScheduledNotification,
   formatLabel,
   listScheduledNotifications,
-} from '../../../services/notification.service.js';
-import '../../../styles/admin/AdminDashboard.css';
-import '../../../styles/common/crud.css';
+} from '@/services/notification.service.js';
+import '@/styles/admin/AdminDashboard.css';
+import '@/styles/common/crud.css';
 
 export default function ScheduledNotificationsPage() {
   const navigate = useNavigate();

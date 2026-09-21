@@ -1,20 +1,20 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { ArrowLeft, Hospital, Clock3, Hash, MapPin, Save } from 'lucide-react';
-import { AppShell } from '../../../layout/admin/AppShell.jsx';
-import { PageHeader } from '../../../layout/admin/PageHeader.jsx';
+import { AppShell } from '@/layout/admin/AppShell.jsx';
+import { PageHeader } from '@/layout/admin/PageHeader.jsx';
 import {
   getSociety,
   createSociety,
   updateSociety,
   deactivateSociety,
   activateSociety,
-} from '../../../services/society.service';
-import SocietyListPanel from '../../../components/admin/SocietyListPanel.jsx';
-import { ConfirmDialog, FormField, FormSelect } from '../../../components/common/index.js';
-import { ADMIN_ROUTES } from '../../../constants/adminRoutes.js';
-import '../../../styles/admin/AdminDashboard.css';
-import '../../../styles/common/crud.css';
+} from '@/services/society.service';
+import SocietyListPanel from '@/components/admin/SocietyListPanel.jsx';
+import { ConfirmDialog, FormField, FormSelect } from '@/components/common/index.js';
+import { ADMIN_ROUTES } from '@/constants/adminRoutes.js';
+import '@/styles/admin/AdminDashboard.css';
+import '@/styles/common/crud.css';
 
 const emptyForm = {
   name: '',

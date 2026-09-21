@@ -1,14 +1,14 @@
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import DataTable from '../../components/common/DataTable';
-import EmptyState from '../../components/common/EmptyState';
-import ListToolbar from '../../components/common/ListToolbar';
-import Pagination from '../../components/common/Pagination';
-import { useListQuery } from '../../hooks/useListQuery';
+import DataTable from '@/components/common/DataTable';
+import EmptyState from '@/components/common/EmptyState';
+import ListToolbar from '@/components/common/ListToolbar';
+import Pagination from '@/components/common/Pagination';
+import { useListQuery } from '@/hooks/useListQuery';
 import {
   listResidentVisitors,
   residentVisitorApproval,
-} from '../../services/residentPortal.service';
+} from '@/services/residentPortal.service';
 
 const columns = [
   { key: 'visitorName', label: 'Visitor', sortable: true },

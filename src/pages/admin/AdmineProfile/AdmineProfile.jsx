@@ -6,9 +6,9 @@ import {
   Shield, Briefcase, BadgeCheck, Clock, LogOut, KeyRound, Camera,
   Pencil, AlertCircle, ChevronRight, Lock, Eye, EyeOff, Check, X,
 } from "lucide-react";
-import { useAuth } from "../../../hooks/useAuth";
-import { getProfile, updateProfile, changePassword } from "../../../services/admin.service";
-import "./AdmineProfile.css";
+import { useAuth } from "@/hooks/useAuth";
+import { getProfile, updateProfile, changePassword } from "@/services/admin.service";
+import "@/pages/admin/AdmineProfile/AdmineProfile.css";
 
 /* ─── Avatar ─────────────────────────────────────────────── */
 const Avatar = ({ name = "", size = 96 }) => {
@@ -508,9 +508,9 @@ export default function AdminProfile() {
 //   Shield, Briefcase, BadgeCheck, Clock, LogOut, KeyRound, Camera,
 //   Pencil, AlertCircle, ChevronRight, Lock, Eye, EyeOff, Check, X,
 // } from "lucide-react";
-// import { useAuth } from "../../../hooks/useAuth";
-// import { getProfile, updateProfile, changePassword } from "../../../services/admin.service";
-// import "./AdmineProfile.css";
+// import { useAuth } from "@/hooks/useAuth";
+// import { getProfile, updateProfile, changePassword } from "@/services/admin.service";
+// import "@/pages/admin/AdmineProfile/AdmineProfile.css";
 
 // /* ─── Avatar ─────────────────────────────────────────────── */
 // const Avatar = ({ name = "", size = 96 }) => {

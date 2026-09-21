@@ -1,27 +1,27 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { ChevronDown } from 'lucide-react';
-import { navigateGuard } from '../../../constants/guardRoutes.js';
-import '../../../styles/guard/guard-main.css';
-import '../../../styles/guard/visitor/visitors.css';
-import '../../../styles/common/crud.css';
-import Sidebar from '../../../components/guard/Sidebar';
-import DashboardHeader from '../../../components/guard/DashboardHeader';
+import { navigateGuard } from '@/constants/guardRoutes.js';
+import '@/styles/guard/guard-main.css';
+import '@/styles/guard/visitor/visitors.css';
+import '@/styles/common/crud.css';
+import Sidebar from '@/components/guard/Sidebar';
+import DashboardHeader from '@/components/guard/DashboardHeader';
 import {
   FormField,
   FormSelect,
   SearchInput,
   ConfirmDialog,
-} from '../../../components/common/index.js';
-import SearchableParkingCode from '../../../components/guard/parking/SearchableParkingCode.jsx';
-import ParkingLogsPanel from '../../../components/guard/parking/ParkingLogsPanel.jsx';
+} from '@/components/common/index.js';
+import SearchableParkingCode from '@/components/guard/parking/SearchableParkingCode.jsx';
+import ParkingLogsPanel from '@/components/guard/parking/ParkingLogsPanel.jsx';
 import {
   createGuardVisitorParking,
   formatLabel,
   listTodayGuardParking,
   recordParkingEntry,
   recordParkingExit,
-} from '../../../services/parking.service.js';
+} from '@/services/parking.service.js';
 
 /**
  * Park+-ready slot shape (frontend model):
@@ -743,8 +743,8 @@ export default function GuardParkingPage() {
     setError('');
     try {
       if (slot.slotId || slot.allottee?.vehicleNumber) {
-        try {
-          await recordParkingEntry({
+    try {
+      await recordParkingEntry({
             slotId: slot.slotId || null,
             vehicleNumber: slot.allottee?.vehicleNumber || null,
           });
@@ -953,7 +953,7 @@ export default function GuardParkingPage() {
         <main className="gm-main gm-park-page gm-pcd">
           <div className="gm-park-topbar">
             <div className="gm-park-page-head">
-              <h2 className="gm-park-page-title">Parking</h2>
+          <h2 className="gm-park-page-title">Parking</h2>
             </div>
             <div className="gm-park-toolbar-btns">
               <button
@@ -986,8 +986,8 @@ export default function GuardParkingPage() {
           <section className="glass-card gm-pcd-live">
             <div className="gm-pcd-live-head">
               <div className="gm-pcd-tabs">
-                <button
-                  type="button"
+              <button
+                type="button"
                   className={tab === 'live' ? 'is-active' : ''}
                   onClick={() => {
                     setTab('live');
@@ -1022,9 +1022,9 @@ export default function GuardParkingPage() {
                   }}
                 >
                   Visitor Parking
-                </button>
-              </div>
+              </button>
             </div>
+          </div>
 
             {tab === 'live' ? (
               <ParkingLogsPanel localLogs={parkLogs} />
@@ -1220,7 +1220,7 @@ export default function GuardParkingPage() {
                           <div>
                             <span>Parking No</span>
                             <strong>{matchedResident.slotCode}</strong>
-                          </div>
+                    </div>
                           <div>
                             <span>Flat No</span>
                             <strong>{matchedResident.allottee?.flat || '—'}</strong>
@@ -1330,7 +1330,7 @@ export default function GuardParkingPage() {
                                     ? 'Owner'
                                     : 'Resident'}
                             </strong>
-                          </div>
+                    </div>
                           <div>
                             <span>Parking No</span>
                             <strong>{exitMatch.slotCode}</strong>
@@ -1389,7 +1389,7 @@ export default function GuardParkingPage() {
                 <div className="gm-park-modal-actions">
                   <button type="button" className="btn-secondary" onClick={closePanel} disabled={busy}>
                     Cancel
-                  </button>
+                </button>
                   {panel === 'residentEntry' ? (
                     <button
                       type="button"
@@ -1424,7 +1424,7 @@ export default function GuardParkingPage() {
                           : 'Mark Outside'}
                     </button>
                   ) : null}
-                </div>
+            </div>
               </div>
             </div>
           ) : null}

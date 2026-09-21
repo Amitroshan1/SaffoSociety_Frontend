@@ -1,18 +1,18 @@
 import { useEffect, useState } from 'react';
 import { FilePlus } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
-import { AppShell } from '../../../layout/admin/AppShell.jsx';
-import { PageHeader } from '../../../layout/admin/PageHeader.jsx';
-import { FormField, FormLayout, FormSelect } from '../../../components/common/index.js';
-import { ADMIN_ROUTES } from '../../../constants/adminRoutes.js';
+import { AppShell } from '@/layout/admin/AppShell.jsx';
+import { PageHeader } from '@/layout/admin/PageHeader.jsx';
+import { FormField, FormLayout, FormSelect } from '@/components/common/index.js';
+import { ADMIN_ROUTES } from '@/constants/adminRoutes.js';
 import {
   generateBills,
   listBillingCycles,
   listChargeHeads,
   listFinancialYears,
-} from '../../../services/billing.service.js';
-import '../../../styles/admin/AdminDashboard.css';
-import '../../../styles/common/crud.css';
+} from '@/services/billing.service.js';
+import '@/styles/admin/AdminDashboard.css';
+import '@/styles/common/crud.css';
 
 const initialForm = {
   cycleId: '',

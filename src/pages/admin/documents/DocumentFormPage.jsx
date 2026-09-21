@@ -1,10 +1,10 @@
 import { useCallback, useEffect, useState } from 'react';
 import { ArrowLeft, FolderOpen, Plus, Save, Send, Trash2 } from 'lucide-react';
 import { useNavigate, useParams } from 'react-router-dom';
-import { AppShell } from '../../../layout/admin/AppShell.jsx';
-import { PageHeader } from '../../../layout/admin/PageHeader.jsx';
-import { FormField, FormLayout, FormSelect } from '../../../components/common/index.js';
-import { ADMIN_ROUTES } from '../../../constants/adminRoutes.js';
+import { AppShell } from '@/layout/admin/AppShell.jsx';
+import { PageHeader } from '@/layout/admin/PageHeader.jsx';
+import { FormField, FormLayout, FormSelect } from '@/components/common/index.js';
+import { ADMIN_ROUTES } from '@/constants/adminRoutes.js';
 import {
   DOCUMENT_ALLOWED_MIME_TYPES,
   DOCUMENT_PERMISSION_TYPES,
@@ -15,9 +15,9 @@ import {
   publishDocument,
   setDocumentPermissions,
   updateDocument,
-} from '../../../services/document.service.js';
-import '../../../styles/admin/AdminDashboard.css';
-import '../../../styles/common/crud.css';
+} from '@/services/document.service.js';
+import '@/styles/admin/AdminDashboard.css';
+import '@/styles/common/crud.css';
 
 const initialForm = {
   title: '',

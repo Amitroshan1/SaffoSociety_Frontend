@@ -1,15 +1,15 @@
 ﻿import { useCallback, useEffect, useState } from 'react';
 import { Link, useNavigate, useParams } from 'react-router-dom';
-import EmptyState from '../../components/common/EmptyState';
-import FormField from '../../components/common/FormField';
-import SkeletonLoader from '../../components/common/SkeletonLoader';
+import EmptyState from '@/components/common/EmptyState';
+import FormField from '@/components/common/FormField';
+import SkeletonLoader from '@/components/common/SkeletonLoader';
 import {
   createResidentBooking,
   formatAmount,
   formatAvailableDays,
   formatCategory,
   getResidentAmenity,
-} from '../../services/facility.service';
+} from '@/services/facility.service';
 
 const initialForm = {
   bookingDate: '',

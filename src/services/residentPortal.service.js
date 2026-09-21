@@ -1,4 +1,4 @@
-import api from './api';
+import api from '@/services/api';
 
 export const getResidentDashboard = () => api.get('/resident/dashboard');
 export const getResidentProfile = () => api.get('/resident/profile');

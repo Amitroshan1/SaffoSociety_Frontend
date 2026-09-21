@@ -1,17 +1,17 @@
 import { useEffect, useState } from 'react';
 import { ArrowLeft, Clock3, Plus, Save } from 'lucide-react';
 import { useNavigate, useParams } from 'react-router-dom';
-import { AppShell } from '../../../layout/admin/AppShell.jsx';
-import { PageHeader } from '../../../layout/admin/PageHeader.jsx';
+import { AppShell } from '@/layout/admin/AppShell.jsx';
+import { PageHeader } from '@/layout/admin/PageHeader.jsx';
 import {
   FormField,
   FormLayout,
   FormSelect,
-} from '../../../components/common/index.js';
-import Spinner from '../../../common/Spinner.jsx';
-import { ADMIN_ROUTES } from '../../../constants/adminRoutes.js';
-import { listGates } from '../../../services/gate.service.js';
-import { listStaff } from '../../../services/staff.service.js';
+} from '@/components/common/index.js';
+import Spinner from '@/common/Spinner.jsx';
+import { ADMIN_ROUTES } from '@/constants/adminRoutes.js';
+import { listGates } from '@/services/gate.service.js';
+import { listStaff } from '@/services/staff.service.js';
 import {
   cancelShift,
   completeShift,
@@ -20,9 +20,9 @@ import {
   markNoShow,
   startShift,
   updateShift,
-} from '../../../services/shift.service.js';
-import '../../../styles/admin/AdminDashboard.css';
-import '../../../styles/common/crud.css';
+} from '@/services/shift.service.js';
+import '@/styles/admin/AdminDashboard.css';
+import '@/styles/common/crud.css';
 
 const SHIFT_TYPES = ['morning', 'evening', 'night', 'custom'];
 

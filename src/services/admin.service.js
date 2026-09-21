@@ -1,4 +1,4 @@
-import api from './api';
+import api from '@/services/api';
 
 export const getProfile = () => api.get('/admin/profile');
 

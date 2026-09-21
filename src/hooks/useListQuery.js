@@ -1,5 +1,5 @@
 import { useCallback, useMemo, useState } from 'react';
-import { DEFAULT_LIST_STATE, toListParams } from '../utils/listQuery';
+import { DEFAULT_LIST_STATE, toListParams } from '@/utils/listQuery';
 
 export function useListQuery(initial = {}) {
   const [state, setState] = useState({ ...DEFAULT_LIST_STATE, ...initial });

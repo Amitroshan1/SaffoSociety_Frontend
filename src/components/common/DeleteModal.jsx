@@ -1,4 +1,4 @@
-import ConfirmDialog from './ConfirmDialog.jsx';
+import ConfirmDialog from '@/components/common/ConfirmDialog.jsx';
 
 export default function DeleteModal({
   open,

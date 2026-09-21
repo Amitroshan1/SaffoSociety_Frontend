@@ -6,14 +6,14 @@ import {
   MessageSquare,
 } from "lucide-react";
 
-import { AppShell } from "../../layout/admin/AppShell.jsx";
-import { PageHeader } from "../../layout/admin/PageHeader.jsx";
-import { SidePanel, PanelSection } from "../../layout/admin/SidePanel.jsx";
-import { StatCard } from "../../components/admin/StatCard.jsx";
-import { PaymentsTable } from "../../components/admin/PaymentsTable.jsx";
-import { ADMIN_ROUTES } from "../../constants/adminRoutes.js";
+import { AppShell } from "@/layout/admin/AppShell.jsx";
+import { PageHeader } from "@/layout/admin/PageHeader.jsx";
+import { SidePanel, PanelSection } from "@/layout/admin/SidePanel.jsx";
+import { StatCard } from "@/components/admin/StatCard.jsx";
+import { PaymentsTable } from "@/components/admin/PaymentsTable.jsx";
+import { ADMIN_ROUTES } from "@/constants/adminRoutes.js";
 import { useState } from "react";
-import '../../styles/admin/AdminDashboard.css';
+import '@/styles/admin/AdminDashboard.css';
 
 export default function Dashboard() {
   const navigate = useNavigate();

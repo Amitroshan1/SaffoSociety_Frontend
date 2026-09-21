@@ -1,8 +1,8 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { Plus, Save, Tags } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
-import { AppShell } from '../../../layout/admin/AppShell.jsx';
-import { PageHeader } from '../../../layout/admin/PageHeader.jsx';
+import { AppShell } from '@/layout/admin/AppShell.jsx';
+import { PageHeader } from '@/layout/admin/PageHeader.jsx';
 import {
   DataTable,
   FilterBar,
@@ -10,16 +10,16 @@ import {
   FormLayout,
   FormSelect,
   SearchInput,
-} from '../../../components/common/index.js';
-import { ADMIN_ROUTES } from '../../../constants/adminRoutes.js';
+} from '@/components/common/index.js';
+import { ADMIN_ROUTES } from '@/constants/adminRoutes.js';
 import {
   createDocumentCategory,
   deactivateDocumentCategory,
   listDocumentCategories,
   updateDocumentCategory,
-} from '../../../services/document.service.js';
-import '../../../styles/admin/AdminDashboard.css';
-import '../../../styles/common/crud.css';
+} from '@/services/document.service.js';
+import '@/styles/admin/AdminDashboard.css';
+import '@/styles/common/crud.css';
 
 const COLUMNS = [
   { key: 'code', label: 'Code' },

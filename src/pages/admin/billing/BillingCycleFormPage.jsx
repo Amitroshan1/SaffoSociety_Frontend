@@ -1,24 +1,24 @@
 import { useEffect, useState } from 'react';
 import { ArrowLeft, CalendarClock, Save } from 'lucide-react';
 import { useNavigate, useParams } from 'react-router-dom';
-import { AppShell } from '../../../layout/admin/AppShell.jsx';
-import { PageHeader } from '../../../layout/admin/PageHeader.jsx';
+import { AppShell } from '@/layout/admin/AppShell.jsx';
+import { PageHeader } from '@/layout/admin/PageHeader.jsx';
 import {
   FormField,
   FormLayout,
   FormSelect,
-} from '../../../components/common/index.js';
-import Spinner from '../../../common/Spinner.jsx';
-import { ADMIN_ROUTES } from '../../../constants/adminRoutes.js';
+} from '@/components/common/index.js';
+import Spinner from '@/common/Spinner.jsx';
+import { ADMIN_ROUTES } from '@/constants/adminRoutes.js';
 import {
   activateBillingCycle,
   createBillingCycle,
   deactivateBillingCycle,
   getBillingCycle,
   updateBillingCycle,
-} from '../../../services/billing.service.js';
-import '../../../styles/admin/AdminDashboard.css';
-import '../../../styles/common/crud.css';
+} from '@/services/billing.service.js';
+import '@/styles/admin/AdminDashboard.css';
+import '@/styles/common/crud.css';
 
 const FREQUENCIES = ['monthly', 'quarterly', 'half_yearly', 'yearly', 'manual', 'custom'];
 

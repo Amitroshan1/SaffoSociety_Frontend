@@ -1,15 +1,15 @@
 ﻿import { useCallback, useEffect, useState } from 'react';
 import { Link, useNavigate, useParams } from 'react-router-dom';
-import EmptyState from '../../components/common/EmptyState';
-import SkeletonLoader from '../../components/common/SkeletonLoader';
-import StatusBadge from '../../components/common/StatusBadge';
+import EmptyState from '@/components/common/EmptyState';
+import SkeletonLoader from '@/components/common/SkeletonLoader';
+import StatusBadge from '@/components/common/StatusBadge';
 import {
   BOOKING_STATUS_COLORS,
   cancelResidentBooking,
   formatAmount,
   getResidentBooking,
   getResidentBookingReceipt,
-} from '../../services/facility.service';
+} from '@/services/facility.service';
 
 export default function ResidentBookingDetailPage() {
   const { id } = useParams();

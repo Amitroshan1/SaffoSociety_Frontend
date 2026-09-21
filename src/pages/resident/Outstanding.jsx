@@ -1,9 +1,9 @@
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import DataTable from '../../components/common/DataTable';
-import EmptyState from '../../components/common/EmptyState';
-import SkeletonLoader from '../../components/common/SkeletonLoader';
-import { formatMoney, getResidentOutstanding } from '../../services/billing.service';
+import DataTable from '@/components/common/DataTable';
+import EmptyState from '@/components/common/EmptyState';
+import SkeletonLoader from '@/components/common/SkeletonLoader';
+import { formatMoney, getResidentOutstanding } from '@/services/billing.service';
 
 const BILL_COLUMNS = [
   { key: 'billNumber', label: 'Bill #' },

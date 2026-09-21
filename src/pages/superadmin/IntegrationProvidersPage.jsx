@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { integrationsService } from '../../services/integrations.service';
+import { integrationsService } from '@/services/integrations.service';
 
 export default function IntegrationProvidersPage() {
   const [providers, setProviders] = useState([]);

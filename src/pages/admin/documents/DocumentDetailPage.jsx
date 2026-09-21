@@ -1,10 +1,10 @@
 import { useCallback, useEffect, useState } from 'react';
 import { ArrowLeft, FolderOpen, Pencil } from 'lucide-react';
 import { useNavigate, useParams } from 'react-router-dom';
-import { AppShell } from '../../../layout/admin/AppShell.jsx';
-import { PageHeader } from '../../../layout/admin/PageHeader.jsx';
-import { ConfirmDialog, EmptyState, FormField, FormSelect } from '../../../components/common/index.js';
-import { ADMIN_ROUTES } from '../../../constants/adminRoutes.js';
+import { AppShell } from '@/layout/admin/AppShell.jsx';
+import { PageHeader } from '@/layout/admin/PageHeader.jsx';
+import { ConfirmDialog, EmptyState, FormField, FormSelect } from '@/components/common/index.js';
+import { ADMIN_ROUTES } from '@/constants/adminRoutes.js';
 import {
   DOCUMENT_ALLOWED_MIME_TYPES,
   archiveDocument,
@@ -15,9 +15,9 @@ import {
   publishDocument,
   restoreDocument,
   addDocumentVersion,
-} from '../../../services/document.service.js';
-import '../../../styles/admin/AdminDashboard.css';
-import '../../../styles/common/crud.css';
+} from '@/services/document.service.js';
+import '@/styles/admin/AdminDashboard.css';
+import '@/styles/common/crud.css';
 
 const TABS = [
   { id: 'info', label: 'Info' },

@@ -1,26 +1,27 @@
 import { useEffect, useState } from 'react';
 import { ArrowLeft, DoorOpen, Save } from 'lucide-react';
 import { useNavigate, useParams } from 'react-router-dom';
-import { AppShell } from '../../../layout/admin/AppShell.jsx';
-import { PageHeader } from '../../../layout/admin/PageHeader.jsx';
+import { AppShell } from '@/layout/admin/AppShell.jsx';
+import { PageHeader } from '@/layout/admin/PageHeader.jsx';
 import {
   FormField,
   FormLayout,
   FormSelect,
-} from '../../../components/common/index.js';
-import Spinner from '../../../common/Spinner.jsx';
-import { ADMIN_ROUTES } from '../../../constants/adminRoutes.js';
+} from '@/components/common/index.js';
+import Spinner from '@/common/Spinner.jsx';
+import { ADMIN_ROUTES } from '@/constants/adminRoutes.js';
 import {
   activateGate,
   createGate,
   deactivateGate,
   getGate,
   updateGate,
-} from '../../../services/gate.service.js';
-import '../../../styles/admin/AdminDashboard.css';
-import '../../../styles/common/crud.css';
+} from '@/services/gate.service.js';
+import '@/styles/admin/AdminDashboard.css';
+import '@/styles/common/crud.css';
 
 const GATE_TYPES = ['main', 'service', 'pedestrian', 'vehicle', 'basement', 'emergency', 'other'];
+const DEFAULT_GEOFENCE_RADIUS_M = 120;
 
 const initialForm = {
   code: '',
@@ -29,6 +30,9 @@ const initialForm = {
   locationDescription: '',
   sequence: '0',
   notes: '',
+  latitude: '',
+  longitude: '',
+  geofenceRadiusMeters: String(DEFAULT_GEOFENCE_RADIUS_M),
 };
 
 function toForm(gate) {
@@ -39,7 +43,31 @@ function toForm(gate) {
     locationDescription: gate.locationDescription || '',
     sequence: String(gate.sequence ?? 0),
     notes: gate.notes || '',
+    latitude:
+      gate.latitude !== undefined && gate.latitude !== null ? String(gate.latitude) : '',
+    longitude:
+      gate.longitude !== undefined && gate.longitude !== null ? String(gate.longitude) : '',
+    geofenceRadiusMeters:
+      gate.geofenceRadiusMeters !== undefined && gate.geofenceRadiusMeters !== null
+        ? String(gate.geofenceRadiusMeters)
+        : String(DEFAULT_GEOFENCE_RADIUS_M),
   };
+}
+
+function parseOptionalNumber(value) {
+  const trimmed = String(value ?? '').trim();
+  if (!trimmed) return null;
+  const n = Number(trimmed);
+  return Number.isFinite(n) ? n : null;
+}
+
+function geofencePayload(form) {
+  const latitude = parseOptionalNumber(form.latitude);
+  const longitude = parseOptionalNumber(form.longitude);
+  const radiusRaw = parseOptionalNumber(form.geofenceRadiusMeters);
+  const geofenceRadiusMeters =
+    radiusRaw !== null && radiusRaw > 0 ? radiusRaw : DEFAULT_GEOFENCE_RADIUS_M;
+  return { latitude, longitude, geofenceRadiusMeters };
 }
 
 export default function GateFormPage() {
@@ -85,6 +113,7 @@ export default function GateFormPage() {
     setError('');
     setSuccess('');
     try {
+      const geo = geofencePayload(form);
       if (isCreate) {
         const payload = {
           code: form.code.trim(),
@@ -93,6 +122,9 @@ export default function GateFormPage() {
           locationDescription: form.locationDescription.trim() || null,
           sequence: Number(form.sequence) || 0,
           notes: form.notes.trim() || null,
+          latitude: geo.latitude,
+          longitude: geo.longitude,
+          geofenceRadiusMeters: geo.geofenceRadiusMeters,
         };
         const res = await createGate(payload);
         navigate('/admin/gates', {
@@ -107,6 +139,9 @@ export default function GateFormPage() {
         locationDescription: form.locationDescription.trim() || null,
         sequence: Number(form.sequence) || 0,
         notes: form.notes.trim() || null,
+        latitude: geo.latitude,
+        longitude: geo.longitude,
+        geofenceRadiusMeters: geo.geofenceRadiusMeters,
       });
       const g = res.data.data?.gate ?? res.data.data;
       if (g) {
@@ -223,6 +258,24 @@ export default function GateFormPage() {
                       label="Sequence"
                       value={form.sequence}
                       onChange={(v) => setForm((s) => ({ ...s, sequence: v }))}
+                    />
+                    <FormField
+                      label="Latitude"
+                      type="number"
+                      value={form.latitude}
+                      onChange={(v) => setForm((s) => ({ ...s, latitude: v }))}
+                    />
+                    <FormField
+                      label="Longitude"
+                      type="number"
+                      value={form.longitude}
+                      onChange={(v) => setForm((s) => ({ ...s, longitude: v }))}
+                    />
+                    <FormField
+                      label="Geofence Radius (meters)"
+                      type="number"
+                      value={form.geofenceRadiusMeters}
+                      onChange={(v) => setForm((s) => ({ ...s, geofenceRadiusMeters: v }))}
                     />
                     <FormField
                       textarea

@@ -1,4 +1,4 @@
-import '../../styles/common/crud.css';
+import '@/styles/common/crud.css';
 
 export default function FilterBar({ filters = [], values = {}, onChange, children }) {
   return (

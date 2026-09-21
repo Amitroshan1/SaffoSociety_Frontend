@@ -1,18 +1,18 @@
 import { useEffect, useState } from 'react';
 import { Settings2 } from 'lucide-react';
-import { AppShell } from '../../../layout/admin/AppShell.jsx';
-import { PageHeader } from '../../../layout/admin/PageHeader.jsx';
-import { DataTable, SkeletonLoader } from '../../../components/common/index.js';
-import { ADMIN_ROUTES } from '../../../constants/adminRoutes.js';
+import { AppShell } from '@/layout/admin/AppShell.jsx';
+import { PageHeader } from '@/layout/admin/PageHeader.jsx';
+import { DataTable, SkeletonLoader } from '@/components/common/index.js';
+import { ADMIN_ROUTES } from '@/constants/adminRoutes.js';
 import {
   formatLabel,
   getAnalyticsPreferences,
   listAnalyticsAccessLogs,
   rebuildAnalytics,
   updateAnalyticsPreferences,
-} from '../../../services/analytics.service.js';
-import '../../../styles/admin/AdminDashboard.css';
-import '../../../styles/common/crud.css';
+} from '@/services/analytics.service.js';
+import '@/styles/admin/AdminDashboard.css';
+import '@/styles/common/crud.css';
 
 export default function AnalyticsSettingsPage() {
   const [prefs, setPrefs] = useState(null);

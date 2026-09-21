@@ -1,25 +1,25 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
-import { navigateGuard } from '../../../constants/guardRoutes.js';
-import '../../../styles/guard/guard-main.css';
-import '../../../styles/guard/visitor/visitors.css';
-import Sidebar from '../../../components/guard/Sidebar';
-import DashboardHeader from '../../../components/guard/DashboardHeader';
-import AddStaffModal from '../../../components/guard/staff/AddStaffModal.jsx';
-import GateDatePicker from '../../../components/guard/shared/GateDatePicker.jsx';
-import api from '../../../services/api.js';
-import { listStaff } from '../../../services/staff.service.js';
+import { navigateGuard } from '@/constants/guardRoutes.js';
+import '@/styles/guard/guard-main.css';
+import '@/styles/guard/visitor/visitors.css';
+import Sidebar from '@/components/guard/Sidebar';
+import DashboardHeader from '@/components/guard/DashboardHeader';
+import AddStaffModal from '@/components/guard/staff/AddStaffModal.jsx';
+import GateDatePicker from '@/components/guard/shared/GateDatePicker.jsx';
+import api from '@/services/api.js';
+import { listStaff } from '@/services/staff.service.js';
 import {
   checkInAttendance,
   checkOutAttendance,
   listAttendance,
-} from '../../../services/attendance.service.js';
+} from '@/services/attendance.service.js';
 import {
   getFlatContact,
   logGuardCall,
   markVisitorExit,
   tryGuardApprove,
-} from '../../../services/guard.service.js';
+} from '@/services/guard.service.js';
 
 const SECURITY_ROLES = new Set(['security_guard', 'security_supervisor']);
 

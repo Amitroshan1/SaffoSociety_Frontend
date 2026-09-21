@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
-import DataTable from '../../components/common/DataTable';
-import EmptyState from '../../components/common/EmptyState';
-import { listResidentVisitors } from '../../services/residentPortal.service';
+import DataTable from '@/components/common/DataTable';
+import EmptyState from '@/components/common/EmptyState';
+import { listResidentVisitors } from '@/services/residentPortal.service';
 
 const columns = [
   { key: 'visitorName', label: 'Visitor' },

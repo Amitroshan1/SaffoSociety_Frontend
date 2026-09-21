@@ -1,11 +1,11 @@
 import { useEffect, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import DataTable from '../../components/common/DataTable';
-import EmptyState from '../../components/common/EmptyState';
-import SkeletonLoader from '../../components/common/SkeletonLoader';
-import { formatMoney, getResidentOutstanding } from '../../services/billing.service';
-import { getResidentDashboard } from '../../services/residentPortal.service';
-import { getResidentPinnedNotices, getResidentUnreadNotices } from '../../services/notice.service';
+import DataTable from '@/components/common/DataTable';
+import EmptyState from '@/components/common/EmptyState';
+import SkeletonLoader from '@/components/common/SkeletonLoader';
+import { formatMoney, getResidentOutstanding } from '@/services/billing.service';
+import { getResidentDashboard } from '@/services/residentPortal.service';
+import { getResidentPinnedNotices, getResidentUnreadNotices } from '@/services/notice.service';
 
 const HOUSEHOLD_COLUMNS = [
   { key: 'residentName', label: 'Member', render: (row) => row.residentName || '-' },

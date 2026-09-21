@@ -1,8 +1,8 @@
 ﻿import { useCallback, useEffect, useState } from 'react';
 import { ClipboardList } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
-import { AppShell } from '../../../layout/admin/AppShell.jsx';
-import { PageHeader } from '../../../layout/admin/PageHeader.jsx';
+import { AppShell } from '@/layout/admin/AppShell.jsx';
+import { PageHeader } from '@/layout/admin/PageHeader.jsx';
 import {
   DataTable,
   FilterBar,
@@ -10,10 +10,10 @@ import {
   Pagination,
   SearchInput,
   StatusBadge,
-} from '../../../components/common/index.js';
-import { ADMIN_ROUTES } from '../../../constants/adminRoutes.js';
-import { useListQuery } from '../../../hooks/useListQuery.js';
-import { normalizePagination } from '../../../utils/listQuery.js';
+} from '@/components/common/index.js';
+import { ADMIN_ROUTES } from '@/constants/adminRoutes.js';
+import { useListQuery } from '@/hooks/useListQuery.js';
+import { normalizePagination } from '@/utils/listQuery.js';
 import {
   BOOKING_STATUSES,
   BOOKING_STATUS_COLORS,
@@ -22,9 +22,9 @@ import {
   listAmenities,
   listBookings,
   rejectBooking,
-} from '../../../services/facility.service.js';
-import '../../../styles/admin/AdminDashboard.css';
-import '../../../styles/common/crud.css';
+} from '@/services/facility.service.js';
+import '@/styles/admin/AdminDashboard.css';
+import '@/styles/common/crud.css';
 
 export default function BookingsPage() {
   const navigate = useNavigate();

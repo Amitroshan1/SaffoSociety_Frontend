@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { platformService } from '../../services/platform.service';
+import { platformService } from '@/services/platform.service';
 
 const emptyForm = {
   name: '',

@@ -1,23 +1,23 @@
 import { useCallback, useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { navigateGuard } from '../../../constants/guardRoutes.js';
-import '../../../styles/guard/guard-main.css';
-import Sidebar from '../../../components/guard/Sidebar';
-import DashboardHeader from '../../../components/guard/DashboardHeader';
+import { navigateGuard } from '@/constants/guardRoutes.js';
+import '@/styles/guard/guard-main.css';
+import Sidebar from '@/components/guard/Sidebar';
+import DashboardHeader from '@/components/guard/DashboardHeader';
 import {
   activateTestSos,
   getActiveTestSosAlerts,
   readTestSos,
   resolveTestSos,
   subscribeTestSos,
-} from '../../../constants/guardSosDemo.js';
+} from '@/constants/guardSosDemo.js';
 import {
   ensureSosSoundBridge,
   getSosSoundState,
   stopSosAlertSound,
   subscribeSosSound,
   syncSosAlertSound,
-} from '../../../utils/sosAlertSound.js';
+} from '@/utils/sosAlertSound.js';
 
 /**
  * Temporary SOS test page — one dummy alert, Activate / Resolve (frontend only).

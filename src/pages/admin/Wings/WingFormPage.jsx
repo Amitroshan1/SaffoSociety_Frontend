@@ -1,26 +1,26 @@
 import { useEffect, useState } from 'react';
 import { ArrowLeft, Layers, Save } from 'lucide-react';
 import { useNavigate, useParams, useSearchParams } from 'react-router-dom';
-import { AppShell } from '../../../layout/admin/AppShell.jsx';
-import { PageHeader } from '../../../layout/admin/PageHeader.jsx';
+import { AppShell } from '@/layout/admin/AppShell.jsx';
+import { PageHeader } from '@/layout/admin/PageHeader.jsx';
 import {
   ConfirmDialog,
   FormField,
   FormLayout,
   FormSelect,
-} from '../../../components/common/index.js';
-import Spinner from '../../../common/Spinner.jsx';
-import { ADMIN_ROUTES } from '../../../constants/adminRoutes.js';
-import { listBuildings } from '../../../services/building.service.js';
+} from '@/components/common/index.js';
+import Spinner from '@/common/Spinner.jsx';
+import { ADMIN_ROUTES } from '@/constants/adminRoutes.js';
+import { listBuildings } from '@/services/building.service.js';
 import {
   activateWing,
   createWing,
   deactivateWing,
   getWing,
   updateWing,
-} from '../../../services/wing.service.js';
-import '../../../styles/admin/AdminDashboard.css';
-import '../../../styles/common/crud.css';
+} from '@/services/wing.service.js';
+import '@/styles/admin/AdminDashboard.css';
+import '@/styles/common/crud.css';
 
 const WING_TYPE_OPTIONS = ['', 'residential', 'commercial', 'service', 'mixed'];
 const OPERATION_STATUS_OPTIONS = ['operational', 'under_maintenance', 'blocked'];

@@ -1,4 +1,4 @@
-import api from './api';
+import api from '@/services/api';
 
 /** Format minor currency units (paise) as major units. */
 export const formatMoney = (minor) => ((Number(minor) || 0) / 100).toFixed(2);

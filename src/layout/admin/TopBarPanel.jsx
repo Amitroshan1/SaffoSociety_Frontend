@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import { Search } from "lucide-react";
-import { useAuth } from "../../hooks/useAuth";
-import ThemeToggle from "../../components/common/ThemeToggle";
+import { useAuth } from "@/hooks/useAuth";
+import ThemeToggle from "@/components/common/ThemeToggle";
 
 export function TopBar({
   title = "Admin Portal",

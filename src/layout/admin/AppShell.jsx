@@ -1,19 +1,19 @@
 import { useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { Dock, ADMIN_DOCK_GROUPS, COLLAPSE_KEY } from "./Dock.jsx";
-import { TopBar } from "./TopBarPanel.jsx";
-import { CommandPalette } from "./CommandPalette.jsx";
-import AdminProfile from "../../pages/admin/AdmineProfile/AdmineProfile.jsx";
-import { ADMIN_ROUTES } from "../../constants/adminRoutes.js";
+import { Dock, ADMIN_DOCK_GROUPS, COLLAPSE_KEY } from "@/layout/admin/Dock.jsx";
+import { TopBar } from "@/layout/admin/TopBarPanel.jsx";
+import { CommandPalette } from "@/layout/admin/CommandPalette.jsx";
+import AdminProfile from "@/pages/admin/AdmineProfile/AdmineProfile.jsx";
+import { ADMIN_ROUTES } from "@/constants/adminRoutes.js";
 import {
   FINANCE_DOCK_BOTTOM,
   FINANCE_DOCK_GROUPS,
   FINANCE_PALETTE_ITEMS,
-} from "./financeDockConfig.js";
-import { useAuth } from "../../hooks/useAuth";
-import "../../styles/resident/resident.css";
-import "../../styles/admin/AdminDashboard.css";
-import "../../styles/common/crud.css";
+} from "@/layout/admin/financeDockConfig.js";
+import { useAuth } from "@/hooks/useAuth";
+import "@/styles/resident/resident.css";
+import "@/styles/admin/AdminDashboard.css";
+import "@/styles/common/crud.css";
 
 function isFinanceRoutes(routes) {
   return routes?.dashboard?.startsWith("/finance");

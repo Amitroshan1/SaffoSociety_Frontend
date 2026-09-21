@@ -1,16 +1,16 @@
 import { useCallback, useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { navigateGuard } from '../../../constants/guardRoutes.js';
-import '../../../styles/guard/guard-main.css';
-import '../../../styles/common/crud.css';
-import Sidebar from '../../../components/guard/Sidebar';
-import DashboardHeader from '../../../components/guard/DashboardHeader';
-import { SearchInput } from '../../../components/common/index.js';
+import { navigateGuard } from '@/constants/guardRoutes.js';
+import '@/styles/guard/guard-main.css';
+import '@/styles/common/crud.css';
+import Sidebar from '@/components/guard/Sidebar';
+import DashboardHeader from '@/components/guard/DashboardHeader';
+import { SearchInput } from '@/components/common/index.js';
 import {
   formatLabel,
   listGuardNotifications,
   markGuardNotificationRead,
-} from '../../../services/notification.service.js';
+} from '@/services/notification.service.js';
 
 export default function GuardNotificationsPage() {
   const navigate = useNavigate();

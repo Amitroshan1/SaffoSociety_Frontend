@@ -1,10 +1,10 @@
 import { ShieldCheck } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
-import { AppShell } from '../../../layout/admin/AppShell.jsx';
-import { PageHeader } from '../../../layout/admin/PageHeader.jsx';
-import { ADMIN_ROUTES } from '../../../constants/adminRoutes.js';
-import '../../../styles/admin/AdminDashboard.css';
-import '../../../styles/common/crud.css';
+import { AppShell } from '@/layout/admin/AppShell.jsx';
+import { PageHeader } from '@/layout/admin/PageHeader.jsx';
+import { ADMIN_ROUTES } from '@/constants/adminRoutes.js';
+import '@/styles/admin/AdminDashboard.css';
+import '@/styles/common/crud.css';
 
 export default function SecurityPage() {
   const navigate = useNavigate();

@@ -8,7 +8,7 @@ import {
   CreditCard, FileText, BarChart3, CheckCircle, Clock,
   AlertCircle, TrendingUp, ArrowUpRight, Menu, X, Sparkles
 } from 'lucide-react';
-import { useAuth } from '../../hooks/useAuth';
+import { useAuth } from '@/hooks/useAuth';
 
 // ─── Static demo data ─────────────────────────────────────────────────────────
 const STATS = [

@@ -1,29 +1,29 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import '../../styles/guard/guard-main.css';
+import '@/styles/guard/guard-main.css';
 
-import Sidebar from '../../components/guard/Sidebar';
-import DashboardHeader from '../../components/guard/DashboardHeader';
-import AlertsBanner from '../../components/guard/AlertsBanner';
-import QuickActions from '../../components/guard/QuickActions';
-import StatsCards from '../../components/guard/StatsCards';
-import ApprovalList from '../../components/guard/ApprovalList';
-import ActiveVisitors from '../../components/guard/ActiveVisitors';
-import DeliverySection from '../../components/guard/DeliverySection';
-import StaffSection from '../../components/guard/StaffSection';
-import RecentActivity from '../../components/guard/RecentActivity';
-import { navigateGuard } from '../../constants/guardRoutes.js';
+import Sidebar from '@/components/guard/Sidebar';
+import DashboardHeader from '@/components/guard/DashboardHeader';
+import AlertsBanner from '@/components/guard/AlertsBanner';
+import QuickActions from '@/components/guard/QuickActions';
+import StatsCards from '@/components/guard/StatsCards';
+import ApprovalList from '@/components/guard/ApprovalList';
+import ActiveVisitors from '@/components/guard/ActiveVisitors';
+import DeliverySection from '@/components/guard/DeliverySection';
+import StaffSection from '@/components/guard/StaffSection';
+import RecentActivity from '@/components/guard/RecentActivity';
+import { navigateGuard } from '@/constants/guardRoutes.js';
 import {
   apiError,
   getDashboardBundle,
   logGuardCall,
   markVisitorExit,
-} from '../../services/guard.service';
+} from '@/services/guard.service';
 import {
   activeSosAlerts,
   getActiveTestSosAlerts,
   subscribeTestSos,
-} from '../../constants/guardSosDemo.js';
+} from '@/constants/guardSosDemo.js';
 
 export default function GuardMain() {
   const navigate = useNavigate();

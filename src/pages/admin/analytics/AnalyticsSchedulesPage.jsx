@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { CalendarClock } from 'lucide-react';
-import { AppShell } from '../../../layout/admin/AppShell.jsx';
-import { PageHeader } from '../../../layout/admin/PageHeader.jsx';
+import { AppShell } from '@/layout/admin/AppShell.jsx';
+import { PageHeader } from '@/layout/admin/PageHeader.jsx';
 import {
   DataTable,
   FormField,
@@ -9,10 +9,10 @@ import {
   FormSelect,
   Pagination,
   SkeletonLoader,
-} from '../../../components/common/index.js';
-import { ADMIN_ROUTES, FINANCE_ROUTES } from '../../../constants/adminRoutes.js';
-import { useListQuery } from '../../../hooks/useListQuery.js';
-import { normalizePagination } from '../../../utils/listQuery.js';
+} from '@/components/common/index.js';
+import { ADMIN_ROUTES, FINANCE_ROUTES } from '@/constants/adminRoutes.js';
+import { useListQuery } from '@/hooks/useListQuery.js';
+import { normalizePagination } from '@/utils/listQuery.js';
 import {
   EXPORT_FORMATS,
   SCHEDULE_FREQUENCIES,
@@ -20,9 +20,9 @@ import {
   deleteReportSchedule,
   formatLabel,
   listReportSchedules,
-} from '../../../services/analytics.service.js';
-import '../../../styles/admin/AdminDashboard.css';
-import '../../../styles/common/crud.css';
+} from '@/services/analytics.service.js';
+import '@/styles/admin/AdminDashboard.css';
+import '@/styles/common/crud.css';
 
 const initial = {
   name: '',

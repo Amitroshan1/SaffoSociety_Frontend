@@ -1,9 +1,9 @@
 import { useCallback, useEffect, useState } from 'react';
-import DataTable from '../../components/common/DataTable';
-import EmptyState from '../../components/common/EmptyState';
-import FormField from '../../components/common/FormField';
-import FormSelect from '../../components/common/FormSelect';
-import StatusBadge from '../../components/common/StatusBadge';
+import DataTable from '@/components/common/DataTable';
+import EmptyState from '@/components/common/EmptyState';
+import FormField from '@/components/common/FormField';
+import FormSelect from '@/components/common/FormSelect';
+import StatusBadge from '@/components/common/StatusBadge';
 import {
   VEHICLE_STATUSES,
   VEHICLE_STATUS_COLORS,
@@ -12,7 +12,7 @@ import {
   formatLabel,
   listResidentVehicles,
   updateResidentVehicle,
-} from '../../services/parking.service';
+} from '@/services/parking.service';
 
 const initialForm = {
   vehicleNumber: '',

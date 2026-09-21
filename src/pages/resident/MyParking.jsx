@@ -1,13 +1,13 @@
 import { useCallback, useEffect, useState } from 'react';
-import DataTable from '../../components/common/DataTable';
-import EmptyState from '../../components/common/EmptyState';
-import StatusBadge from '../../components/common/StatusBadge';
+import DataTable from '@/components/common/DataTable';
+import EmptyState from '@/components/common/EmptyState';
+import StatusBadge from '@/components/common/StatusBadge';
 import {
   ALLOCATION_STATUS_COLORS,
   formatFee,
   formatLabel,
   listResidentParking,
-} from '../../services/parking.service';
+} from '@/services/parking.service';
 
 export default function MyParking() {
   const [rows, setRows] = useState([]);

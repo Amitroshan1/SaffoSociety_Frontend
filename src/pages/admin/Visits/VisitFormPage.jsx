@@ -9,17 +9,17 @@ import {
   XCircle,
 } from 'lucide-react';
 import { useNavigate, useParams, useSearchParams } from 'react-router-dom';
-import { AppShell } from '../../../layout/admin/AppShell.jsx';
-import { PageHeader } from '../../../layout/admin/PageHeader.jsx';
+import { AppShell } from '@/layout/admin/AppShell.jsx';
+import { PageHeader } from '@/layout/admin/PageHeader.jsx';
 import {
   FormField,
   FormLayout,
   FormSelect,
-} from '../../../components/common/index.js';
-import Spinner from '../../../common/Spinner.jsx';
-import { ADMIN_ROUTES } from '../../../constants/adminRoutes.js';
-import { listOccupancies } from '../../../services/occupancy.service.js';
-import { listVisitors } from '../../../services/visitor.service.js';
+} from '@/components/common/index.js';
+import Spinner from '@/common/Spinner.jsx';
+import { ADMIN_ROUTES } from '@/constants/adminRoutes.js';
+import { listOccupancies } from '@/services/occupancy.service.js';
+import { listVisitors } from '@/services/visitor.service.js';
 import {
   approveVisit,
   cancelVisit,
@@ -28,9 +28,9 @@ import {
   createVisit,
   getVisit,
   rejectVisit,
-} from '../../../services/visit.service.js';
-import '../../../styles/admin/AdminDashboard.css';
-import '../../../styles/common/crud.css';
+} from '@/services/visit.service.js';
+import '@/styles/admin/AdminDashboard.css';
+import '@/styles/common/crud.css';
 
 const VISITOR_TYPE_OPTIONS = [
   'guest',

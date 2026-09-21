@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
-import EmptyState from '../../components/common/EmptyState';
-import SkeletonLoader from '../../components/common/SkeletonLoader';
-import { getResidentFlat } from '../../services/residentPortal.service';
+import EmptyState from '@/components/common/EmptyState';
+import SkeletonLoader from '@/components/common/SkeletonLoader';
+import { getResidentFlat } from '@/services/residentPortal.service';
 
 export default function ResidentFlatPage() {
   const [data, setData] = useState(null);

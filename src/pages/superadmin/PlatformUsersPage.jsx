@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { platformService } from '../../services/platform.service';
+import { platformService } from '@/services/platform.service';
 
 export default function PlatformUsersPage() {
   const [items, setItems] = useState([]);

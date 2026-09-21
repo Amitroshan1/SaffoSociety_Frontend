@@ -6,7 +6,7 @@
 import {
   getActiveTestSosAlerts,
   subscribeTestSos,
-} from '../constants/guardSosDemo.js';
+} from '@/constants/guardSosDemo.js';
 
 const SOS_SOUND_CANDIDATES = [
   '/sound/Sos_Alert.mp3',

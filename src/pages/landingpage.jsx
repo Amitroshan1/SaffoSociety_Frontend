@@ -23,7 +23,7 @@ import {
   Code2,
   Target,
 } from "lucide-react";
-import ThemeToggle from "../components/common/ThemeToggle";
+import ThemeToggle from "@/components/common/ThemeToggle";
 
 const PARTICLES = Array.from({ length: 30 }, (_, i) => ({
   id: i,

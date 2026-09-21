@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
-import '../../../styles/guard/visitor/visitors.css';
+import '@/styles/guard/visitor/visitors.css';
 
 function isPhoneCameraLabel(label = '') {
   const l = String(label).toLowerCase();

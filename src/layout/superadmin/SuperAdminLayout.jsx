@@ -1,8 +1,8 @@
 import { NavLink, Outlet, useNavigate } from 'react-router-dom';
-import { useAuth } from '../../hooks/useAuth';
-import ThemeToggle from '../../components/common/ThemeToggle';
-import { SUPER_ADMIN_ROUTES } from '../../constants/superAdminRoutes';
-import '../../styles/superadmin/superadmin.css';
+import { useAuth } from '@/hooks/useAuth';
+import ThemeToggle from '@/components/common/ThemeToggle';
+import { SUPER_ADMIN_ROUTES } from '@/constants/superAdminRoutes';
+import '@/styles/superadmin/superadmin.css';
 
 const groups = [...new Set(SUPER_ADMIN_ROUTES.map((r) => r.group))];
 

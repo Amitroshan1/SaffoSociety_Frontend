@@ -1,4 +1,4 @@
-import api from './api';
+import api from '@/services/api';
 
 /* ── Enums ────────────────────────────────────────────────────────────────── */
 export const NOTIFICATION_CHANNELS = ['in_app', 'email', 'sms', 'push', 'webhook'];

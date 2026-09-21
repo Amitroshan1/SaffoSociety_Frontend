@@ -1,12 +1,12 @@
 import { useEffect, useState } from 'react';
 import { Shield } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
-import { AppShell } from '../../../layout/admin/AppShell.jsx';
-import { PageHeader } from '../../../layout/admin/PageHeader.jsx';
-import { getGateDashboard } from '../../../services/gate.service.js';
-import { listVisits } from '../../../services/visit.service.js';
-import '../../../styles/admin/AdminDashboard.css';
-import '../../../styles/common/crud.css';
+import { AppShell } from '@/layout/admin/AppShell.jsx';
+import { PageHeader } from '@/layout/admin/PageHeader.jsx';
+import { getGateDashboard } from '@/services/gate.service.js';
+import { listVisits } from '@/services/visit.service.js';
+import '@/styles/admin/AdminDashboard.css';
+import '@/styles/common/crud.css';
 
 const routes = {
   dashboard: '/admin/dashboard',

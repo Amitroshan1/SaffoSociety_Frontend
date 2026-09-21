@@ -1,8 +1,8 @@
 import { useEffect, useState } from 'react';
-import DataTable from '../../components/common/DataTable';
-import EmptyState from '../../components/common/EmptyState';
-import SkeletonLoader from '../../components/common/SkeletonLoader';
-import { getResidentHousehold } from '../../services/residentPortal.service';
+import DataTable from '@/components/common/DataTable';
+import EmptyState from '@/components/common/EmptyState';
+import SkeletonLoader from '@/components/common/SkeletonLoader';
+import { getResidentHousehold } from '@/services/residentPortal.service';
 
 const columns = [
   { key: 'residentName', label: 'Member' },

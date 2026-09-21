@@ -1,4 +1,4 @@
-import '../../styles/common/crud.css';
+import '@/styles/common/crud.css';
 
 /** Generic color-coded status pill. Pass a `colors` map of status -> hex color. */
 export default function StatusBadge({ status, colors = {}, fallbackColor = '#94a3b8' }) {

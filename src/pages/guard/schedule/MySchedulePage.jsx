@@ -1,21 +1,21 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { navigateGuard } from '../../../constants/guardRoutes.js';
-import '../../../styles/guard/guard-main.css';
-import '../../../styles/guard/visitor/visitors.css';
-import '../../../styles/common/crud.css';
-import Sidebar from '../../../components/guard/Sidebar';
-import DashboardHeader from '../../../components/guard/DashboardHeader';
-import GateDatePicker from '../../../components/guard/shared/GateDatePicker.jsx';
-import ScheduleMonthCalendar from '../../../components/guard/schedule/ScheduleMonthCalendar.jsx';
-import { StatusBadge } from '../../../components/common/index.js';
+import { navigateGuard } from '@/constants/guardRoutes.js';
+import '@/styles/guard/guard-main.css';
+import '@/styles/guard/visitor/visitors.css';
+import '@/styles/common/crud.css';
+import Sidebar from '@/components/guard/Sidebar';
+import DashboardHeader from '@/components/guard/DashboardHeader';
+import GateDatePicker from '@/components/guard/shared/GateDatePicker.jsx';
+import ScheduleMonthCalendar from '@/components/guard/schedule/ScheduleMonthCalendar.jsx';
+import { StatusBadge } from '@/components/common/index.js';
 import {
   checkInAttendance,
   checkOutAttendance,
   listAttendance,
-} from '../../../services/attendance.service.js';
-import { listGates } from '../../../services/gate.service.js';
-import { getMyStaff } from '../../../services/staff.service.js';
+} from '@/services/attendance.service.js';
+import { listGates } from '@/services/gate.service.js';
+import { getMyStaff } from '@/services/staff.service.js';
 import {
   SHIFT_STATUS_COLORS,
   completeShift,
@@ -26,12 +26,12 @@ import {
   listShifts,
   startShift,
   toIsoDate,
-} from '../../../services/shift.service.js';
+} from '@/services/shift.service.js';
 import {
   captureCurrentLocation,
   geolocationErrorMessage,
   summarizeGeo,
-} from '../../../utils/guardScheduleGeo.js';
+} from '@/utils/guardScheduleGeo.js';
 
 const VIEW_TABS = [
   { key: 'overview', label: 'Overview' },
@@ -453,15 +453,27 @@ export default function MySchedulePage() {
       setSaving(false);
       return;
     }
+    const lat = Number(location?.latitude);
+    const lng = Number(location?.longitude);
+    if (!Number.isFinite(lat) || !Number.isFinite(lng)) {
+      setLocError('Location is required for punch in.');
+      setError('Could not get GPS. Allow location and try again.');
+      setSaving(false);
+      return;
+    }
     const onLocation = summarizeGeo(location, selectedGate).state === 'on_location';
     const linkedShiftId = shiftId || undefined;
-    const minimalPayload = {
+    const accuracy = Number(location.accuracy);
+    const payload = {
       staffId: staff.id,
       gateId: gateId || undefined,
       shiftId: linkedShiftId,
+      latitude: lat,
+      longitude: lng,
+      accuracyMeters: Number.isFinite(accuracy) ? accuracy : undefined,
     };
     try {
-      const res = await checkInAttendance(minimalPayload);
+      const res = await checkInAttendance(payload);
       const attId = res.data?.data?.attendance?.id;
       rememberPunchLocation(attId, 'checkIn', onLocation);
       await syncShiftOnPunchIn(linkedShiftId);
@@ -489,12 +501,26 @@ export default function MySchedulePage() {
       setSaving(false);
       return;
     }
+    const lat = Number(location?.latitude);
+    const lng = Number(location?.longitude);
+    if (!Number.isFinite(lat) || !Number.isFinite(lng)) {
+      setLocError('Location is required for punch out.');
+      setError('Could not get GPS. Allow location and try again.');
+      setSaving(false);
+      return;
+    }
     const gateForGeo =
       gates.find((g) => String(g.id) === String(openAttendance.gateId || gateId)) || selectedGate;
     const onLocation = summarizeGeo(location, gateForGeo).state === 'on_location';
     const linkedShiftId = openAttendance.shiftId || shiftId || undefined;
+    const accuracy = Number(location.accuracy);
+    const checkoutPayload = {
+      latitude: lat,
+      longitude: lng,
+      accuracyMeters: Number.isFinite(accuracy) ? accuracy : undefined,
+    };
     try {
-      await checkOutAttendance(openAttendance.id, {});
+      await checkOutAttendance(openAttendance.id, checkoutPayload);
       rememberPunchLocation(openAttendance.id, 'checkOut', onLocation);
       await syncShiftOnPunchOut(linkedShiftId);
       setSuccess('Punched out');

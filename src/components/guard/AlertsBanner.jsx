@@ -1,7 +1,7 @@
 // client/src/components/guard/AlertsBanner.jsx
 
-import { useSosAlertSound } from '../../hooks/useSosAlertSound';
-import '../../styles/guard/guard-main.css';
+import { useSosAlertSound } from '@/hooks/useSosAlertSound';
+import '@/styles/guard/guard-main.css';
 
 /**
  * Top SOS strip. Alarm loops until SOS is resolved or guard presses Stop Sound.

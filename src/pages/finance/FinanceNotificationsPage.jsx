@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useState } from 'react';
 import { BellRing, Send } from 'lucide-react';
-import { AppShell } from '../../layout/admin/AppShell.jsx';
-import { PageHeader } from '../../layout/admin/PageHeader.jsx';
+import { AppShell } from '@/layout/admin/AppShell.jsx';
+import { PageHeader } from '@/layout/admin/PageHeader.jsx';
 import {
   DataTable,
   FilterBar,
@@ -9,19 +9,19 @@ import {
   FormLayout,
   Pagination,
   SearchInput,
-} from '../../components/common/index.js';
-import { FINANCE_ROUTES } from '../../constants/adminRoutes.js';
-import { useListQuery } from '../../hooks/useListQuery.js';
-import { normalizePagination } from '../../utils/listQuery.js';
+} from '@/components/common/index.js';
+import { FINANCE_ROUTES } from '@/constants/adminRoutes.js';
+import { useListQuery } from '@/hooks/useListQuery.js';
+import { normalizePagination } from '@/utils/listQuery.js';
 import {
   formatLabel,
   listFinanceNotificationHistory,
   sendInvoiceNotification,
   sendPaymentReminder,
   sendReceiptNotification,
-} from '../../services/notification.service.js';
-import '../../styles/admin/AdminDashboard.css';
-import '../../styles/common/crud.css';
+} from '@/services/notification.service.js';
+import '@/styles/admin/AdminDashboard.css';
+import '@/styles/common/crud.css';
 
 const initialPaymentForm = { flatId: '', invoiceId: '', dueDate: '', amount: '', message: '' };
 const initialInvoiceForm = { flatId: '', invoiceId: '', invoiceNumber: '', amount: '', message: '' };

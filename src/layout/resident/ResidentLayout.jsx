@@ -34,12 +34,12 @@ import {
   Wrench,
   X,
 } from 'lucide-react';
-import { useAuth } from '../../hooks/useAuth';
-import ThemeToggle from '../../components/common/ThemeToggle';
-import '../../styles/resident/resident.css';
-import '../../styles/admin/AdminDashboard.css';
-import '../../styles/common/crud.css';
-import '../../styles/glassmorphism.css';
+import { useAuth } from '@/hooks/useAuth';
+import ThemeToggle from '@/components/common/ThemeToggle';
+import '@/styles/resident/resident.css';
+import '@/styles/admin/AdminDashboard.css';
+import '@/styles/common/crud.css';
+import '@/styles/glassmorphism.css';
 
 const NAV_GROUPS = [
   {

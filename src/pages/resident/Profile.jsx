@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
-import EmptyState from '../../components/common/EmptyState';
-import SkeletonLoader from '../../components/common/SkeletonLoader';
-import { getResidentProfile } from '../../services/residentPortal.service';
+import EmptyState from '@/components/common/EmptyState';
+import SkeletonLoader from '@/components/common/SkeletonLoader';
+import { getResidentProfile } from '@/services/residentPortal.service';
 
 function formatDate(value) {
   if (!value) return null;

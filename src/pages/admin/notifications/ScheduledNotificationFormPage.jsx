@@ -1,10 +1,10 @@
 import { useEffect, useState } from 'react';
 import { ArrowLeft, CalendarClock, Save } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
-import { AppShell } from '../../../layout/admin/AppShell.jsx';
-import { PageHeader } from '../../../layout/admin/PageHeader.jsx';
-import { FormField, FormSelect } from '../../../components/common/index.js';
-import { ADMIN_ROUTES } from '../../../constants/adminRoutes.js';
+import { AppShell } from '@/layout/admin/AppShell.jsx';
+import { PageHeader } from '@/layout/admin/PageHeader.jsx';
+import { FormField, FormSelect } from '@/components/common/index.js';
+import { ADMIN_ROUTES } from '@/constants/adminRoutes.js';
 import {
   NOTIFICATION_CATEGORIES,
   NOTIFICATION_CHANNELS,
@@ -14,9 +14,9 @@ import {
   formatLabel,
   listNotificationTemplates,
   scheduleNotification,
-} from '../../../services/notification.service.js';
-import '../../../styles/admin/AdminDashboard.css';
-import '../../../styles/common/crud.css';
+} from '@/services/notification.service.js';
+import '@/styles/admin/AdminDashboard.css';
+import '@/styles/common/crud.css';
 
 const LIST_PATH = '/admin/notifications/scheduled';
 

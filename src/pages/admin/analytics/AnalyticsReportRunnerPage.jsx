@@ -1,26 +1,26 @@
 import { useCallback, useEffect, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { FileBarChart } from 'lucide-react';
-import { AppShell } from '../../../layout/admin/AppShell.jsx';
-import { PageHeader } from '../../../layout/admin/PageHeader.jsx';
+import { AppShell } from '@/layout/admin/AppShell.jsx';
+import { PageHeader } from '@/layout/admin/PageHeader.jsx';
 import {
   DataTable,
   FilterBar,
   FormSelect,
   Pagination,
   SkeletonLoader,
-} from '../../../components/common/index.js';
-import { BarChart, PieChart } from '../../../components/analytics/Charts.jsx';
-import { ADMIN_ROUTES } from '../../../constants/adminRoutes.js';
+} from '@/components/common/index.js';
+import { BarChart, PieChart } from '@/components/analytics/Charts.jsx';
+import { ADMIN_ROUTES } from '@/constants/adminRoutes.js';
 import {
   EXPORT_FORMATS,
   createAnalyticsExport,
   formatLabel,
   getAnalyticsChart,
   runAnalyticsReport,
-} from '../../../services/analytics.service.js';
-import '../../../styles/admin/AdminDashboard.css';
-import '../../../styles/common/crud.css';
+} from '@/services/analytics.service.js';
+import '@/styles/admin/AdminDashboard.css';
+import '@/styles/common/crud.css';
 
 export default function AnalyticsReportRunnerPage({ basePath = '/admin' } = {}) {
   const { reportKey } = useParams();

@@ -1,4 +1,4 @@
-import api from './api';
+import api from '@/services/api';
 
 /* ── Enums (shared across admin + finance + guard + resident document UI) ─── */
 export const DOCUMENT_SCOPES = [

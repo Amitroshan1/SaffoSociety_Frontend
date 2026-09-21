@@ -3,11 +3,11 @@ import {
   DataTable,
   ListToolbar,
   Pagination,
-} from '../common/index.js';
-import { useListQuery } from '../../hooks/useListQuery.js';
-import { listSocieties } from '../../services/society.service.js';
-import { normalizePagination } from '../../utils/listQuery.js';
-import '../../styles/common/crud.css';
+} from '@/components/common/index.js';
+import { useListQuery } from '@/hooks/useListQuery.js';
+import { listSocieties } from '@/services/society.service.js';
+import { normalizePagination } from '@/utils/listQuery.js';
+import '@/styles/common/crud.css';
 
 const STATUS_FILTER = {
   key: 'isActive',

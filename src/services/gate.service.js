@@ -1,4 +1,4 @@
-import api from './api';
+import api from '@/services/api';
 
 export const listGates = (params) => api.get('/gates', { params });
 export const getGate = (id) => api.get(`/gates/${id}`);

@@ -1,4 +1,4 @@
-import api from './api';
+import api from '@/services/api';
 
 /* ── Enums (shared across admin + resident notice UI) ────────────────────── */
 export const NOTICE_CATEGORIES = [

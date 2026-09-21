@@ -1,17 +1,17 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { navigateGuard } from '../../../constants/guardRoutes.js';
-import '../../../styles/guard/guard-main.css';
-import '../../../styles/common/crud.css';
-import Sidebar from '../../../components/guard/Sidebar';
-import DashboardHeader from '../../../components/guard/DashboardHeader';
-import { SearchInput } from '../../../components/common/index.js';
+import { navigateGuard } from '@/constants/guardRoutes.js';
+import '@/styles/guard/guard-main.css';
+import '@/styles/common/crud.css';
+import Sidebar from '@/components/guard/Sidebar';
+import DashboardHeader from '@/components/guard/DashboardHeader';
+import { SearchInput } from '@/components/common/index.js';
 import {
   downloadGuardDocument,
   formatFileSize,
   listGuardDocuments,
   openDownloadedFile,
-} from '../../../services/document.service.js';
+} from '@/services/document.service.js';
 
 const PAGE_TABS = [
   { key: 'documents', label: 'Documents' },

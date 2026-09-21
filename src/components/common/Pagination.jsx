@@ -1,5 +1,5 @@
 import { ChevronLeft, ChevronRight } from 'lucide-react';
-import '../../styles/common/crud.css';
+import '@/styles/common/crud.css';
 
 export default function Pagination({
   page = 1,

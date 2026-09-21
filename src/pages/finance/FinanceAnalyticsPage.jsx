@@ -1,17 +1,17 @@
 import { useEffect, useState } from 'react';
 import { IndianRupee } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
-import { AppShell } from '../../layout/admin/AppShell.jsx';
-import { PageHeader } from '../../layout/admin/PageHeader.jsx';
-import { SkeletonLoader } from '../../components/common/index.js';
-import { BarChart, KpiCard, LineChart } from '../../components/analytics/Charts.jsx';
-import { FINANCE_ROUTES } from '../../constants/adminRoutes.js';
+import { AppShell } from '@/layout/admin/AppShell.jsx';
+import { PageHeader } from '@/layout/admin/PageHeader.jsx';
+import { SkeletonLoader } from '@/components/common/index.js';
+import { BarChart, KpiCard, LineChart } from '@/components/analytics/Charts.jsx';
+import { FINANCE_ROUTES } from '@/constants/adminRoutes.js';
 import {
   formatLabel,
   getFinanceAnalyticsDashboard,
-} from '../../services/analytics.service.js';
-import '../../styles/admin/AdminDashboard.css';
-import '../../styles/common/crud.css';
+} from '@/services/analytics.service.js';
+import '@/styles/admin/AdminDashboard.css';
+import '@/styles/common/crud.css';
 
 export default function FinanceAnalyticsPage() {
   const navigate = useNavigate();

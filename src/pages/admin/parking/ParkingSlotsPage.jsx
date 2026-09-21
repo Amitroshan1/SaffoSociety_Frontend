@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useState } from 'react';
 import { Grid3x3, Plus } from 'lucide-react';
-import { AppShell } from '../../../layout/admin/AppShell.jsx';
-import { PageHeader } from '../../../layout/admin/PageHeader.jsx';
+import { AppShell } from '@/layout/admin/AppShell.jsx';
+import { PageHeader } from '@/layout/admin/PageHeader.jsx';
 import {
   DataTable,
   FilterBar,
@@ -10,9 +10,9 @@ import {
   Pagination,
   SearchInput,
   StatusBadge,
-} from '../../../components/common/index.js';
-import { useListQuery } from '../../../hooks/useListQuery.js';
-import { normalizePagination } from '../../../utils/listQuery.js';
+} from '@/components/common/index.js';
+import { useListQuery } from '@/hooks/useListQuery.js';
+import { normalizePagination } from '@/utils/listQuery.js';
 import {
   SLOT_CATEGORIES,
   SLOT_STATUSES,
@@ -23,9 +23,9 @@ import {
   listParkingSlots,
   listParkingZones,
   updateParkingSlot,
-} from '../../../services/parking.service.js';
-import '../../../styles/admin/AdminDashboard.css';
-import '../../../styles/common/crud.css';
+} from '@/services/parking.service.js';
+import '@/styles/admin/AdminDashboard.css';
+import '@/styles/common/crud.css';
 
 const initialForm = {
   zoneId: '',

@@ -1,11 +1,11 @@
 import { useState } from 'react';
-import FormField from '../../components/common/FormField';
-import FormSelect from '../../components/common/FormSelect';
+import FormField from '@/components/common/FormField';
+import FormSelect from '@/components/common/FormSelect';
 import {
   VEHICLE_TYPES,
   createResidentVisitorParking,
   formatLabel,
-} from '../../services/parking.service';
+} from '@/services/parking.service';
 
 export default function VisitorParkingRequest() {
   const [form, setForm] = useState({

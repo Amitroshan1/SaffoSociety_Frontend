@@ -1,4 +1,4 @@
-import api from './api';
+import api from '@/services/api';
 
 export const listComplaints = (params) => api.get('/complaints', { params });
 export const getComplaintDashboard = () => api.get('/complaints/dashboard');

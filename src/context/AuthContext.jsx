@@ -1,6 +1,6 @@
 import { createContext, useContext, useState, useEffect, useCallback, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { authService } from '../services/auth.service';
+import { authService } from '@/services/auth.service';
 import {
   cacheAuthUser,
   clearAuthStorage,
@@ -12,7 +12,7 @@ import {
   refreshSession,
   setAccessToken,
   setSessionMarker,
-} from '../services/api';
+} from '@/services/api';
 
 const AuthContext = createContext(null);
 

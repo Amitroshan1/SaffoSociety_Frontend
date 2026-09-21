@@ -1,10 +1,10 @@
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import DataTable from '../../components/common/DataTable';
-import SkeletonLoader from '../../components/common/SkeletonLoader';
-import NoticeTabs from '../../components/resident/NoticeTabs';
-import { buildNoticeColumns } from '../../components/resident/noticeUi';
-import { getResidentPinnedNotices } from '../../services/notice.service';
+import DataTable from '@/components/common/DataTable';
+import SkeletonLoader from '@/components/common/SkeletonLoader';
+import NoticeTabs from '@/components/resident/NoticeTabs';
+import { buildNoticeColumns } from '@/components/resident/noticeUi';
+import { getResidentPinnedNotices } from '@/services/notice.service';
 
 const columns = buildNoticeColumns({ dateKey: 'pinUntil', dateLabel: 'Pinned until' });
 

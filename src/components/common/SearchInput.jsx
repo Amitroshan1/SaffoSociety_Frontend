@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { Search } from 'lucide-react';
-import '../../styles/common/crud.css';
+import '@/styles/common/crud.css';
 
 export default function SearchInput({
   value = '',

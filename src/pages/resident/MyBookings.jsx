@@ -1,19 +1,19 @@
 ﻿import { useCallback, useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import DataTable from '../../components/common/DataTable';
-import EmptyState from '../../components/common/EmptyState';
-import ListToolbar from '../../components/common/ListToolbar';
-import Pagination from '../../components/common/Pagination';
-import StatusBadge from '../../components/common/StatusBadge';
-import { useListQuery } from '../../hooks/useListQuery';
-import { normalizePagination } from '../../utils/listQuery';
+import DataTable from '@/components/common/DataTable';
+import EmptyState from '@/components/common/EmptyState';
+import ListToolbar from '@/components/common/ListToolbar';
+import Pagination from '@/components/common/Pagination';
+import StatusBadge from '@/components/common/StatusBadge';
+import { useListQuery } from '@/hooks/useListQuery';
+import { normalizePagination } from '@/utils/listQuery';
 import {
   BOOKING_STATUSES,
   BOOKING_STATUS_COLORS,
   cancelResidentBooking,
   formatAmount,
   listResidentBookings,
-} from '../../services/facility.service';
+} from '@/services/facility.service';
 
 export default function ResidentMyBookingsPage() {
   const navigate = useNavigate();

@@ -1,12 +1,12 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
-import { navigateGuard } from '../../../constants/guardRoutes.js';
-import '../../../styles/guard/guard-main.css';
-import '../../../styles/guard/visitor/visitors.css';
-import Sidebar from '../../../components/guard/Sidebar';
-import DashboardHeader from '../../../components/guard/DashboardHeader';
-import CabEntryForm from '../../../components/guard/quick-entry/CabEntryForm.jsx';
-import GateDatePicker from '../../../components/guard/shared/GateDatePicker.jsx';
+import { navigateGuard } from '@/constants/guardRoutes.js';
+import '@/styles/guard/guard-main.css';
+import '@/styles/guard/visitor/visitors.css';
+import Sidebar from '@/components/guard/Sidebar';
+import DashboardHeader from '@/components/guard/DashboardHeader';
+import CabEntryForm from '@/components/guard/quick-entry/CabEntryForm.jsx';
+import GateDatePicker from '@/components/guard/shared/GateDatePicker.jsx';
 import {
   apiError,
   callResidentForDelivery,
@@ -14,7 +14,7 @@ import {
   logCabEntry,
   tryGuardApprove,
   tryGuardDeny,
-} from '../../../services/guard.service';
+} from '@/services/guard.service';
 
 const TABS = [
   { key: 'add', label: 'Add Cab', icon: 'plus', cls: 'add' },

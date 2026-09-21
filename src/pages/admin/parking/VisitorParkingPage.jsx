@@ -1,25 +1,25 @@
 import { useCallback, useEffect, useState } from 'react';
 import { ParkingCircle } from 'lucide-react';
-import { AppShell } from '../../../layout/admin/AppShell.jsx';
-import { PageHeader } from '../../../layout/admin/PageHeader.jsx';
+import { AppShell } from '@/layout/admin/AppShell.jsx';
+import { PageHeader } from '@/layout/admin/PageHeader.jsx';
 import {
   DataTable,
   FilterBar,
   Pagination,
   SearchInput,
   StatusBadge,
-} from '../../../components/common/index.js';
-import { useListQuery } from '../../../hooks/useListQuery.js';
-import { normalizePagination } from '../../../utils/listQuery.js';
+} from '@/components/common/index.js';
+import { useListQuery } from '@/hooks/useListQuery.js';
+import { normalizePagination } from '@/utils/listQuery.js';
 import {
   VISITOR_PARKING_STATUSES,
   VISITOR_STATUS_COLORS,
   formatFee,
   formatLabel,
   listVisitorParkingLogs,
-} from '../../../services/parking.service.js';
-import '../../../styles/admin/AdminDashboard.css';
-import '../../../styles/common/crud.css';
+} from '@/services/parking.service.js';
+import '@/styles/admin/AdminDashboard.css';
+import '@/styles/common/crud.css';
 
 const COLUMNS = [
   { key: 'vehicleNumber', label: 'Vehicle', sortable: true },

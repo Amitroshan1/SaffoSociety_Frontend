@@ -1,4 +1,4 @@
-import api, { refreshSession } from './api';
+import api, { refreshSession } from '@/services/api';
 
 export const authService = {
   register: (data) => api.post('/auth/register-request', data),

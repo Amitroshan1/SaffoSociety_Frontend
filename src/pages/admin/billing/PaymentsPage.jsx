@@ -1,19 +1,19 @@
 import { useCallback, useEffect, useState } from 'react';
 import { CreditCard } from 'lucide-react';
 import { useLocation, useNavigate } from 'react-router-dom';
-import { AppShell } from '../../../layout/admin/AppShell.jsx';
-import { PageHeader } from '../../../layout/admin/PageHeader.jsx';
+import { AppShell } from '@/layout/admin/AppShell.jsx';
+import { PageHeader } from '@/layout/admin/PageHeader.jsx';
 import {
   DataTable,
   ListToolbar,
   Pagination,
-} from '../../../components/common/index.js';
-import { ADMIN_ROUTES, FINANCE_ROUTES } from '../../../constants/adminRoutes.js';
-import { useListQuery } from '../../../hooks/useListQuery.js';
-import { normalizePagination } from '../../../utils/listQuery.js';
-import { formatMoney, listPayments } from '../../../services/billing.service.js';
-import '../../../styles/admin/AdminDashboard.css';
-import '../../../styles/common/crud.css';
+} from '@/components/common/index.js';
+import { ADMIN_ROUTES, FINANCE_ROUTES } from '@/constants/adminRoutes.js';
+import { useListQuery } from '@/hooks/useListQuery.js';
+import { normalizePagination } from '@/utils/listQuery.js';
+import { formatMoney, listPayments } from '@/services/billing.service.js';
+import '@/styles/admin/AdminDashboard.css';
+import '@/styles/common/crud.css';
 
 const MODES = ['cash', 'cheque', 'upi', 'bank_transfer', 'card', 'online_gateway'];
 const STATUSES = ['pending', 'cleared', 'failed', 'reversed'];

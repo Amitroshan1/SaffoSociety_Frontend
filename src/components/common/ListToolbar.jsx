@@ -1,8 +1,8 @@
 import { useMemo } from 'react';
 import { Plus, X } from 'lucide-react';
-import FilterBar from './FilterBar.jsx';
-import SearchInput from './SearchInput.jsx';
-import '../../styles/common/crud.css';
+import FilterBar from '@/components/common/FilterBar.jsx';
+import SearchInput from '@/components/common/SearchInput.jsx';
+import '@/styles/common/crud.css';
 
 /**
  * Shared list toolbar: search + filters + Clear + small New action on the right.

@@ -68,7 +68,7 @@
 // â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 import { useState, useRef, useEffect, useCallback } from "react";
-import { searchRecentWalkIns } from "../../../services/guard.service";
+import { searchRecentWalkIns } from "@/services/guard.service";
 
 const PURPOSES = [
   "Guest",

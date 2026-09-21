@@ -1,15 +1,15 @@
 import { useEffect, useState } from 'react';
-import DataTable from '../../components/common/DataTable';
-import EmptyState from '../../components/common/EmptyState';
-import ListToolbar from '../../components/common/ListToolbar';
-import Pagination from '../../components/common/Pagination';
-import { useListQuery } from '../../hooks/useListQuery';
-import { normalizePagination } from '../../utils/listQuery';
+import DataTable from '@/components/common/DataTable';
+import EmptyState from '@/components/common/EmptyState';
+import ListToolbar from '@/components/common/ListToolbar';
+import Pagination from '@/components/common/Pagination';
+import { useListQuery } from '@/hooks/useListQuery';
+import { normalizePagination } from '@/utils/listQuery';
 import {
   formatMoney,
   getResidentReceipt,
   listResidentReceipts,
-} from '../../services/billing.service';
+} from '@/services/billing.service';
 
 const columns = [
   { key: 'receiptNumber', label: 'Receipt #', sortable: true },

@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import EmptyState from '../../components/common/EmptyState';
-import { createResidentVisitorInvitation } from '../../services/residentPortal.service';
+import EmptyState from '@/components/common/EmptyState';
+import { createResidentVisitorInvitation } from '@/services/residentPortal.service';
 
 const initialForm = {
   name: '',

@@ -2,8 +2,8 @@ import { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { Eye, EyeOff, ArrowLeft, Lock, Mail, Sparkles } from 'lucide-react';
-import { useAuth } from '../../hooks/useAuth';
-import ThemeToggle from '../../components/common/ThemeToggle';
+import { useAuth } from '@/hooks/useAuth';
+import ThemeToggle from '@/components/common/ThemeToggle';
 
 const ROLE_REDIRECT = {
   admin: '/admin/dashboard',

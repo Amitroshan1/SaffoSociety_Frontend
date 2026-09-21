@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useState } from 'react';
 import { MapPin, Plus } from 'lucide-react';
-import { AppShell } from '../../../layout/admin/AppShell.jsx';
-import { PageHeader } from '../../../layout/admin/PageHeader.jsx';
+import { AppShell } from '@/layout/admin/AppShell.jsx';
+import { PageHeader } from '@/layout/admin/PageHeader.jsx';
 import {
   ConfirmDialog,
   DataTable,
@@ -10,9 +10,9 @@ import {
   FormSelect,
   Pagination,
   SearchInput,
-} from '../../../components/common/index.js';
-import { useListQuery } from '../../../hooks/useListQuery.js';
-import { normalizePagination } from '../../../utils/listQuery.js';
+} from '@/components/common/index.js';
+import { useListQuery } from '@/hooks/useListQuery.js';
+import { normalizePagination } from '@/utils/listQuery.js';
 import {
   PARKING_ZONE_TYPES,
   createParkingZone,
@@ -21,9 +21,9 @@ import {
   formatLabel,
   listParkingZones,
   updateParkingZone,
-} from '../../../services/parking.service.js';
-import '../../../styles/admin/AdminDashboard.css';
-import '../../../styles/common/crud.css';
+} from '@/services/parking.service.js';
+import '@/styles/admin/AdminDashboard.css';
+import '@/styles/common/crud.css';
 
 const initialForm = {
   code: '',

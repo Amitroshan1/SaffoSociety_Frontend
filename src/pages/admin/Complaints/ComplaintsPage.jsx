@@ -1,8 +1,8 @@
 import { useCallback, useEffect, useState } from 'react';
 import { MessageSquare } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
-import { AppShell } from '../../../layout/admin/AppShell.jsx';
-import { PageHeader } from '../../../layout/admin/PageHeader.jsx';
+import { AppShell } from '@/layout/admin/AppShell.jsx';
+import { PageHeader } from '@/layout/admin/PageHeader.jsx';
 import {
   DataTable,
   FilterBar,
@@ -11,10 +11,10 @@ import {
   FormSelect,
   Pagination,
   SearchInput,
-} from '../../../components/common/index.js';
-import { ADMIN_ROUTES } from '../../../constants/adminRoutes.js';
-import { useListQuery } from '../../../hooks/useListQuery.js';
-import { normalizePagination } from '../../../utils/listQuery.js';
+} from '@/components/common/index.js';
+import { ADMIN_ROUTES } from '@/constants/adminRoutes.js';
+import { useListQuery } from '@/hooks/useListQuery.js';
+import { normalizePagination } from '@/utils/listQuery.js';
 import {
   addComplaintComment,
   assignComplaint,
@@ -26,10 +26,10 @@ import {
   resolveComplaint,
   updateComplaintPriority,
   updateComplaintStatus,
-} from '../../../services/complaint.service.js';
-import { listStaff } from '../../../services/staff.service.js';
-import '../../../styles/admin/AdminDashboard.css';
-import '../../../styles/common/crud.css';
+} from '@/services/complaint.service.js';
+import { listStaff } from '@/services/staff.service.js';
+import '@/styles/admin/AdminDashboard.css';
+import '@/styles/common/crud.css';
 
 const STATUSES = ['open', 'assigned', 'in_progress', 'waiting', 'resolved', 'closed', 'reopened', 'rejected'];
 const PRIORITIES = ['low', 'medium', 'high', 'critical'];

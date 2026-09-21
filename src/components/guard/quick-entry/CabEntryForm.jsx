@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
-import '../../../styles/guard/visitor/visitors.css';
-import { searchGuardFlats } from '../../../services/guard.service';
-import GatePhotoCapture from '../shared/GatePhotoCapture';
+import '@/styles/guard/visitor/visitors.css';
+import { searchGuardFlats } from '@/services/guard.service';
+import GatePhotoCapture from '@/components/guard/shared/GatePhotoCapture';
 
 const CAB_SERVICES = ['Uber', 'Ola', 'Rapido', 'Local / Other'];
 const TRIP_PURPOSES = ['Pickup', 'Drop', 'Guest'];

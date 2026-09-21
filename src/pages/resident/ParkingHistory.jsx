@@ -1,10 +1,10 @@
 import { useCallback, useEffect, useState } from 'react';
-import DataTable from '../../components/common/DataTable';
-import EmptyState from '../../components/common/EmptyState';
-import Pagination from '../../components/common/Pagination';
-import StatusBadge from '../../components/common/StatusBadge';
-import { useListQuery } from '../../hooks/useListQuery';
-import { normalizePagination } from '../../utils/listQuery';
+import DataTable from '@/components/common/DataTable';
+import EmptyState from '@/components/common/EmptyState';
+import Pagination from '@/components/common/Pagination';
+import StatusBadge from '@/components/common/StatusBadge';
+import { useListQuery } from '@/hooks/useListQuery';
+import { normalizePagination } from '@/utils/listQuery';
 import {
   ALLOCATION_STATUS_COLORS,
   VISITOR_STATUS_COLORS,
@@ -12,7 +12,7 @@ import {
   formatLabel,
   getResidentParkingReceipt,
   listResidentParkingHistory,
-} from '../../services/parking.service';
+} from '@/services/parking.service';
 
 export default function ParkingHistory() {
   const { state, params, setPage } = useListQuery({

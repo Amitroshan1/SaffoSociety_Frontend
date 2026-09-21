@@ -1,7 +1,7 @@
 import { ArrowDown, ArrowUp, ArrowUpDown } from 'lucide-react';
-import EmptyState from './EmptyState.jsx';
-import SkeletonLoader from './SkeletonLoader.jsx';
-import '../../styles/common/crud.css';
+import EmptyState from '@/components/common/EmptyState.jsx';
+import SkeletonLoader from '@/components/common/SkeletonLoader.jsx';
+import '@/styles/common/crud.css';
 
 function SortIcon({ column, sortBy, sortOrder }) {
   if (sortBy !== column.key) return <ArrowUpDown size={12} style={{ opacity: 0.35 }} />;

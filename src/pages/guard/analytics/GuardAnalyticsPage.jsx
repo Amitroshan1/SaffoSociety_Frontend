@@ -1,15 +1,15 @@
 ﻿import { useEffect, useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import '../../../styles/guard/guard-main.css';
-import '../../../styles/common/crud.css';
-import Sidebar from '../../../components/guard/Sidebar';
-import DashboardHeader from '../../../components/guard/DashboardHeader';
-import { navigateGuard } from '../../../constants/guardRoutes.js';
+import '@/styles/guard/guard-main.css';
+import '@/styles/common/crud.css';
+import Sidebar from '@/components/guard/Sidebar';
+import DashboardHeader from '@/components/guard/DashboardHeader';
+import { navigateGuard } from '@/constants/guardRoutes.js';
 import {
   createAnalyticsExport,
   formatLabel,
   getGuardAnalyticsToday,
-} from '../../../services/analytics.service.js';
+} from '@/services/analytics.service.js';
 
 const HIDDEN_PACK_LABELS = /complaint/i;
 

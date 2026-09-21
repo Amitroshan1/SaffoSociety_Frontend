@@ -1,19 +1,19 @@
 ﻿import { useCallback, useEffect, useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { navigateGuard } from '../../../constants/guardRoutes.js';
-import '../../../styles/guard/guard-main.css';
-import '../../../styles/guard/visitor/visitors.css';
-import '../../../styles/common/crud.css';
-import Sidebar from '../../../components/guard/Sidebar';
-import DashboardHeader from '../../../components/guard/DashboardHeader';
-import GateDatePicker from '../../../components/guard/shared/GateDatePicker.jsx';
-import { SearchInput, StatusBadge } from '../../../components/common/index.js';
+import { navigateGuard } from '@/constants/guardRoutes.js';
+import '@/styles/guard/guard-main.css';
+import '@/styles/guard/visitor/visitors.css';
+import '@/styles/common/crud.css';
+import Sidebar from '@/components/guard/Sidebar';
+import DashboardHeader from '@/components/guard/DashboardHeader';
+import GateDatePicker from '@/components/guard/shared/GateDatePicker.jsx';
+import { SearchInput, StatusBadge } from '@/components/common/index.js';
 import {
   BOOKING_STATUS_COLORS,
   checkinBooking,
   checkoutBooking,
   listTodayGuardBookings,
-} from '../../../services/facility.service.js';
+} from '@/services/facility.service.js';
 
 const FILTERS = [
   { key: 'today', label: "Today's Bookings" },

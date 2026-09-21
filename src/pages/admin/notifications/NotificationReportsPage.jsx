@@ -1,15 +1,15 @@
 import { useState } from 'react';
 import { BarChart3 } from 'lucide-react';
-import { AppShell } from '../../../layout/admin/AppShell.jsx';
-import { PageHeader } from '../../../layout/admin/PageHeader.jsx';
-import { DataTable, FormField, FormSelect } from '../../../components/common/index.js';
+import { AppShell } from '@/layout/admin/AppShell.jsx';
+import { PageHeader } from '@/layout/admin/PageHeader.jsx';
+import { DataTable, FormField, FormSelect } from '@/components/common/index.js';
 import {
   NOTIFICATION_REPORT_KEYS,
   formatLabel,
   getNotificationReport,
-} from '../../../services/notification.service.js';
-import '../../../styles/admin/AdminDashboard.css';
-import '../../../styles/common/crud.css';
+} from '@/services/notification.service.js';
+import '@/styles/admin/AdminDashboard.css';
+import '@/styles/common/crud.css';
 
 function columnsFromRows(rows) {
   if (!rows.length) return [];

@@ -1,18 +1,18 @@
 import { useEffect, useState } from 'react';
 import { LayoutDashboard } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
-import { AppShell } from '../../layout/admin/AppShell.jsx';
-import { PageHeader } from '../../layout/admin/PageHeader.jsx';
-import { DataTable } from '../../components/common/index.js';
-import { FINANCE_ROUTES } from '../../constants/adminRoutes.js';
-import { useAuth } from '../../hooks/useAuth';
+import { AppShell } from '@/layout/admin/AppShell.jsx';
+import { PageHeader } from '@/layout/admin/PageHeader.jsx';
+import { DataTable } from '@/components/common/index.js';
+import { FINANCE_ROUTES } from '@/constants/adminRoutes.js';
+import { useAuth } from '@/hooks/useAuth';
 import {
   formatMoney,
   getBillingDashboard,
   listPayments,
-} from '../../services/billing.service';
-import '../../styles/admin/AdminDashboard.css';
-import '../../styles/common/crud.css';
+} from '@/services/billing.service';
+import '@/styles/admin/AdminDashboard.css';
+import '@/styles/common/crud.css';
 
 const money = (stats, key) =>
   formatMoney(stats?.[`${key}Minor`] ?? stats?.[key]);

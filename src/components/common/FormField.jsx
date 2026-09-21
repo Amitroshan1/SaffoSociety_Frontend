@@ -1,4 +1,4 @@
-import { FORM_CONTROL_CLASS, formControlStyle, formLabelStyle } from './formControls.js';
+import { FORM_CONTROL_CLASS, formControlStyle, formLabelStyle } from '@/components/common/formControls.js';
 
 export default function FormField({
   label,

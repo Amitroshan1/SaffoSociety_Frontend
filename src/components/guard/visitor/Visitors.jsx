@@ -55,8 +55,8 @@
 
 import { useState, useCallback, useEffect } from "react";
 import { useSearchParams } from "react-router-dom";
-import AddVisitorForm from "./AddVisitorForm";
-import VisitorTable   from "./VisitorTable";
+import AddVisitorForm from "@/components/guard/visitor/AddVisitorForm";
+import VisitorTable   from "@/components/guard/visitor/VisitorTable";
 import {
   apiError,
   checkInVisitor,
@@ -68,7 +68,7 @@ import {
   tryGuardApprove,
   tryGuardDeny,
   verifyVisitorOTP,
-} from "../../../services/guard.service";
+} from "@/services/guard.service";
 
 const TABS = [
   { key: "add",      label: "Add Visitor", icon: "plus"  },

@@ -1,27 +1,27 @@
 import { useEffect, useMemo, useState } from 'react';
 import { ArrowLeft, LogOut, Save, UserCheck } from 'lucide-react';
 import { useNavigate, useParams, useSearchParams } from 'react-router-dom';
-import { AppShell } from '../../../layout/admin/AppShell.jsx';
-import { PageHeader } from '../../../layout/admin/PageHeader.jsx';
+import { AppShell } from '@/layout/admin/AppShell.jsx';
+import { PageHeader } from '@/layout/admin/PageHeader.jsx';
 import {
   FormField,
   FormLayout,
   FormSelect,
-} from '../../../components/common/index.js';
-import Spinner from '../../../common/Spinner.jsx';
-import { ADMIN_ROUTES } from '../../../constants/adminRoutes.js';
-import { listBuildings } from '../../../services/building.service.js';
-import { listWings } from '../../../services/wing.service.js';
-import { listFlats } from '../../../services/flat.service.js';
-import { listResidents } from '../../../services/resident.service.js';
+} from '@/components/common/index.js';
+import Spinner from '@/common/Spinner.jsx';
+import { ADMIN_ROUTES } from '@/constants/adminRoutes.js';
+import { listBuildings } from '@/services/building.service.js';
+import { listWings } from '@/services/wing.service.js';
+import { listFlats } from '@/services/flat.service.js';
+import { listResidents } from '@/services/resident.service.js';
 import {
   createOccupancy,
   getOccupancy,
   moveOutOccupancy,
   updateOccupancy,
-} from '../../../services/occupancy.service.js';
-import '../../../styles/admin/AdminDashboard.css';
-import '../../../styles/common/crud.css';
+} from '@/services/occupancy.service.js';
+import '@/styles/admin/AdminDashboard.css';
+import '@/styles/common/crud.css';
 
 const ROLE_OPTIONS = ['owner', 'tenant', 'family_member', 'domestic_help'];
 const ENDED_REASON_OPTIONS = ['moved_out', 'lease_ended', 'transfer', 'deceased', 'other'];

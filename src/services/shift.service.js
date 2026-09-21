@@ -1,4 +1,4 @@
-import api from './api';
+import api from '@/services/api';
 
 export const listShifts = (params) => api.get('/shifts', { params });
 export const getTodayShifts = () => api.get('/shifts/today');

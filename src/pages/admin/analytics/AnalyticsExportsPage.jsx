@@ -1,18 +1,18 @@
 import { useEffect, useState } from 'react';
 import { Download } from 'lucide-react';
-import { AppShell } from '../../../layout/admin/AppShell.jsx';
-import { PageHeader } from '../../../layout/admin/PageHeader.jsx';
-import { DataTable, Pagination, SkeletonLoader } from '../../../components/common/index.js';
-import { ADMIN_ROUTES, FINANCE_ROUTES } from '../../../constants/adminRoutes.js';
-import { useListQuery } from '../../../hooks/useListQuery.js';
-import { normalizePagination } from '../../../utils/listQuery.js';
+import { AppShell } from '@/layout/admin/AppShell.jsx';
+import { PageHeader } from '@/layout/admin/PageHeader.jsx';
+import { DataTable, Pagination, SkeletonLoader } from '@/components/common/index.js';
+import { ADMIN_ROUTES, FINANCE_ROUTES } from '@/constants/adminRoutes.js';
+import { useListQuery } from '@/hooks/useListQuery.js';
+import { normalizePagination } from '@/utils/listQuery.js';
 import {
   downloadAnalyticsExport,
   formatLabel,
   listAnalyticsExports,
-} from '../../../services/analytics.service.js';
-import '../../../styles/admin/AdminDashboard.css';
-import '../../../styles/common/crud.css';
+} from '@/services/analytics.service.js';
+import '@/styles/admin/AdminDashboard.css';
+import '@/styles/common/crud.css';
 
 const columns = (onDownload) => [
   { key: 'reportKey', label: 'Report' },

@@ -1,13 +1,13 @@
 import { useEffect, useState } from 'react';
 import { IndianRupee } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
-import { AppShell } from '../../../layout/admin/AppShell.jsx';
-import { PageHeader } from '../../../layout/admin/PageHeader.jsx';
-import { DataTable } from '../../../components/common/index.js';
-import { ADMIN_ROUTES, FINANCE_ROUTES } from '../../../constants/adminRoutes.js';
-import { formatMoney, getBillingDashboard } from '../../../services/billing.service.js';
-import '../../../styles/admin/AdminDashboard.css';
-import '../../../styles/common/crud.css';
+import { AppShell } from '@/layout/admin/AppShell.jsx';
+import { PageHeader } from '@/layout/admin/PageHeader.jsx';
+import { DataTable } from '@/components/common/index.js';
+import { ADMIN_ROUTES, FINANCE_ROUTES } from '@/constants/adminRoutes.js';
+import { formatMoney, getBillingDashboard } from '@/services/billing.service.js';
+import '@/styles/admin/AdminDashboard.css';
+import '@/styles/common/crud.css';
 
 const LINKS = [
   { id: 'bills', label: 'Bills' },

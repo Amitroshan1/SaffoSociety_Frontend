@@ -1,4 +1,4 @@
-import api from './api';
+import api from '@/services/api';
 
 export const integrationsService = {
   listProviders: (params) => api.get('/platform/integrations/providers', { params }),

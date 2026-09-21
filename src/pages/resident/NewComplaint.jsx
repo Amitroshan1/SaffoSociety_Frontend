@@ -1,9 +1,9 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import FormField from '../../components/common/FormField';
-import FormLayout from '../../components/common/FormLayout';
-import FormSelect from '../../components/common/FormSelect';
-import { createResidentComplaint } from '../../services/complaint.service';
+import FormField from '@/components/common/FormField';
+import FormLayout from '@/components/common/FormLayout';
+import FormSelect from '@/components/common/FormSelect';
+import { createResidentComplaint } from '@/services/complaint.service';
 
 const CATEGORIES = [
   'electrical',

@@ -1,27 +1,27 @@
 import { useEffect, useMemo, useState } from 'react';
 import { ArrowLeft, DoorOpen, Save } from 'lucide-react';
 import { useNavigate, useParams, useSearchParams } from 'react-router-dom';
-import { AppShell } from '../../../layout/admin/AppShell.jsx';
-import { PageHeader } from '../../../layout/admin/PageHeader.jsx';
+import { AppShell } from '@/layout/admin/AppShell.jsx';
+import { PageHeader } from '@/layout/admin/PageHeader.jsx';
 import {
   ConfirmDialog,
   FormField,
   FormLayout,
   FormSelect,
-} from '../../../components/common/index.js';
-import Spinner from '../../../common/Spinner.jsx';
-import { ADMIN_ROUTES } from '../../../constants/adminRoutes.js';
-import { listBuildings } from '../../../services/building.service.js';
-import { listWings } from '../../../services/wing.service.js';
+} from '@/components/common/index.js';
+import Spinner from '@/common/Spinner.jsx';
+import { ADMIN_ROUTES } from '@/constants/adminRoutes.js';
+import { listBuildings } from '@/services/building.service.js';
+import { listWings } from '@/services/wing.service.js';
 import {
   activateFlat,
   createFlat,
   deactivateFlat,
   getFlat,
   updateFlat,
-} from '../../../services/flat.service.js';
-import '../../../styles/admin/AdminDashboard.css';
-import '../../../styles/common/crud.css';
+} from '@/services/flat.service.js';
+import '@/styles/admin/AdminDashboard.css';
+import '@/styles/common/crud.css';
 
 const FLAT_TYPE_OPTIONS = [
   '',

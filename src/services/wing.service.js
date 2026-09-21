@@ -1,4 +1,4 @@
-import api from './api';
+import api from '@/services/api';
 
 export const listWings = (params) => api.get('/wings', { params });
 

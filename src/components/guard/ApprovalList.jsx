@@ -1,6 +1,6 @@
 // client/src/components/guard/ApprovalList.jsx
 
-import '../../styles/guard/guard-main.css';
+import '@/styles/guard/guard-main.css';
 
 const MAX_VISIBLE_ROWS = 8;
 

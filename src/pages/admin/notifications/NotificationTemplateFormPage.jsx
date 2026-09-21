@@ -1,15 +1,15 @@
 import { useEffect, useState } from 'react';
 import { ArrowLeft, FileText, Save } from 'lucide-react';
 import { useLocation, useNavigate, useParams } from 'react-router-dom';
-import { AppShell } from '../../../layout/admin/AppShell.jsx';
-import { PageHeader } from '../../../layout/admin/PageHeader.jsx';
+import { AppShell } from '@/layout/admin/AppShell.jsx';
+import { PageHeader } from '@/layout/admin/PageHeader.jsx';
 import {
   ConfirmDialog,
   FormField,
   FormSelect,
-} from '../../../components/common/index.js';
-import Spinner from '../../../common/Spinner.jsx';
-import { ADMIN_ROUTES } from '../../../constants/adminRoutes.js';
+} from '@/components/common/index.js';
+import Spinner from '@/common/Spinner.jsx';
+import { ADMIN_ROUTES } from '@/constants/adminRoutes.js';
 import {
   NOTIFICATION_CATEGORIES,
   NOTIFICATION_CHANNELS,
@@ -20,9 +20,9 @@ import {
   formatLabel,
   listNotificationTemplates,
   updateNotificationTemplate,
-} from '../../../services/notification.service.js';
-import '../../../styles/admin/AdminDashboard.css';
-import '../../../styles/common/crud.css';
+} from '@/services/notification.service.js';
+import '@/styles/admin/AdminDashboard.css';
+import '@/styles/common/crud.css';
 
 const LIST_PATH = '/admin/notifications/templates';
 

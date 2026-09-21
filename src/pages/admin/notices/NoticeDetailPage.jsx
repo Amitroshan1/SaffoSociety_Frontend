@@ -1,10 +1,10 @@
 import { useCallback, useEffect, useState } from 'react';
 import { ArrowLeft, Bell, Pencil } from 'lucide-react';
 import { useNavigate, useParams } from 'react-router-dom';
-import { AppShell } from '../../../layout/admin/AppShell.jsx';
-import { PageHeader } from '../../../layout/admin/PageHeader.jsx';
-import { ConfirmDialog, DataTable, EmptyState, FormField } from '../../../components/common/index.js';
-import { ADMIN_ROUTES } from '../../../constants/adminRoutes.js';
+import { AppShell } from '@/layout/admin/AppShell.jsx';
+import { PageHeader } from '@/layout/admin/PageHeader.jsx';
+import { ConfirmDialog, DataTable, EmptyState, FormField } from '@/components/common/index.js';
+import { ADMIN_ROUTES } from '@/constants/adminRoutes.js';
 import {
   archiveNotice,
   cancelNotice,
@@ -14,9 +14,9 @@ import {
   pinNotice,
   publishNotice,
   unpinNotice,
-} from '../../../services/notice.service.js';
-import '../../../styles/admin/AdminDashboard.css';
-import '../../../styles/common/crud.css';
+} from '@/services/notice.service.js';
+import '@/styles/admin/AdminDashboard.css';
+import '@/styles/common/crud.css';
 
 const TABS = [
   { id: 'targets', label: 'Targets' },

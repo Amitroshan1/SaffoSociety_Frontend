@@ -1,5 +1,5 @@
 import { Inbox } from 'lucide-react';
-import '../../styles/common/crud.css';
+import '@/styles/common/crud.css';
 
 export default function EmptyState({ title = 'Nothing here yet', description, icon: Icon = Inbox, action }) {
   return (

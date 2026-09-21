@@ -1,8 +1,8 @@
 import { useCallback, useEffect, useState } from 'react';
 import { FolderOpen, Plus, Save } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
-import { AppShell } from '../../layout/admin/AppShell.jsx';
-import { PageHeader } from '../../layout/admin/PageHeader.jsx';
+import { AppShell } from '@/layout/admin/AppShell.jsx';
+import { PageHeader } from '@/layout/admin/PageHeader.jsx';
 import {
   DataTable,
   FilterBar,
@@ -11,10 +11,10 @@ import {
   FormSelect,
   Pagination,
   SearchInput,
-} from '../../components/common/index.js';
-import { FINANCE_ROUTES } from '../../constants/adminRoutes.js';
-import { useListQuery } from '../../hooks/useListQuery.js';
-import { normalizePagination } from '../../utils/listQuery.js';
+} from '@/components/common/index.js';
+import { FINANCE_ROUTES } from '@/constants/adminRoutes.js';
+import { useListQuery } from '@/hooks/useListQuery.js';
+import { normalizePagination } from '@/utils/listQuery.js';
 import {
   DOCUMENT_ALLOWED_MIME_TYPES,
   DOCUMENT_STATUSES,
@@ -24,9 +24,9 @@ import {
   listDocumentCategories,
   listFinanceDocuments,
   openDownloadedFile,
-} from '../../services/document.service.js';
-import '../../styles/admin/AdminDashboard.css';
-import '../../styles/common/crud.css';
+} from '@/services/document.service.js';
+import '@/styles/admin/AdminDashboard.css';
+import '@/styles/common/crud.css';
 
 const initialForm = {
   title: '',

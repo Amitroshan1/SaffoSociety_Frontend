@@ -1,6 +1,6 @@
 import { useState } from 'react';
-import '../../../styles/guard/visitor/visitors.css';
-import GatePhotoCapture from '../shared/GatePhotoCapture';
+import '@/styles/guard/visitor/visitors.css';
+import GatePhotoCapture from '@/components/guard/shared/GatePhotoCapture';
 
 const COURIER_COMPANIES = [
   'Amazon',

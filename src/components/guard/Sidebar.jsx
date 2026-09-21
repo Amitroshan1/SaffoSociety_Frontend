@@ -1,12 +1,12 @@
 import { useEffect, useState } from 'react';
-import { useAuth } from '../../hooks/useAuth';
-import { GUARD_ROUTES } from '../../constants/guardRoutes.js';
+import { useAuth } from '@/hooks/useAuth';
+import { GUARD_ROUTES } from '@/constants/guardRoutes.js';
 import {
   closeGuardMobileNav,
   isGuardMobileNavOpen,
   subscribeGuardMobileNav,
-} from '../../utils/guardMobileNav.js';
-import '../../styles/guard/guard-main.css';
+} from '@/utils/guardMobileNav.js';
+import '@/styles/guard/guard-main.css';
 
 const COLLAPSE_KEY = 'guard-sidebar-collapsed';
 

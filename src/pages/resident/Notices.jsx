@@ -1,20 +1,20 @@
 import { useEffect, useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import DataTable from '../../components/common/DataTable';
-import EmptyState from '../../components/common/EmptyState';
-import ListToolbar from '../../components/common/ListToolbar';
-import Pagination from '../../components/common/Pagination';
-import NoticeTabs from '../../components/resident/NoticeTabs';
-import { buildNoticeColumns, titleCase } from '../../components/resident/noticeUi';
-import { useListQuery } from '../../hooks/useListQuery';
-import { normalizePagination } from '../../utils/listQuery';
+import DataTable from '@/components/common/DataTable';
+import EmptyState from '@/components/common/EmptyState';
+import ListToolbar from '@/components/common/ListToolbar';
+import Pagination from '@/components/common/Pagination';
+import NoticeTabs from '@/components/resident/NoticeTabs';
+import { buildNoticeColumns, titleCase } from '@/components/resident/noticeUi';
+import { useListQuery } from '@/hooks/useListQuery';
+import { normalizePagination } from '@/utils/listQuery';
 import {
   NOTICE_CATEGORIES,
   NOTICE_PRIORITIES,
   getResidentPinnedNotices,
   getResidentUnreadNotices,
   listResidentNotices,
-} from '../../services/notice.service';
+} from '@/services/notice.service';
 
 const columns = buildNoticeColumns();
 

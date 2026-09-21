@@ -1,12 +1,12 @@
 import { useEffect, useState } from 'react';
-import EmptyState from '../../components/common/EmptyState';
-import SkeletonLoader from '../../components/common/SkeletonLoader';
-import { BarChart, KpiCard } from '../../components/analytics/Charts.jsx';
+import EmptyState from '@/components/common/EmptyState';
+import SkeletonLoader from '@/components/common/SkeletonLoader';
+import { BarChart, KpiCard } from '@/components/analytics/Charts.jsx';
 import {
   createAnalyticsExport,
   formatLabel,
   getResidentAnalyticsSummary,
-} from '../../services/analytics.service.js';
+} from '@/services/analytics.service.js';
 
 export default function ResidentAnalyticsPage() {
   const [data, setData] = useState(null);

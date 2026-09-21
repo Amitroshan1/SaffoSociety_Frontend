@@ -1,8 +1,8 @@
 // Guard panel API helpers — wired to dedicated /guard/* backend routes (no backend changes).
 
-import api from './api';
-import { getMyStaff } from './staff.service';
-import { listGuardNotifications } from './notification.service';
+import api from '@/services/api';
+import { getMyStaff } from '@/services/staff.service';
+import { listGuardNotifications } from '@/services/notification.service';
 
 function unwrap(res) {
   return res?.data?.data;

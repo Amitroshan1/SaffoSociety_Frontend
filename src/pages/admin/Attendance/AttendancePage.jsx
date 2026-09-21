@@ -1,14 +1,14 @@
 import { useCallback, useEffect, useState } from 'react';
 import { ClipboardList } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
-import { AppShell } from '../../../layout/admin/AppShell.jsx';
-import { PageHeader } from '../../../layout/admin/PageHeader.jsx';
-import { DataTable, FilterBar, Pagination, SearchInput } from '../../../components/common/index.js';
-import { useListQuery } from '../../../hooks/useListQuery.js';
-import { normalizePagination } from '../../../utils/listQuery.js';
-import { listAttendance, voidAttendance } from '../../../services/attendance.service.js';
-import '../../../styles/admin/AdminDashboard.css';
-import '../../../styles/common/crud.css';
+import { AppShell } from '@/layout/admin/AppShell.jsx';
+import { PageHeader } from '@/layout/admin/PageHeader.jsx';
+import { DataTable, FilterBar, Pagination, SearchInput } from '@/components/common/index.js';
+import { useListQuery } from '@/hooks/useListQuery.js';
+import { normalizePagination } from '@/utils/listQuery.js';
+import { listAttendance, voidAttendance } from '@/services/attendance.service.js';
+import '@/styles/admin/AdminDashboard.css';
+import '@/styles/common/crud.css';
 
 const routes = {
   dashboard: '/admin/dashboard',

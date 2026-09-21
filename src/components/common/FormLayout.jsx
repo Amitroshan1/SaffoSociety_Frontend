@@ -1,4 +1,4 @@
-import '../../styles/common/crud.css';
+import '@/styles/common/crud.css';
 
 export default function FormLayout({ sections, children, footer }) {
   return (

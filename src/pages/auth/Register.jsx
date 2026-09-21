@@ -1,7 +1,3 @@
-
-
-
-
 import { useState } from "react";
 import { useNavigate, Link, useSearchParams } from "react-router-dom";
 import { motion } from "framer-motion";
@@ -17,7 +13,7 @@ import {
   Sparkles,
   CheckCircle2,
 } from "lucide-react";
-import { authService } from "../../services/auth.service";
+import { authService } from "@/services/auth.service";
 
 const ROLES = [
   {
@@ -526,8 +522,8 @@ export default Register;
 //   Sparkles,
 //   CheckCircle2,
 // } from "lucide-react";
-// import { authService } from "../../services/auth.service";
-// import "./Register.css";
+// import { authService } from "@/services/auth.service";
+// import "@/pages/auth/Register.css";
 
 // // ─── Color key → CSS class suffix mapping ────────────────────────────────────
 // // Keeps gradient/glow classes consistent across stripe, icon, button, etc.

@@ -1,12 +1,12 @@
 import { useCallback, useEffect, useState } from 'react';
 import { Link, useNavigate, useParams } from 'react-router-dom';
-import { EmptyState, SkeletonLoader } from '../../components/common/index.js';
+import { EmptyState, SkeletonLoader } from '@/components/common/index.js';
 import {
   archiveResidentNotification,
   formatLabel,
   getResidentNotification,
   markResidentNotificationRead,
-} from '../../services/notification.service.js';
+} from '@/services/notification.service.js';
 
 export default function ResidentNotificationDetailPage() {
   const { id } = useParams();

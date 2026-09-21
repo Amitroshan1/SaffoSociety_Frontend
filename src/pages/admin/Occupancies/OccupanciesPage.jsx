@@ -1,21 +1,21 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { UserCheck } from 'lucide-react';
 import { useLocation, useNavigate, useSearchParams } from 'react-router-dom';
-import { AppShell } from '../../../layout/admin/AppShell.jsx';
-import { PageHeader } from '../../../layout/admin/PageHeader.jsx';
+import { AppShell } from '@/layout/admin/AppShell.jsx';
+import { PageHeader } from '@/layout/admin/PageHeader.jsx';
 import {
   DataTable,
   ListToolbar,
   Pagination,
-} from '../../../components/common/index.js';
-import { useListQuery } from '../../../hooks/useListQuery.js';
-import { normalizePagination } from '../../../utils/listQuery.js';
-import { ADMIN_ROUTES } from '../../../constants/adminRoutes.js';
-import { listBuildings } from '../../../services/building.service.js';
-import { listWings } from '../../../services/wing.service.js';
-import { listOccupancies } from '../../../services/occupancy.service.js';
-import '../../../styles/admin/AdminDashboard.css';
-import '../../../styles/common/crud.css';
+} from '@/components/common/index.js';
+import { useListQuery } from '@/hooks/useListQuery.js';
+import { normalizePagination } from '@/utils/listQuery.js';
+import { ADMIN_ROUTES } from '@/constants/adminRoutes.js';
+import { listBuildings } from '@/services/building.service.js';
+import { listWings } from '@/services/wing.service.js';
+import { listOccupancies } from '@/services/occupancy.service.js';
+import '@/styles/admin/AdminDashboard.css';
+import '@/styles/common/crud.css';
 
 const COLUMNS = [
   { key: 'flatNo', label: 'Flat', sortable: false },

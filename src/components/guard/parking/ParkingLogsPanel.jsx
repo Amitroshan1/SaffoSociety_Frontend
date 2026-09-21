@@ -1,13 +1,13 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
-import { SearchInput } from '../../common/index.js';
-import GateDatePicker from '../shared/GateDatePicker.jsx';
+import { SearchInput } from '@/components/common/index.js';
+import GateDatePicker from '@/components/guard/shared/GateDatePicker.jsx';
 import {
   dateRangeForPreset,
   formatLogWhen,
   resolveParkingLogs,
   summarizeLogs,
   withLogDurations,
-} from './parkingLogsData.js';
+} from '@/components/guard/parking/parkingLogsData.js';
 
 const PAGE_SIZE = 10;
 

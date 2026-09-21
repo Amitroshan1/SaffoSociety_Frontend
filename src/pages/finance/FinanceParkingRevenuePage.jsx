@@ -1,18 +1,18 @@
 import { useCallback, useEffect, useState } from 'react';
 import { IndianRupee } from 'lucide-react';
-import { AppShell } from '../../layout/admin/AppShell.jsx';
-import { PageHeader } from '../../layout/admin/PageHeader.jsx';
-import { DataTable, FormField, Pagination } from '../../components/common/index.js';
-import { FINANCE_ROUTES } from '../../constants/adminRoutes.js';
-import { normalizePagination } from '../../utils/listQuery.js';
+import { AppShell } from '@/layout/admin/AppShell.jsx';
+import { PageHeader } from '@/layout/admin/PageHeader.jsx';
+import { DataTable, FormField, Pagination } from '@/components/common/index.js';
+import { FINANCE_ROUTES } from '@/constants/adminRoutes.js';
+import { normalizePagination } from '@/utils/listQuery.js';
 import {
   formatFee,
   getParkingRevenue,
   listParkingPayments,
   refundParking,
-} from '../../services/parking.service.js';
-import '../../styles/admin/AdminDashboard.css';
-import '../../styles/common/crud.css';
+} from '@/services/parking.service.js';
+import '@/styles/admin/AdminDashboard.css';
+import '@/styles/common/crud.css';
 
 export default function FinanceParkingRevenuePage() {
   const [from, setFrom] = useState('');

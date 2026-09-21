@@ -1,12 +1,12 @@
 import { useCallback, useEffect, useState } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
-import { navigateGuard } from '../../../constants/guardRoutes.js';
-import '../../../styles/guard/guard-main.css';
-import '../../../styles/guard/visitor/visitors.css';
-import Sidebar from '../../../components/guard/Sidebar';
-import DashboardHeader from '../../../components/guard/DashboardHeader';
-import DeliveryEntryForm from '../../../components/guard/quick-entry/DeliveryEntryForm.jsx';
-import VisitorTable from '../../../components/guard/visitor/VisitorTable.jsx';
+import { navigateGuard } from '@/constants/guardRoutes.js';
+import '@/styles/guard/guard-main.css';
+import '@/styles/guard/visitor/visitors.css';
+import Sidebar from '@/components/guard/Sidebar';
+import DashboardHeader from '@/components/guard/DashboardHeader';
+import DeliveryEntryForm from '@/components/guard/quick-entry/DeliveryEntryForm.jsx';
+import VisitorTable from '@/components/guard/visitor/VisitorTable.jsx';
 import {
   apiError,
   callResidentForDelivery,
@@ -15,7 +15,7 @@ import {
   logDelivery,
   markHeldParcelCollected,
   markResidentReceived,
-} from '../../../services/guard.service';
+} from '@/services/guard.service';
 
 const DELIVERY_CONFIG = {
   title: 'Deliveries',

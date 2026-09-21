@@ -36,8 +36,16 @@ export function gateCoords(gate) {
   return null;
 }
 
+/** Prefer gate.geofenceRadiusMeters; fall back to 120m. */
+export function gateRadiusMeters(gate) {
+  const n = numOrNull(gate?.geofenceRadiusMeters ?? gate?.geofence_radius_meters);
+  if (n !== null && n > 0) return n;
+  return LOCATION_RADIUS_METERS;
+}
+
 export function summarizeGeo(locData, gate) {
   const coords = gateCoords(gate);
+  const radius = gateRadiusMeters(gate);
   if (!locData) {
     return {
       state: 'not_captured',
@@ -53,7 +61,7 @@ export function summarizeGeo(locData, gate) {
     };
   }
   const dist = distanceMeters(locData.latitude, locData.longitude, coords.lat, coords.lng);
-  if (dist <= LOCATION_RADIUS_METERS) {
+  if (dist <= radius) {
     return {
       state: 'on_location',
       text: 'On location',
@@ -63,7 +71,7 @@ export function summarizeGeo(locData, gate) {
   return {
     state: 'off_location',
     text: 'Outside gate radius',
-    hint: `${Math.round(dist)}m away (allowed ${LOCATION_RADIUS_METERS}m)`,
+    hint: `${Math.round(dist)}m away (allowed ${Math.round(radius)}m)`,
   };
 }
 

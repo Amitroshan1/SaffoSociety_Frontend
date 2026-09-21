@@ -1,4 +1,4 @@
-import api from './api';
+import api from '@/services/api';
 
 export const listAttendance = (params) => api.get('/staff-attendance', { params });
 export const getAttendance = (id) => api.get(`/staff-attendance/${id}`);

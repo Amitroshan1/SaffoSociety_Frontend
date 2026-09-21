@@ -1,15 +1,15 @@
 import { useCallback, useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { DataTable, ListToolbar, Pagination } from '../../components/common/index.js';
-import { useListQuery } from '../../hooks/useListQuery.js';
-import { normalizePagination } from '../../utils/listQuery.js';
+import { DataTable, ListToolbar, Pagination } from '@/components/common/index.js';
+import { useListQuery } from '@/hooks/useListQuery.js';
+import { normalizePagination } from '@/utils/listQuery.js';
 import {
   archiveResidentNotification,
   formatLabel,
   listResidentNotifications,
   markAllResidentNotificationsRead,
   markResidentNotificationRead,
-} from '../../services/notification.service.js';
+} from '@/services/notification.service.js';
 
 const columns = [
   { key: 'title', label: 'Title', render: (row) => row.title || row.subject || 'Untitled notification' },

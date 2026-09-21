@@ -4,14 +4,14 @@
 
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { useAuth } from '../../hooks/useAuth';
-import { useTheme } from '../../context/ThemeContext';
+import { useAuth } from '@/hooks/useAuth';
+import { useTheme } from '@/context/ThemeContext';
 import {
   getGuardProfile,
   getUnreadNotificationCount,
-} from '../../services/guard.service';
-import { toggleGuardMobileNav } from '../../utils/guardMobileNav.js';
-import '../../styles/guard/guard-main.css';
+} from '@/services/guard.service';
+import { toggleGuardMobileNav } from '@/utils/guardMobileNav.js';
+import '@/styles/guard/guard-main.css';
 
 export default function DashboardHeader() {
   const [time, setTime]             = useState(new Date());
