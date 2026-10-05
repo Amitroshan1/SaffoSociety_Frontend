@@ -1,0 +1,126 @@
+/**
+ * Cab feature styles.
+ */
+@import '../shared/gate-forms.css';
+
+/* ================================================================
+   CAB ENTRY (simple gate log)
+   ================================================================ */
+.cab-grid {
+  display: grid;
+  grid-template-columns: minmax(120px, 1.2fr) minmax(110px, 1fr) minmax(120px, 1.2fr) minmax(90px, 0.9fr) minmax(80px, 0.8fr) minmax(90px, 0.85fr);
+  column-gap: 14px;
+  align-items: center;
+}
+.cab-grid--actions {
+  grid-template-columns:
+    minmax(100px, 1.1fr)
+    minmax(90px, 0.9fr)
+    minmax(100px, 1fr)
+    minmax(70px, 0.7fr)
+    minmax(70px, 0.7fr)
+    minmax(80px, 0.75fr)
+    minmax(200px, 1.6fr);
+}
+.vtbl-head.cab-grid {
+  padding-top: 8px;
+  padding-bottom: 8px;
+  min-height: 0;
+}
+.vtbl-row.cab-grid {
+  padding-top: 8px;
+  padding-bottom: 8px;
+  min-height: 44px;
+}
+.cab-flat-dropdown {
+  position: absolute;
+  z-index: 40;
+  left: 0;
+  right: 0;
+  top: calc(100% + 4px);
+  margin: 0;
+  padding: 4px;
+  list-style: none;
+  max-height: 220px;
+  overflow: auto;
+  background: var(--vp-s2);
+  border: 1px solid var(--vp-b2);
+  border-radius: var(--vp-r);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.35);
+}
+.cab-flat-dropdown button {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 2px;
+  padding: 8px 10px;
+  border: none;
+  border-radius: 6px;
+  background: transparent;
+  color: var(--vp-tx);
+  font-family: inherit;
+  cursor: pointer;
+  text-align: left;
+}
+.cab-flat-dropdown button:hover {
+  background: var(--vp-s3);
+}
+.cab-flat-label {
+  font-size: 13px;
+  font-weight: 600;
+}
+.cab-flat-res {
+  font-size: 12px;
+  color: var(--vp-tx3);
+}
+.vtbl-toolbar--cab {
+  gap: 8px;
+  align-items: center;
+}
+.vtbl-toolbar--cab .vtbl-search-wrap input {
+  border: 1px solid var(--vp-b2, #cbd5e1);
+  border-radius: var(--vp-r2);
+  transition:
+    border-color 0.15s ease,
+    box-shadow 0.15s ease,
+    background 0.15s ease;
+}
+.vtbl-toolbar--cab .vtbl-search-wrap input:hover,
+.vtbl-toolbar--cab .vtbl-search-wrap input:focus {
+  border-color: var(--vp-indigo, #6366f1);
+  background: var(--vp-s1, var(--vp-s2));
+}
+.vtbl-toolbar--cab .vtbl-search-wrap input:focus {
+  box-shadow: 0 0 0 3px var(--vp-indigo-ll);
+}
+.vtbl-toolbar--cab-dates {
+  gap: 8px;
+  align-items: center;
+}
+.vtbl-toolbar--cab-dates .vtbl-search-wrap {
+  flex: 0 1 400px;
+  min-width: 200px;
+  max-width: 480px;
+}
+.vtbl-toolbar--cab-dates .vtbl-search-wrap input {
+  padding: 8px 10px 8px 30px;
+  min-height: 42px;
+  box-sizing: border-box;
+  font-size: 13px;
+}
+.cab-date-range {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  flex: 0 1 auto;
+  flex-wrap: wrap;
+  min-width: 0;
+}
+.cab-date-sep {
+  color: var(--vp-tx3);
+  font-size: 13px;
+  font-weight: 500;
+  line-height: 1;
+  opacity: 0.7;
+}

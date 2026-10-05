@@ -1,0 +1,80 @@
+/**
+ * Shared page chrome used across Guard feature pages
+ * (title, toolbar, search, table card shells).
+ */
+
+.gm-park-page-title {
+  margin: 0;
+  font-size: 28px;
+  font-weight: 700;
+  color: var(--gm-text-primary);
+}
+
+.gm-park-hint {
+  margin: 0;
+  font-size: 13px;
+  line-height: 1.45;
+  color: var(--gm-text-secondary);
+}
+
+.gm-park-hint--wide {
+  grid-column: 1 / -1;
+  padding: 8px 10px;
+  border-radius: 8px;
+  border: 1px solid var(--gm-border);
+  background: rgba(37, 99, 235, 0.06);
+}
+
+.gm-park-hint--warn {
+  background: rgba(245, 158, 11, 0.1);
+  border-color: rgba(245, 158, 11, 0.35);
+  color: #b45309;
+}
+
+.gm-park-toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 12px;
+}
+
+.gm-park-toolbar-btns {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-left: auto;
+}
+
+.gm-park-topbar .gm-park-toolbar-btns {
+  margin-left: 0;
+}
+
+.gm-park-search {
+  flex: 1 1 240px;
+  min-width: 0;
+  max-width: 360px;
+}
+
+.gm-park-controlbar .gm-park-search {
+  flex: 1 1 220px;
+  max-width: 360px;
+  min-width: 180px;
+}
+
+.gm-park-page .gm-park-search input {
+  font-size: 14px;
+  height: 38px;
+}
+
+.gm-park-table-card {
+  padding: 12px 14px;
+  border-radius: var(--gm-radius-lg);
+}
+
+.gm-park-table-title {
+  margin: 0 0 8px;
+  font-size: 18px;
+  font-weight: 600;
+  color: var(--gm-text-primary);
+}

@@ -1,0 +1,30 @@
+/** Resident routes. Axios baseURL is the API origin; these paths match FastAPI. */
+export const RESIDENT_ENDPOINTS = {
+  gateDashboard: '/resident/gate-dashboard',
+  flat: '/resident/flat',
+  household: '/resident/household',
+  profile: '/resident/profile',
+  password: '/resident/change-password',
+  visitors: '/resident/visitors',
+  invite: '/resident/visitor-invitations',
+  approval: '/resident/visitor-approval',
+  sos: '/resident/sos',
+  sosClose: (id) => `/resident/sos/${id}/close`,
+  facilities: '/resident/facilities',
+  facilitySlots: (id) => `/resident/facilities/${id}`,
+  bookings: '/resident/bookings',
+  booking: (id) => `/resident/bookings/${id}`,
+  bookingCancel: (id) => `/resident/bookings/${id}/cancel`,
+  parking: '/resident/parking',
+  parkingHistory: '/resident/parking/history',
+  vehicles: '/resident/vehicles',
+  vehicle: (id) => `/resident/vehicles/${id}`,
+  visitorParking: '/resident/visitor-parking',
+  clearances: '/resident/clearances',
+  clearanceDocuments: (id) => `/resident/clearances/${id}/documents`,
+  notifications: '/resident/notifications',
+  notificationRead: (id) => `/resident/notifications/${id}/read`,
+  unreadCount: '/resident/notifications/unread-count',
+};
+
+export const GATE_NOTE_CATEGORIES = ['visitor', 'emergency', 'parking', 'amenity'];

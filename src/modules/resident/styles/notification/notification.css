@@ -1,0 +1,25 @@
+.resident-app .res-note-item {
+  display: flex;
+  gap: 12px;
+  align-items: flex-start;
+  padding: 14px 0;
+  border-bottom: 1px solid var(--res-border);
+}
+
+.resident-app .res-note-item.is-unread {
+  background: rgba(91, 33, 182, 0.04);
+  margin: 0 -18px;
+  padding: 14px 18px;
+}
+
+.resident-app .res-note-item.is-emergency .res-avatar {
+  background: #fee2e2;
+  color: #991b1b;
+}
+
+@media (max-width: 860px) {
+  .resident-app .res-note-item {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+}

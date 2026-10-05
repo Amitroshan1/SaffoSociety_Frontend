@@ -1,0 +1,415 @@
+/**
+ * Delivery feature styles.
+ */
+@import '../shared/gate-forms.css';
+
+/* ================================================================
+   GATE DELIVERIES (At Gate / Held / Completed)
+   ================================================================ */
+.gd-log-btn {
+  margin-left: auto;
+  border: none;
+  border-radius: var(--vp-r);
+  background: var(--vp-indigo-l);
+  color: var(--vp-indigo2);
+  font-family: inherit;
+  font-size: 13px;
+  font-weight: 600;
+  padding: 8px 14px;
+  cursor: pointer;
+  white-space: nowrap;
+}
+.gd-log-btn:hover {
+  filter: brightness(1.05);
+}
+.gd-log-wrap {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+.gd-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+.gd-card {
+  border: 1px solid var(--vp-b1);
+  border-radius: var(--vp-r2);
+  background: var(--vp-s2);
+  padding: 14px 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+.gd-card-top {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  align-items: flex-start;
+}
+.gd-company {
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--vp-tx);
+  letter-spacing: -0.2px;
+}
+.gd-flat {
+  font-size: 13px;
+  color: var(--vp-tx2);
+  margin-top: 2px;
+}
+.gd-time {
+  font-size: 12px;
+  color: var(--vp-tx3);
+  white-space: nowrap;
+}
+.gd-meta {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  font-size: 13px;
+  color: var(--vp-tx2);
+}
+.gd-meta strong {
+  color: var(--vp-tx);
+  font-weight: 600;
+}
+.gd-note {
+  color: var(--vp-tx3);
+  font-style: italic;
+}
+.gd-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 2px;
+}
+.gd-btn {
+  border: 1px solid var(--vp-b2);
+  border-radius: var(--vp-r);
+  background: var(--vp-s3);
+  color: var(--vp-tx);
+  font-family: inherit;
+  font-size: 12px;
+  font-weight: 600;
+  padding: 8px 12px;
+  cursor: pointer;
+}
+.gd-btn:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+.gd-btn--call {
+  background: var(--vp-indigo-l);
+  border-color: transparent;
+  color: var(--vp-indigo2);
+}
+.gd-btn--received {
+  background: var(--vp-green-ll);
+  border-color: transparent;
+  color: var(--vp-green);
+}
+.gd-btn--hold {
+  background: var(--vp-amber-ll);
+  border-color: transparent;
+  color: var(--vp-amber);
+}
+.gd-btn--collected {
+  background: var(--vp-green-ll);
+  border-color: transparent;
+  color: var(--vp-green);
+}
+.gd-done-pill {
+  align-self: flex-start;
+  font-size: 11px;
+  font-weight: 700;
+  padding: 4px 8px;
+  border-radius: 8px;
+  background: var(--vp-green-l);
+  color: var(--vp-green);
+}
+.gd-empty {
+  padding: 36px 16px;
+  text-align: center;
+  color: var(--vp-tx3);
+}
+.gd-empty-title {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--vp-tx2);
+}
+.gd-empty-sub {
+  font-size: 13px;
+  margin-top: 4px;
+}
+.gd-hint {
+  margin: 12px 4px 0;
+  font-size: 12px;
+  color: var(--vp-tx3);
+  line-height: 1.4;
+}
+@media (max-width: 640px) {
+  .gd-actions {
+    flex-direction: column;
+  }
+  .gd-btn {
+    width: 100%;
+    text-align: center;
+  }
+  .gd-log-btn {
+    margin-left: 0;
+    width: 100%;
+  }
+  .vp-header {
+    flex-wrap: wrap;
+  }
+}
+
+/* Hand parcel over — security record. Portaled to document.body so the
+   dashboard header (z-index 1000) and the scrolling page cannot cover it. */
+.dho-status {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 4px;
+  min-width: 0;
+}
+.gm-root .dho-who {
+  border: none;
+  background: transparent;
+  padding: 0;
+  max-width: 100%;
+  text-align: left;
+  font-size: 12px;
+  font-weight: 700;
+  color: #ea580c;
+  cursor: pointer;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.gm-root .dho-who:hover {
+  text-decoration: underline;
+}
+.dho-host.vp-root {
+  position: fixed;
+  inset: 0;
+  z-index: 10050;
+  padding: 0;
+  min-height: 0;
+  background: transparent;
+}
+.dho-overlay {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px 16px;
+  background: rgba(15, 23, 42, 0.55);
+}
+.dho-modal {
+  width: min(720px, 100%);
+  max-height: 100%;
+  background: #fff;
+  border-radius: 16px;
+  box-shadow: 0 24px 60px rgba(15, 23, 42, 0.28);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+.dho-modal--narrow {
+  width: min(520px, 100%);
+}
+.dho-header,
+.dho-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 16px 20px;
+  flex-shrink: 0;
+}
+.dho-header {
+  border-bottom: 1px solid var(--vp-b1);
+}
+.dho-header h2 {
+  font-size: 18px;
+  font-weight: 700;
+  color: var(--vp-tx);
+}
+.dho-header p {
+  margin-top: 2px;
+  font-size: 13px;
+  color: var(--vp-tx2);
+}
+.dho-close {
+  width: 32px;
+  height: 32px;
+  border: none;
+  border-radius: 8px;
+  background: var(--vp-s3);
+  color: var(--vp-tx2);
+  font-size: 20px;
+  line-height: 1;
+  cursor: pointer;
+}
+.dho-body {
+  padding: 16px 20px 8px;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  overflow-y: auto;
+  min-height: 0;
+}
+.dho-parcel {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 8px;
+}
+.dho-parcel-item {
+  background: var(--vp-s1);
+  border: 1px solid var(--vp-b1);
+  border-radius: 10px;
+  padding: 8px 10px;
+  min-width: 0;
+}
+.dho-parcel-item span {
+  display: block;
+  font-size: 11px;
+  color: var(--vp-tx3);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+.dho-parcel-item strong {
+  display: block;
+  margin-top: 2px;
+  font-size: 13px;
+  color: var(--vp-tx);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.dho-cap {
+  text-transform: capitalize;
+}
+.dho-mono {
+  font-family: var(--vp-mono);
+  font-weight: 600;
+}
+.dho-section {
+  border: 1px solid var(--vp-b1);
+  border-radius: 12px;
+  padding: 12px 14px 4px;
+}
+.dho-section-title {
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--vp-tx3);
+  margin-bottom: 8px;
+}
+.dho-grid-2 {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+}
+.dho-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+.dho-chip {
+  border: 1px solid var(--vp-b2);
+  background: #fff;
+  color: var(--vp-tx2);
+  border-radius: 999px;
+  padding: 6px 12px;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+}
+.dho-chip.is-active {
+  background: var(--vp-indigo-l);
+  color: var(--vp-indigo);
+  border-color: var(--vp-indigo);
+}
+.dho-chip--warn.is-active {
+  background: var(--vp-red-l);
+  color: var(--vp-red);
+  border-color: var(--vp-red);
+}
+.dho-photo .avf-form-grid,
+.dho-photo {
+  min-width: 0;
+}
+.dho-footer {
+  border-top: 1px solid var(--vp-b1);
+  justify-content: flex-end;
+}
+.dho-btn {
+  border-radius: 10px;
+  padding: 9px 16px;
+  font-size: 14px;
+  font-weight: 700;
+  cursor: pointer;
+}
+.dho-btn:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+.dho-btn--ghost {
+  background: transparent;
+  border: 1px solid var(--vp-b2);
+  color: var(--vp-tx2);
+}
+.dho-btn--primary {
+  background: var(--vp-indigo);
+  border: 1px solid var(--vp-indigo);
+  color: #fff;
+}
+.dho-record {
+  display: flex;
+  gap: 14px;
+  align-items: flex-start;
+}
+.dho-record-photo {
+  width: 88px;
+  height: 88px;
+  object-fit: cover;
+  border-radius: 12px;
+  border: 1px solid var(--vp-b1);
+  flex-shrink: 0;
+}
+.dho-record-list {
+  flex: 1;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px 16px;
+}
+.dho-record-list dt {
+  font-size: 11px;
+  color: var(--vp-tx3);
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+}
+.dho-record-list dd {
+  margin-top: 2px;
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--vp-tx);
+}
+.dho-record-list .is-warn dd {
+  color: var(--vp-red);
+}
+@media (max-width: 700px) {
+  .dho-parcel,
+  .dho-grid-2,
+  .dho-record-list {
+    grid-template-columns: 1fr 1fr;
+  }
+  .dho-record {
+    flex-direction: column;
+  }
+}

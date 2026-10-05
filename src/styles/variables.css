@@ -1,0 +1,16 @@
+:root,
+[data-theme='light'] {
+  --bg: #f8fafc;
+  --text: #0f172a;
+  --muted: #64748b;
+  --accent: #6d28d9;
+  --accent-deep: #5b21b6;
+  --accent-soft: rgba(109, 40, 217, 0.1);
+  --card: #ffffff;
+  --border: rgba(15, 23, 42, 0.08);
+  --sidebar-bg: #ffffff;
+  --sidebar-border: rgba(15, 23, 42, 0.08);
+  --sidebar-item-hover: rgba(109, 40, 217, 0.08);
+  --sidebar-ink: #0f172a;
+  --sidebar-muted: #64748b;
+}

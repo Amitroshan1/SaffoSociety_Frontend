@@ -1,0 +1,237 @@
+.resident-app .res-prof {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.resident-app .res-prof-hero {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 16px 20px;
+  padding: 20px 22px;
+}
+
+.resident-app .res-prof-avatar {
+  display: grid;
+  flex: 0 0 auto;
+  place-items: center;
+  width: 60px;
+  height: 60px;
+  border-radius: 50%;
+  background: var(--res-purple-soft);
+  color: var(--res-purple);
+  font-size: 20px;
+  font-weight: 700;
+}
+
+.resident-app .res-prof-id {
+  flex: 1 1 240px;
+  min-width: 0;
+}
+
+.resident-app .res-prof-id h2 {
+  margin: 0;
+  font-size: 20px;
+  font-weight: 700;
+  letter-spacing: -0.01em;
+}
+
+.resident-app .res-prof-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px 18px;
+  margin-top: 6px;
+  color: var(--res-muted);
+  font-size: 13px;
+}
+
+.resident-app .res-prof-meta span {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  min-width: 0;
+}
+
+.resident-app .res-prof-meta svg {
+  flex: 0 0 auto;
+  width: 15px;
+  height: 15px;
+}
+
+.resident-app .res-prof-flat {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px 10px;
+  padding: 10px 14px;
+  border: 1px solid var(--res-border);
+  border-radius: 12px;
+  background: var(--res-bg);
+  color: var(--res-muted);
+  font-size: 13px;
+}
+
+.resident-app .res-prof-flat-no {
+  color: var(--res-text);
+  font-size: 15px;
+  font-weight: 700;
+}
+
+.resident-app .res-prof-role {
+  padding: 2px 8px;
+  border: 1px solid var(--res-border);
+  border-radius: 6px;
+  background: var(--res-surface);
+  color: var(--res-text);
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.resident-app .res-prof-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(300px, 360px);
+  align-items: start;
+  gap: 16px;
+}
+
+.resident-app .res-prof-side {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.resident-app .res-prof-section {
+  padding: 18px;
+}
+
+.resident-app .res-prof-section + .res-prof-section {
+  border-top: 1px solid var(--res-border);
+}
+
+.resident-app .res-prof-subhead {
+  margin: 0 0 14px;
+  color: var(--res-text);
+  font-size: 14px;
+  font-weight: 650;
+}
+
+.resident-app .res-prof-fields {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 14px 16px;
+}
+
+.resident-app .res-prof-stack {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.resident-app .res-prof-stack .res-btn {
+  align-self: flex-start;
+}
+
+.resident-app .res-prof-foot {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  align-items: center;
+  gap: 10px 16px;
+  padding: 14px 18px;
+  border-top: 1px solid var(--res-border);
+  border-radius: 0 0 16px 16px;
+  background: var(--res-bg);
+}
+
+.resident-app .res-prof-foot-note {
+  min-width: 0;
+}
+
+.resident-app .res-prof-foot-note .res-note {
+  padding: 6px 10px;
+}
+
+.resident-app .res-prof-unsaved {
+  color: #b45309;
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.resident-app .res-prof-foot-actions {
+  display: flex;
+  gap: 8px;
+  margin-left: auto;
+}
+
+.resident-app .res-prof .res-card-head {
+  flex-direction: row;
+  align-items: center;
+}
+
+.resident-app .res-prof-count {
+  color: var(--res-muted);
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.resident-app .res-prof-members {
+  margin: 0;
+  padding: 6px 18px;
+  list-style: none;
+}
+
+.resident-app .res-prof-members li {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 0;
+}
+
+.resident-app .res-prof-members li + li {
+  border-top: 1px solid var(--res-border);
+}
+
+.resident-app .res-prof-members strong {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  font-size: 14px;
+  font-weight: 600;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.resident-app .res-prof-member-avatar {
+  display: grid;
+  flex: 0 0 auto;
+  place-items: center;
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  background: var(--res-bg);
+  color: var(--res-text);
+  font-size: 12px;
+  font-weight: 700;
+}
+
+@media (max-width: 1100px) {
+  .resident-app .res-prof-grid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+@media (max-width: 640px) {
+  .resident-app .res-prof-fields {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .resident-app .res-prof-foot-actions {
+    width: 100%;
+  }
+  .resident-app .res-prof-foot-actions .res-btn {
+    flex: 1;
+  }
+  .resident-app .res-prof-flat {
+    width: 100%;
+  }
+}

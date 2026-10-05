@@ -1,0 +1,716 @@
+/**
+ * Documents feature styles.
+ */
+@import '../core/crud.css';
+@import '../shared/page-chrome.css';
+@import '../booking/booking.css';
+
+.gm-main.gdoc-page {
+  width: 100%;
+  max-width: none;
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.gdoc-head {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.gdoc-kicker {
+  margin: 0;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: #6d28d9;
+}
+
+.gdoc-title {
+  margin: 0;
+  font-size: 22px;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  line-height: 1.2;
+  color: var(--gm-text-primary, #0f172a);
+}
+
+.gdoc-lead {
+  margin: 2px 0 0;
+  font-size: 13.5px;
+  line-height: 1.4;
+  color: #64748b;
+}
+
+.gdoc-note {
+  margin: 0;
+  padding: 10px 12px;
+  border-radius: 8px;
+  font-size: 13px;
+  line-height: 1.4;
+}
+
+.gdoc-note--error {
+  color: #991b1b;
+  background: rgba(220, 38, 38, 0.08);
+  border: 1px solid rgba(220, 38, 38, 0.16);
+}
+
+.gdoc-note--ok {
+  color: #047857;
+  background: rgba(16, 185, 129, 0.1);
+  border: 1px solid rgba(5, 150, 105, 0.18);
+}
+
+.gdoc-retry {
+  margin-left: 10px;
+  border: 0;
+  background: transparent;
+  color: inherit;
+  font: 700 13px/1 inherit;
+  text-decoration: underline;
+  cursor: pointer;
+}
+
+.gdoc-tabs {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  width: fit-content;
+  max-width: 100%;
+}
+
+.gdoc-tab {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  height: 34px;
+  padding: 0 12px;
+  border: 1px solid transparent;
+  border-radius: 8px;
+  background: transparent;
+  color: #475569;
+  font: 600 13px/1 var(--gm-font, inherit);
+  cursor: pointer;
+}
+
+.gdoc-tab:hover {
+  background: rgba(15, 23, 42, 0.04);
+}
+
+.gdoc-tab.is-active {
+  background: #6d28d9;
+  border-color: #6d28d9;
+  color: #fff;
+}
+
+.gdoc-tab-count {
+  min-width: 18px;
+  height: 18px;
+  padding: 0 5px;
+  border-radius: 4px;
+  background: rgba(15, 23, 42, 0.08);
+  font-size: 11px;
+  font-weight: 700;
+  line-height: 18px;
+  text-align: center;
+}
+
+.gdoc-tab.is-active .gdoc-tab-count {
+  background: rgba(255, 255, 255, 0.22);
+  color: #fff;
+}
+
+.gdoc-workspace {
+  background: #fff;
+  border: 1px solid rgba(15, 23, 42, 0.08);
+  border-radius: 12px;
+  box-shadow: 0 1px 2px rgba(15, 23, 42, 0.04);
+  overflow: hidden;
+}
+
+.gdoc-section-head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 14px 16px 0;
+}
+
+.gdoc-section-head h2 {
+  margin: 0;
+  font-size: 15px;
+  font-weight: 700;
+  letter-spacing: -0.01em;
+  color: #0f172a;
+}
+
+.gdoc-section-head span {
+  font-size: 12px;
+  font-weight: 600;
+  color: #64748b;
+  white-space: nowrap;
+}
+
+.gdoc-toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 12px 16px;
+  border-bottom: 1px solid rgba(15, 23, 42, 0.06);
+}
+
+.gdoc-search {
+  flex: 1 1 320px;
+  max-width: 460px;
+  min-width: 0;
+}
+
+.gdoc-chips {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: 2px;
+}
+
+.gdoc-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  height: 30px;
+  padding: 0 10px;
+  border: 0;
+  border-radius: 6px;
+  background: transparent;
+  color: #475569;
+  font: 600 13px/1 var(--gm-font, inherit);
+  cursor: pointer;
+}
+
+.gdoc-chip span {
+  font-size: 11px;
+  font-weight: 700;
+  color: #94a3b8;
+}
+
+.gdoc-chip:hover {
+  background: rgba(15, 23, 42, 0.04);
+  color: #0f172a;
+}
+
+.gdoc-chip.is-active {
+  background: rgba(109, 40, 217, 0.1);
+  color: #5b21b6;
+}
+
+.gdoc-chip.is-active span {
+  color: #5b21b6;
+}
+
+.gdoc-skeleton {
+  display: grid;
+  gap: 8px;
+  padding: 14px 16px 16px;
+}
+
+.gdoc-skeleton span {
+  display: block;
+  height: 42px;
+  border-radius: 8px;
+  background: linear-gradient(90deg, #f1f5f9 0%, #e2e8f0 50%, #f1f5f9 100%);
+  background-size: 200% 100%;
+  animation: gdoc-shimmer 1.2s ease-in-out infinite;
+}
+
+@keyframes gdoc-shimmer {
+  0% { background-position: 100% 0; }
+  100% { background-position: -100% 0; }
+}
+
+.gdoc-empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  min-height: 168px;
+  padding: 28px 16px;
+  text-align: center;
+}
+
+.gdoc-empty-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  margin-bottom: 6px;
+  border-radius: 8px;
+  background: rgba(109, 40, 217, 0.08);
+  color: #6d28d9;
+}
+
+.gdoc-empty-title {
+  margin: 0;
+  font-size: 15px;
+  font-weight: 700;
+  color: #0f172a;
+}
+
+.gdoc-empty-text {
+  margin: 0;
+  max-width: 26rem;
+  font-size: 13px;
+  line-height: 1.45;
+  color: #64748b;
+}
+
+.gdoc-grid-head,
+.gdoc-grid-row {
+  display: grid;
+  align-items: center;
+  gap: 12px;
+  padding: 11px 16px;
+}
+
+.gdoc-grid--docs .gdoc-grid-head,
+.gdoc-grid--docs .gdoc-grid-row {
+  grid-template-columns: minmax(0, 1.7fr) minmax(88px, 0.7fr) minmax(72px, 0.55fr) minmax(120px, 0.9fr) auto;
+}
+
+.gdoc-grid--clr .gdoc-grid-head,
+.gdoc-grid--clr .gdoc-grid-row {
+  grid-template-columns: minmax(0, 1.35fr) minmax(84px, 0.7fr) minmax(112px, 0.85fr) minmax(132px, 1.15fr) minmax(84px, 0.6fr) minmax(112px, auto);
+}
+
+.gdoc-grid-head {
+  border-top: 1px solid rgba(15, 23, 42, 0.06);
+  border-bottom: 1px solid rgba(15, 23, 42, 0.06);
+  background: #f8fafc;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: #475569;
+}
+
+.gdoc-grid-row {
+  border-top: 1px solid rgba(15, 23, 42, 0.06);
+  font-size: 14px;
+  color: #0f172a;
+}
+
+.gdoc-grid-row:hover {
+  background: #f8fafc;
+}
+
+.gdoc-file {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-width: 0;
+}
+
+.gdoc-file-icon {
+  display: inline-flex;
+  width: 30px;
+  height: 30px;
+  align-items: center;
+  justify-content: center;
+  border-radius: 7px;
+  background: rgba(109, 40, 217, 0.08);
+  color: #6d28d9;
+  flex-shrink: 0;
+}
+
+.gdoc-file span:last-child {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+  min-width: 0;
+}
+
+.gdoc-file-title,
+.gdoc-person-name,
+.gdoc-flat span {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.gdoc-file-title,
+.gdoc-person-name {
+  font-size: 14px;
+  font-weight: 650;
+  color: #0f172a;
+}
+
+.gdoc-file-kind,
+.gdoc-person-meta,
+.gdoc-date,
+.gdoc-muted {
+  font-size: 12px;
+  font-weight: 500;
+  color: #64748b;
+}
+
+.gdoc-cat {
+  text-transform: capitalize;
+  font-size: 13px;
+  font-weight: 600;
+  color: #334155;
+}
+
+.gdoc-person {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.gdoc-flat,
+.gdoc-when {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  min-width: 0;
+  font-size: 13.5px;
+  font-weight: 650;
+  color: #0f172a;
+}
+
+.gdoc-flat svg,
+.gdoc-when svg {
+  flex-shrink: 0;
+  color: #64748b;
+}
+
+.gdoc-docs {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 2px;
+  min-width: 0;
+}
+
+.gdoc-docs-line {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.gdoc-docs-line strong {
+  font-size: 13px;
+  font-weight: 650;
+  color: #0f172a;
+}
+
+.gdoc-meter {
+  width: 56px;
+  height: 4px;
+  border-radius: 99px;
+  background: #e2e8f0;
+  overflow: hidden;
+  flex-shrink: 0;
+}
+
+.gdoc-meter > span {
+  display: block;
+  height: 100%;
+  border-radius: inherit;
+  background: #b45309;
+}
+
+.gdoc-meter.is-done > span {
+  background: #059669;
+}
+
+.gdoc-link {
+  border: 0;
+  padding: 0;
+  background: transparent;
+  color: #6d28d9;
+  font: 600 12px/1.3 var(--gm-font, inherit);
+  cursor: pointer;
+}
+
+.gdoc-link:hover {
+  text-decoration: underline;
+}
+
+.gdoc-badge {
+  display: inline-flex;
+  align-items: center;
+  height: 22px;
+  padding: 0 7px;
+  border-radius: 4px;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.gdoc-badge--ready {
+  color: #047857;
+  background: #ecfdf5;
+}
+
+.gdoc-badge--pending {
+  color: #b45309;
+  background: #fffbeb;
+}
+
+.gdoc-badge--allowed {
+  color: #334155;
+  background: #f1f5f9;
+}
+
+.gdoc-row-actions {
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  gap: 6px;
+}
+
+.gdoc-page .gdoc-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  min-height: 30px;
+  height: 30px;
+  padding: 0 10px;
+  border-radius: 7px;
+  font-size: 12.5px;
+  white-space: nowrap;
+}
+
+.gdoc-detail-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 70;
+  display: flex;
+  justify-content: flex-end;
+  background: rgba(15, 23, 42, 0.28);
+}
+
+.gdoc-detail {
+  width: min(400px, 100%);
+  height: 100%;
+  padding: 20px 18px;
+  background: #fff;
+  border-left: 1px solid rgba(15, 23, 42, 0.08);
+  box-shadow: -8px 0 24px rgba(15, 23, 42, 0.08);
+  overflow: auto;
+}
+
+.gdoc-detail-head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.gdoc-detail-head h2 {
+  margin: 0;
+  font-size: 18px;
+  font-weight: 700;
+  color: #0f172a;
+}
+
+.gdoc-detail-head p {
+  margin: 4px 0 0;
+  font-size: 13px;
+  color: #64748b;
+}
+
+.gdoc-detail-meta {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px 16px;
+  margin: 18px 0 0;
+}
+
+.gdoc-detail-meta div:last-child {
+  grid-column: 1 / -1;
+}
+
+.gdoc-detail-meta dt {
+  margin: 0 0 4px;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: #64748b;
+}
+
+.gdoc-detail-meta dd {
+  margin: 0;
+  font-size: 14px;
+  font-weight: 650;
+  color: #0f172a;
+}
+
+.gdoc-checklist {
+  list-style: none;
+  margin: 18px 0 0;
+  padding: 0;
+  border-top: 1px solid rgba(15, 23, 42, 0.06);
+}
+
+.gdoc-checklist li {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 0;
+  border-bottom: 1px solid rgba(15, 23, 42, 0.06);
+  font-size: 13.5px;
+  color: #334155;
+}
+
+.gdoc-checklist li > span {
+  display: inline-flex;
+  width: 16px;
+  justify-content: center;
+  color: #94a3b8;
+}
+
+.gdoc-checklist li.is-ok > span {
+  color: #059669;
+}
+
+.gdoc-detail-note {
+  margin: 14px 0 0;
+  font-size: 12px;
+  color: #64748b;
+}
+
+.gdoc-detail-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 18px;
+}
+
+.gm-clr-viewer-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 80;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+  background: rgba(15, 23, 42, 0.55);
+}
+
+.gm-clr-viewer {
+  width: min(920px, 100%);
+  max-height: min(88vh, 900px);
+  display: flex;
+  flex-direction: column;
+  border-radius: 12px;
+  border: 1px solid var(--gm-border, rgba(15, 23, 42, 0.1));
+  background: #fff;
+  box-shadow: 0 18px 50px rgba(15, 23, 42, 0.28);
+  overflow: hidden;
+}
+
+.gm-clr-viewer-head,
+.gm-clr-viewer-foot {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 14px 16px;
+}
+
+.gm-clr-viewer-foot {
+  align-items: center;
+  border-top: 1px solid rgba(15, 23, 42, 0.08);
+}
+
+.gm-clr-viewer-head {
+  border-bottom: 1px solid rgba(15, 23, 42, 0.08);
+}
+
+.gm-clr-viewer-title {
+  font-size: 15px;
+  font-weight: 700;
+  color: #0f172a;
+}
+
+.gm-clr-viewer-meta {
+  margin-top: 4px;
+  font-size: 12px;
+  color: #64748b;
+}
+
+.gm-clr-viewer-body {
+  flex: 1;
+  min-height: 360px;
+  background: #f1f5f9;
+}
+
+.gm-clr-viewer-frame {
+  width: 100%;
+  height: min(58vh, 560px);
+  border: 0;
+  background: #fff;
+}
+
+@media (max-width: 980px) {
+  .gdoc-grid--clr .gdoc-grid-head {
+    display: none;
+  }
+
+  .gdoc-grid--clr .gdoc-grid-row {
+    grid-template-columns: 1fr 1fr;
+    gap: 10px 16px;
+    padding: 14px 16px;
+  }
+
+  .gdoc-grid--clr .gdoc-person,
+  .gdoc-grid--clr .gdoc-row-actions {
+    grid-column: 1 / -1;
+  }
+
+  .gdoc-grid--clr .gdoc-row-actions {
+    justify-content: flex-start;
+  }
+}
+
+@media (max-width: 800px) {
+  .gdoc-toolbar {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .gdoc-search {
+    max-width: none;
+  }
+
+  .gdoc-chips {
+    justify-content: flex-start;
+  }
+
+  .gdoc-grid--docs .gdoc-grid-head {
+    display: none;
+  }
+
+  .gdoc-grid--docs .gdoc-grid-row {
+    grid-template-columns: 1fr 1fr;
+    gap: 8px 12px;
+  }
+
+  .gdoc-grid--docs .gdoc-file,
+  .gdoc-grid--docs .gdoc-row-actions {
+    grid-column: 1 / -1;
+  }
+
+  .gdoc-grid--docs .gdoc-row-actions {
+    justify-content: flex-start;
+  }
+}

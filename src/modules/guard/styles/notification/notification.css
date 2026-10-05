@@ -1,0 +1,6 @@
+/**
+ * Notifications feature styles.
+ * Uses shared page chrome + CRUD list UI.
+ */
+@import '../core/crud.css';
+@import '../shared/page-chrome.css';

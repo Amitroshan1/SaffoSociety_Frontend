@@ -1,0 +1,6 @@
+@media (max-width: 768px) {
+  .page-placeholder,
+  .coming-soon {
+    padding: 1.25rem;
+  }
+}
